@@ -289,6 +289,112 @@ Final paragraph.
       });
     });
 
+    group('Table Parsing', () {
+      test('should parse simple table', () {
+        final markdown = '''
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        expect(table.headers.length, 2);
+        expect(table.rows.length, 2);
+      });
+
+      test('should parse table with alignment', () {
+        final markdown = '''
+| Left | Center | Right |
+|:-----|:------:|------:|
+| L1   | C1     | R1    |
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        expect(table.alignments.length, 3);
+        expect(table.alignments[0], TableAlignment.left);
+        expect(table.alignments[1], TableAlignment.center);
+        expect(table.alignments[2], TableAlignment.right);
+      });
+
+      test('should parse table with inline formatting', () {
+        final markdown = '''
+| Name | Description |
+|------|-------------|
+| **Bold** | *Italic* text |
+| `code` | [link](url) |
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        expect(table.rows.length, 2);
+        // Check that cells contain parsed inline nodes
+        expect(table.rows[0].cells[0].length, greaterThan(0));
+      });
+
+      test('should parse table with empty cells', () {
+        final markdown = '''
+| Col1 | Col2 |
+|------|------|
+|      | Data |
+| Data |      |
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        expect(table.rows.length, 2);
+      });
+
+      test('should parse table without outer pipes', () {
+        final markdown = '''
+Header 1 | Header 2
+---------|----------
+Cell 1   | Cell 2
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        expect(table.headers.length, 2);
+        expect(table.rows.length, 1);
+      });
+
+      test('should stop table at empty line', () {
+        final markdown = '''
+| Header |
+|--------|
+| Cell   |
+
+Not a table
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 2);
+        expect(result[0], isA<TableNode>());
+        expect(result[1], isA<ParagraphNode>());
+      });
+
+      test('should handle default alignment', () {
+        final markdown = '''
+| Col1 | Col2 |
+|------|------|
+| Data | Data |
+''';
+        final result = parser.parse(markdown);
+        expect(result.length, 1);
+        expect(result[0], isA<TableNode>());
+        final table = result[0] as TableNode;
+        // Default alignment should be null
+        expect(table.alignments[0], isNull);
+        expect(table.alignments[1], isNull);
+      });
+    });
+
     group('Edge Cases', () {
       test('should handle empty input', () {
         final result = parser.parse('');

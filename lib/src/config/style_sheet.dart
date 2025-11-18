@@ -25,6 +25,9 @@ class MarkdownStyleSheet {
     this.blockquoteDecoration,
     this.codeBlockDecoration,
     this.tableBorder,
+    this.tableHeaderDecoration,
+    this.tableOddRowDecoration,
+    this.tableEvenRowDecoration,
     this.horizontalRuleColor,
     this.horizontalRuleThickness,
     this.blockSpacing,
@@ -121,6 +124,15 @@ class MarkdownStyleSheet {
         color: Colors.grey[400]!,
         width: 1,
       ),
+      tableHeaderDecoration: BoxDecoration(
+        color: Colors.grey[200],
+      ),
+      tableOddRowDecoration: BoxDecoration(
+        color: Colors.white,
+      ),
+      tableEvenRowDecoration: BoxDecoration(
+        color: Colors.grey[50],
+      ),
       horizontalRuleColor: Colors.grey[400],
       horizontalRuleThickness: 1,
       blockSpacing: 16,
@@ -131,6 +143,108 @@ class MarkdownStyleSheet {
       ),
       codeBlockPadding: const EdgeInsets.all(12),
       tableCellPadding: const EdgeInsets.all(8),
+    );
+  }
+
+  /// Creates a style sheet from Flutter's ThemeData
+  ///
+  /// Automatically adapts to the current brightness (light/dark mode)
+  factory MarkdownStyleSheet.fromTheme(ThemeData theme) {
+    final brightness = theme.brightness;
+    final baseStyle = theme.textTheme.bodyMedium ?? const TextStyle();
+
+    return brightness == Brightness.dark
+        ? MarkdownStyleSheet.dark(baseStyle: baseStyle)
+        : MarkdownStyleSheet.light(baseStyle: baseStyle);
+  }
+
+  /// Creates a style sheet based on brightness
+  factory MarkdownStyleSheet.fromBrightness(
+    Brightness brightness, {
+    TextStyle? baseStyle,
+  }) {
+    return brightness == Brightness.dark
+        ? MarkdownStyleSheet.dark(baseStyle: baseStyle)
+        : MarkdownStyleSheet.light(baseStyle: baseStyle);
+  }
+
+  /// Creates a GitHub-style theme
+  factory MarkdownStyleSheet.github({Brightness brightness = Brightness.light}) {
+    if (brightness == Brightness.dark) {
+      return MarkdownStyleSheet.dark().copyWith(
+        textStyle: const TextStyle(fontSize: 16, color: Color(0xFFE6EDF3)),
+        codeBlockStyle: const TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 14,
+          color: Color(0xFFE6EDF3),
+        ),
+        codeBlockDecoration: BoxDecoration(
+          color: const Color(0xFF161B22),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        linkStyle: const TextStyle(
+          color: Color(0xFF58A6FF),
+          decoration: TextDecoration.underline,
+        ),
+      );
+    }
+
+    return MarkdownStyleSheet.light().copyWith(
+      textStyle: const TextStyle(fontSize: 16, color: Color(0xFF24292F)),
+      codeBlockStyle: const TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 14,
+        color: Color(0xFF24292F),
+      ),
+      codeBlockDecoration: BoxDecoration(
+        color: const Color(0xFFF6F8FA),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      linkStyle: const TextStyle(
+        color: Color(0xFF0969DA),
+        decoration: TextDecoration.underline,
+      ),
+    );
+  }
+
+  /// Creates a VS Code-style theme
+  factory MarkdownStyleSheet.vscode({Brightness brightness = Brightness.light}) {
+    if (brightness == Brightness.dark) {
+      return MarkdownStyleSheet.dark().copyWith(
+        textStyle: const TextStyle(fontSize: 16, color: Color(0xFFCCCCCC)),
+        codeBlockStyle: const TextStyle(
+          fontFamily: 'Consolas',
+          fontSize: 14,
+          color: Color(0xFFD4D4D4),
+        ),
+        codeBlockDecoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0xFF404040)),
+        ),
+        linkStyle: const TextStyle(
+          color: Color(0xFF4FC1FF),
+          decoration: TextDecoration.underline,
+        ),
+      );
+    }
+
+    return MarkdownStyleSheet.light().copyWith(
+      textStyle: const TextStyle(fontSize: 16, color: Color(0xFF1E1E1E)),
+      codeBlockStyle: const TextStyle(
+        fontFamily: 'Consolas',
+        fontSize: 14,
+        color: Color(0xFF1E1E1E),
+      ),
+      codeBlockDecoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      linkStyle: const TextStyle(
+        color: Color(0xFF0066BF),
+        decoration: TextDecoration.underline,
+      ),
     );
   }
 
@@ -233,6 +347,15 @@ class MarkdownStyleSheet {
         color: Colors.grey[700]!,
         width: 1,
       ),
+      tableHeaderDecoration: BoxDecoration(
+        color: Colors.grey[850],
+      ),
+      tableOddRowDecoration: BoxDecoration(
+        color: Colors.grey[900],
+      ),
+      tableEvenRowDecoration: BoxDecoration(
+        color: Colors.grey[800],
+      ),
       horizontalRuleColor: Colors.grey[700],
       horizontalRuleThickness: 1,
       blockSpacing: 16,
@@ -309,6 +432,15 @@ class MarkdownStyleSheet {
   /// Border for tables
   final TableBorder? tableBorder;
 
+  /// Decoration for table header row
+  final BoxDecoration? tableHeaderDecoration;
+
+  /// Decoration for odd table rows
+  final BoxDecoration? tableOddRowDecoration;
+
+  /// Decoration for even table rows
+  final BoxDecoration? tableEvenRowDecoration;
+
   /// Color for horizontal rules
   final Color? horizontalRuleColor;
 
@@ -353,6 +485,9 @@ class MarkdownStyleSheet {
     BoxDecoration? blockquoteDecoration,
     BoxDecoration? codeBlockDecoration,
     TableBorder? tableBorder,
+    BoxDecoration? tableHeaderDecoration,
+    BoxDecoration? tableOddRowDecoration,
+    BoxDecoration? tableEvenRowDecoration,
     Color? horizontalRuleColor,
     double? horizontalRuleThickness,
     double? blockSpacing,
@@ -383,6 +518,9 @@ class MarkdownStyleSheet {
       blockquoteDecoration: blockquoteDecoration ?? this.blockquoteDecoration,
       codeBlockDecoration: codeBlockDecoration ?? this.codeBlockDecoration,
       tableBorder: tableBorder ?? this.tableBorder,
+      tableHeaderDecoration: tableHeaderDecoration ?? this.tableHeaderDecoration,
+      tableOddRowDecoration: tableOddRowDecoration ?? this.tableOddRowDecoration,
+      tableEvenRowDecoration: tableEvenRowDecoration ?? this.tableEvenRowDecoration,
       horizontalRuleColor: horizontalRuleColor ?? this.horizontalRuleColor,
       horizontalRuleThickness:
           horizontalRuleThickness ?? this.horizontalRuleThickness,

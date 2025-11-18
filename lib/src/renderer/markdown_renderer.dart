@@ -2,15 +2,20 @@ import 'package:flutter/widgets.dart';
 
 import '../config/style_sheet.dart';
 import '../parser/ast/markdown_node.dart';
+import 'builders/block_math_builder.dart';
 import 'builders/blockquote_builder.dart';
 import 'builders/code_block_builder.dart';
+import 'builders/footnote_definition_builder.dart';
+import 'builders/footnote_reference_builder.dart';
 import 'builders/header_builder.dart';
 import 'builders/horizontal_rule_builder.dart';
 import 'builders/image_builder.dart';
 import 'builders/inline_code_builder.dart';
+import 'builders/inline_math_builder.dart';
 import 'builders/link_builder.dart';
 import 'builders/list_builder.dart';
 import 'builders/paragraph_builder.dart';
+import 'builders/table_builder.dart';
 import 'builders/text_builder.dart';
 import 'builders/text_style_builder.dart';
 import 'widget_builder.dart';
@@ -39,8 +44,13 @@ class MarkdownRenderer {
       ..register('code_block', const CodeBlockBuilder())
       ..register('blockquote', const BlockquoteBuilder())
       ..register('list', const ListBuilder())
+      ..register('table', const TableBuilder())
       ..register('horizontal_rule', const HorizontalRuleBuilder())
       ..register('inline_code', const InlineCodeBuilder())
+      ..register('inline_math', const InlineMathBuilder())
+      ..register('block_math', const BlockMathBuilder())
+      ..register('footnote_reference', const FootnoteReferenceBuilder())
+      ..register('footnote_definition', const FootnoteDefinitionBuilder())
       ..register('bold', const BoldBuilder())
       ..register('italic', const ItalicBuilder())
       ..register('strikethrough', const StrikethroughBuilder())

@@ -465,3 +465,212 @@ class ImageNode extends MarkdownNode {
   @override
   String toString() => 'ImageNode(url: $url, alt: $alt)';
 }
+
+/// Represents a table node
+class TableNode extends MarkdownNode {
+  /// Creates a new table node
+  const TableNode({
+    required this.headers,
+    required this.alignments,
+    required this.rows,
+  });
+
+  /// Table header cells
+  final List<List<MarkdownNode>> headers;
+
+  /// Column alignments (left, center, right, null for default)
+  final List<TableAlignment?> alignments;
+
+  /// Table data rows
+  final List<TableRowNode> rows;
+
+  @override
+  String get type => 'table';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'headers': headers.map((row) => row.map((cell) => cell.toJson()).toList()).toList(),
+        'alignments': alignments.map((a) => a?.name).toList(),
+        'rows': rows.map((row) => row.toJson()).toList(),
+      };
+
+  @override
+  TableNode copyWith({
+    List<List<MarkdownNode>>? headers,
+    List<TableAlignment?>? alignments,
+    List<TableRowNode>? rows,
+  }) {
+    return TableNode(
+      headers: headers ?? this.headers,
+      alignments: alignments ?? this.alignments,
+      rows: rows ?? this.rows,
+    );
+  }
+
+  @override
+  String toString() => 'TableNode(headers: ${headers.length}, rows: ${rows.length})';
+}
+
+/// Table column alignment options
+enum TableAlignment {
+  /// Align left
+  left,
+
+  /// Align center
+  center,
+
+  /// Align right
+  right,
+}
+
+/// Represents a table row
+class TableRowNode extends MarkdownNode {
+  /// Creates a new table row node
+  const TableRowNode(this.cells);
+
+  /// The cells in this row
+  final List<List<MarkdownNode>> cells;
+
+  @override
+  String get type => 'table_row';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'cells': cells.map((cell) => cell.map((node) => node.toJson()).toList()).toList(),
+      };
+
+  @override
+  TableRowNode copyWith({List<List<MarkdownNode>>? cells}) {
+    return TableRowNode(cells ?? this.cells);
+  }
+
+  @override
+  String toString() => 'TableRowNode(cells: ${cells.length})';
+}
+
+/// Represents an inline math node (LaTeX formula)
+///
+/// Example: `$x^2 + y^2 = z^2$`
+class InlineMathNode extends MarkdownNode {
+  /// Creates a new inline math node
+  const InlineMathNode(this.latex);
+
+  /// The LaTeX formula content
+  final String latex;
+
+  @override
+  String get type => 'inline_math';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'latex': latex,
+      };
+
+  @override
+  InlineMathNode copyWith({String? latex}) {
+    return InlineMathNode(latex ?? this.latex);
+  }
+
+  @override
+  String toString() => 'InlineMathNode(latex: $latex)';
+}
+
+/// Represents a block math node (display LaTeX formula)
+///
+/// Example: `$$\sum_{i=1}^{n} x_i = x_1 + x_2 + ... + x_n$$`
+class BlockMathNode extends MarkdownNode {
+  /// Creates a new block math node
+  const BlockMathNode(this.latex);
+
+  /// The LaTeX formula content
+  final String latex;
+
+  @override
+  String get type => 'block_math';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'latex': latex,
+      };
+
+  @override
+  BlockMathNode copyWith({String? latex}) {
+    return BlockMathNode(latex ?? this.latex);
+  }
+
+  @override
+  String toString() => 'BlockMathNode(latex: $latex)';
+}
+
+/// Represents a footnote reference node
+///
+/// Example: `[^1]` or `[^label]`
+class FootnoteReferenceNode extends MarkdownNode {
+  /// Creates a new footnote reference node
+  const FootnoteReferenceNode(this.label);
+
+  /// The footnote label/identifier
+  final String label;
+
+  @override
+  String get type => 'footnote_reference';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'label': label,
+      };
+
+  @override
+  FootnoteReferenceNode copyWith({String? label}) {
+    return FootnoteReferenceNode(label ?? this.label);
+  }
+
+  @override
+  String toString() => 'FootnoteReferenceNode(label: $label)';
+}
+
+/// Represents a footnote definition node
+///
+/// Example: `[^1]: This is the footnote content`
+class FootnoteDefinitionNode extends MarkdownNode {
+  /// Creates a new footnote definition node
+  const FootnoteDefinitionNode({
+    required this.label,
+    required this.children,
+  });
+
+  /// The footnote label/identifier
+  final String label;
+
+  /// The footnote content as child nodes
+  final List<MarkdownNode> children;
+
+  @override
+  String get type => 'footnote_definition';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'label': label,
+        'children': children.map((child) => child.toJson()).toList(),
+      };
+
+  @override
+  FootnoteDefinitionNode copyWith({
+    String? label,
+    List<MarkdownNode>? children,
+  }) {
+    return FootnoteDefinitionNode(
+      label: label ?? this.label,
+      children: children ?? this.children,
+    );
+  }
+
+  @override
+  String toString() => 'FootnoteDefinitionNode(label: $label, children: ${children.length})';
+}
