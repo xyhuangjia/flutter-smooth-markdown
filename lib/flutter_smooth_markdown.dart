@@ -15,6 +15,12 @@ export 'src/parser/markdown_parser.dart';
 export 'src/renderer/markdown_renderer.dart';
 export 'src/renderer/widget_builder.dart';
 
+// Export enhanced builders
+export 'src/renderer/builders/enhanced_blockquote_builder.dart';
+export 'src/renderer/builders/enhanced_code_block_builder.dart';
+export 'src/renderer/builders/enhanced_header_builder.dart';
+export 'src/renderer/builders/enhanced_link_builder.dart';
+
 // Export widgets
 export 'widgets/smooth_markdown.dart';
 

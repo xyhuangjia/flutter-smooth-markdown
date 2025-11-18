@@ -134,6 +134,108 @@ class MarkdownStyleSheet {
     );
   }
 
+  /// Creates a style sheet from Flutter's ThemeData
+  ///
+  /// Automatically adapts to the current brightness (light/dark mode)
+  factory MarkdownStyleSheet.fromTheme(ThemeData theme) {
+    final brightness = theme.brightness;
+    final baseStyle = theme.textTheme.bodyMedium ?? const TextStyle();
+
+    return brightness == Brightness.dark
+        ? MarkdownStyleSheet.dark(baseStyle: baseStyle)
+        : MarkdownStyleSheet.light(baseStyle: baseStyle);
+  }
+
+  /// Creates a style sheet based on brightness
+  factory MarkdownStyleSheet.fromBrightness(
+    Brightness brightness, {
+    TextStyle? baseStyle,
+  }) {
+    return brightness == Brightness.dark
+        ? MarkdownStyleSheet.dark(baseStyle: baseStyle)
+        : MarkdownStyleSheet.light(baseStyle: baseStyle);
+  }
+
+  /// Creates a GitHub-style theme
+  factory MarkdownStyleSheet.github({Brightness brightness = Brightness.light}) {
+    if (brightness == Brightness.dark) {
+      return MarkdownStyleSheet.dark().copyWith(
+        textStyle: const TextStyle(fontSize: 16, color: Color(0xFFE6EDF3)),
+        codeBlockStyle: const TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 14,
+          color: Color(0xFFE6EDF3),
+        ),
+        codeBlockDecoration: BoxDecoration(
+          color: const Color(0xFF161B22),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        linkStyle: const TextStyle(
+          color: Color(0xFF58A6FF),
+          decoration: TextDecoration.underline,
+        ),
+      );
+    }
+
+    return MarkdownStyleSheet.light().copyWith(
+      textStyle: const TextStyle(fontSize: 16, color: Color(0xFF24292F)),
+      codeBlockStyle: const TextStyle(
+        fontFamily: 'monospace',
+        fontSize: 14,
+        color: Color(0xFF24292F),
+      ),
+      codeBlockDecoration: BoxDecoration(
+        color: const Color(0xFFF6F8FA),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      linkStyle: const TextStyle(
+        color: Color(0xFF0969DA),
+        decoration: TextDecoration.underline,
+      ),
+    );
+  }
+
+  /// Creates a VS Code-style theme
+  factory MarkdownStyleSheet.vscode({Brightness brightness = Brightness.light}) {
+    if (brightness == Brightness.dark) {
+      return MarkdownStyleSheet.dark().copyWith(
+        textStyle: const TextStyle(fontSize: 16, color: Color(0xFFCCCCCC)),
+        codeBlockStyle: const TextStyle(
+          fontFamily: 'Consolas',
+          fontSize: 14,
+          color: Color(0xFFD4D4D4),
+        ),
+        codeBlockDecoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0xFF404040)),
+        ),
+        linkStyle: const TextStyle(
+          color: Color(0xFF4FC1FF),
+          decoration: TextDecoration.underline,
+        ),
+      );
+    }
+
+    return MarkdownStyleSheet.light().copyWith(
+      textStyle: const TextStyle(fontSize: 16, color: Color(0xFF1E1E1E)),
+      codeBlockStyle: const TextStyle(
+        fontFamily: 'Consolas',
+        fontSize: 14,
+        color: Color(0xFF1E1E1E),
+      ),
+      codeBlockDecoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      linkStyle: const TextStyle(
+        color: Color(0xFF0066BF),
+        decoration: TextDecoration.underline,
+      ),
+    );
+  }
+
   /// Creates a default dark theme style sheet
   factory MarkdownStyleSheet.dark({TextStyle? baseStyle}) {
     final base = baseStyle ??
