@@ -11,9 +11,12 @@ export 'src/parser/ast/markdown_node.dart';
 // Export parser
 export 'src/parser/markdown_parser.dart';
 
-// TODO: Export widgets when implemented
-// export 'widgets/smooth_markdown.dart';
-// export 'widgets/smooth_markdown_stream.dart';
+// Export renderer
+export 'src/renderer/markdown_renderer.dart';
+export 'src/renderer/widget_builder.dart';
 
-// TODO: Export renderer when implemented
-// export 'src/renderer/markdown_renderer.dart';
+// Export widgets
+export 'widgets/smooth_markdown.dart';
+
+// TODO: Export streaming widget when implemented
+// export 'widgets/smooth_markdown_stream.dart';

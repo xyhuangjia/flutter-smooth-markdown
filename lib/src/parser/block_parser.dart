@@ -71,9 +71,7 @@ class BlockParser {
         consumed = result.linesConsumed;
       }
 
-      if (node != null) {
-        nodes.add(node);
-      }
+      nodes.add(node);
       i += consumed > 0 ? consumed : 1;
     }
 

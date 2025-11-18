@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 /// Configuration options for Markdown parsing and rendering
 class MarkdownConfig {
   /// Creates a new Markdown configuration
@@ -111,7 +113,3 @@ class MarkdownConfig {
       'enableLatex: $enableLatex, '
       'syntaxHighlightTheme: $syntaxHighlightTheme)';
 }
-
-// Placeholder type for Widget - will be replaced with actual import
-typedef Widget = dynamic;
-typedef BuildContext = dynamic;
