@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2025-11-18
+
+### Removed
+- Removed unused `markdown: ^7.0.0` dependency (package uses custom parser implementation)
+
+### Changed
+- Reduced package size by removing unnecessary dependencies
+
 ## [0.1.7] - 2025-11-18
 
 ### Changed
@@ -98,7 +106,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 87+ unit tests with comprehensive coverage
 - Flutter lints enabled for code quality
 
-[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.7...HEAD
+[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.8...HEAD
+[0.1.8]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.4...v0.1.5

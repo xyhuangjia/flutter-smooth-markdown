@@ -161,7 +161,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.7"
   flutter_svg:
     dependency: transitive
     description:
@@ -244,14 +244,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.1.1"
-  markdown:
-    dependency: transitive
-    description:
-      name: markdown
-      sha256: "935e23e1ff3bc02d390bad4d4be001208ee92cc217cb5b5a6c19bc14aaa318c1"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "7.3.0"
   matcher:
     dependency: transitive
     description:
