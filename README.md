@@ -232,9 +232,10 @@ This project is licensed under the MIT License.
 - [x] Math formula rendering (LaTeX with flutter_math_fork)
 - [x] Footnote support (references and definitions)
 - [x] Multi-language internationalization (Chinese, English, Japanese, Spanish, French, Korean)
+- [x] Phase 4: Stream support for real-time rendering with StreamMarkdown widget
+- [x] Streaming demo in example app
 
 ### In Progress
-- [ ] Phase 4: Stream support for real-time rendering
 - [ ] Performance optimization and benchmarking
 - [ ] API documentation and code comments
 
