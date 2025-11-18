@@ -22,10 +22,31 @@ class TableBuilder extends MarkdownWidgetBuilder {
     final tableNode = node as TableNode;
     final renderer = MarkdownRenderer(styleSheet: styleSheet);
 
+    // Determine the column count - use the maximum of headers, alignments, and all row cell counts
+    var columnCount = tableNode.alignments.length;
+
+    // Consider header length
+    if (tableNode.headers.length > columnCount) {
+      columnCount = tableNode.headers.length;
+    }
+
+    // Consider all data row lengths
+    for (final row in tableNode.rows) {
+      if (row.cells.length > columnCount) {
+        columnCount = row.cells.length;
+      }
+    }
+
+    // Ensure at least 1 column
+    if (columnCount == 0) {
+      columnCount = 1;
+    }
+
     // Build header row
     final headerRow = _buildRow(
       tableNode.headers,
       tableNode.alignments,
+      columnCount,
       styleSheet,
       renderer,
       context,
@@ -37,6 +58,7 @@ class TableBuilder extends MarkdownWidgetBuilder {
       return _buildRow(
         row.cells,
         tableNode.alignments,
+        columnCount,
         styleSheet,
         renderer,
         context,
@@ -50,7 +72,7 @@ class TableBuilder extends MarkdownWidgetBuilder {
     return Table(
       border: styleSheet.tableBorder,
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      columnWidths: _buildColumnWidths(tableNode.alignments),
+      columnWidths: _buildColumnWidths(columnCount),
       children: allRows,
     );
   }
@@ -59,6 +81,7 @@ class TableBuilder extends MarkdownWidgetBuilder {
   TableRow _buildRow(
     List<List<MarkdownNode>> cells,
     List<TableAlignment?> alignments,
+    int columnCount,
     MarkdownStyleSheet styleSheet,
     MarkdownRenderer renderer,
     MarkdownRenderContext context, {
@@ -66,8 +89,9 @@ class TableBuilder extends MarkdownWidgetBuilder {
   }) {
     final cellWidgets = <Widget>[];
 
-    for (var i = 0; i < cells.length; i++) {
-      final cellContent = cells[i];
+    for (var i = 0; i < columnCount; i++) {
+      // Get cell content, or use empty list if this column doesn't exist in this row
+      final cellContent = i < cells.length ? cells[i] : <MarkdownNode>[];
       final alignment = i < alignments.length ? alignments[i] : null;
 
       cellWidgets.add(
@@ -130,8 +154,8 @@ class TableBuilder extends MarkdownWidgetBuilder {
     }
   }
 
-  /// Builds column widths based on alignments
-  Map<int, TableColumnWidth> _buildColumnWidths(List<TableAlignment?> alignments) {
+  /// Builds column widths based on column count
+  Map<int, TableColumnWidth> _buildColumnWidths(int columnCount) {
     // For now, use flexible columns for all
     // Could be enhanced to support fixed widths or intrinsic sizing
     return {};

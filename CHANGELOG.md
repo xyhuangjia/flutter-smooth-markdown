@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-11-18
+
+### Fixed
+- 🐛 **Table rendering crash** - Fixed "irregular row lengths" error
+  - Tables with inconsistent column counts now render correctly
+  - Automatically fills missing cells with empty content
+  - Calculates correct column count from headers, alignments, and data rows
+  - Handles edge cases (empty tables, varying row lengths)
+
+### Technical Details
+- Improved table column count calculation logic in `TableBuilder`
+- Replaced problematic `double.infinity.toInt()` with safe max calculation
+- Added defensive checks to ensure at least 1 column in all tables
+
 ## [0.3.0] - 2025-11-18
 
 ### 🚀 Major Performance Improvements
