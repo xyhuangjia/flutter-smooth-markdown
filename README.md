@@ -17,6 +17,20 @@ A high-performance Flutter package for smooth markdown rendering with beautiful 
 - 📎 **Footnotes** - Reference and definition support for academic writing
 - 🖼️ **SVG Images** - Native SVG rendering support with flutter_svg
 - 🌐 **Internationalization** - Multi-language example app (6 languages supported)
+- 🎬 **Streaming Support** - Real-time markdown rendering with StreamMarkdown widget
+
+## 📺 Demo
+
+### Basic Rendering
+![Basic Markdown Rendering](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/basic-demo.png)
+
+### Enhanced Components
+![Enhanced UI Components](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/enhanced-demo.png)
+
+### Streaming Support
+![Real-time Streaming](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/streaming-demo.gif)
+
+> **Note**: Run the example app to see all features in action: `cd example && flutter run`
 
 ## 🚀 Getting Started
 
@@ -129,7 +143,7 @@ void main() {
 ### Links and Images
 ```markdown
 [Link text](https://example.com)
-![Alt text](https://example.com/image.png)
+![Flutter Logo](https://storage.googleapis.com/cms-storage-bucket/4fd0db61df0567c0f352.png)
 ```
 
 ### Tables
@@ -158,7 +172,7 @@ This text has a footnote[^1].
 
 ### SVG Images
 ```markdown
-![SVG Image](https://example.com/image.svg)
+![Flutter Icon](https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/flutter.svg)
 ```
 
 ## 🎨 Theming
