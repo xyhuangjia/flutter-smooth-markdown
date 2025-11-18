@@ -47,7 +47,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.1.4
+  flutter_smooth_markdown: ^0.1.6
 ```
 
 Then run:
