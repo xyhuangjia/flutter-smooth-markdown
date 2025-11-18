@@ -21,14 +21,17 @@ A high-performance Flutter package for smooth markdown rendering with beautiful 
 
 ## 📺 Demo
 
-### Basic Rendering
-![Basic Markdown Rendering](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/basic-demo.png)
+### Main Interface
+![Main Interface](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/main.jpg)
 
-### Enhanced Components
-![Enhanced UI Components](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/enhanced-demo.png)
+### Code Blocks with Syntax Highlighting
+![Enhanced Code Blocks](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/code.jpg)
+
+### Math Formula Rendering (LaTeX)
+![LaTeX Math Formulas](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/latx.jpg)
 
 ### Streaming Support
-![Real-time Streaming](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/streaming-demo.gif)
+![Real-time Streaming](https://raw.githubusercontent.com/JackCaow/flutter-smooth-markdown/main/screenshots/streaming.gif)
 
 > **Note**: Run the example app to see all features in action: `cd example && flutter run`
 
