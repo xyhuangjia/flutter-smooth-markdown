@@ -74,6 +74,12 @@ class BlockParser {
         node = result.node;
         consumed = result.linesConsumed;
       }
+      // Try footnote definition
+      else if (_isFootnoteDefinition(line)) {
+        final result = _parseFootnoteDefinition(lines, i);
+        node = result.node;
+        consumed = result.linesConsumed;
+      }
       // Try table
       else if (_isTableStart(lines, i)) {
         final result = _parseTable(lines, i);
@@ -331,6 +337,62 @@ class BlockParser {
     );
   }
 
+  /// Checks if a line is a footnote definition
+  ///
+  /// Format: [^label]: content
+  bool _isFootnoteDefinition(String line) {
+    final trimmed = line.trim();
+    return RegExp(r'^\[\^[^\]]+\]:\s+.+').hasMatch(trimmed);
+  }
+
+  /// Parses a footnote definition
+  ///
+  /// Format: [^label]: content (can span multiple indented lines)
+  _ParseResult _parseFootnoteDefinition(List<String> lines, int startIndex) {
+    final firstLine = lines[startIndex].trim();
+    final match = RegExp(r'^\[\^([^\]]+)\]:\s+(.+)$').firstMatch(firstLine);
+
+    if (match == null) {
+      throw FormatException('Invalid footnote format: $firstLine');
+    }
+
+    final label = match.group(1)!;
+    final contentLines = <String>[match.group(2)!];
+    var i = startIndex + 1;
+
+    // Collect continuation lines (indented lines)
+    while (i < lines.length) {
+      final line = lines[i];
+
+      // Empty line might be part of footnote
+      if (line.trim().isEmpty) {
+        i++;
+        continue;
+      }
+
+      // Check if line is indented (continuation of footnote)
+      if (line.startsWith('    ') || line.startsWith('\t')) {
+        contentLines.add(line.trim());
+        i++;
+      } else {
+        // Not indented, footnote definition ends
+        break;
+      }
+    }
+
+    // Parse the content as inline elements
+    final content = contentLines.join(' ');
+    final children = _inlineParser.parse(content);
+
+    return _ParseResult(
+      node: FootnoteDefinitionNode(
+        label: label,
+        children: children,
+      ),
+      linesConsumed: i - startIndex,
+    );
+  }
+
   /// Parses a paragraph
   _ParseResult _parseParagraph(List<String> lines, int startIndex) {
     final paragraphLines = <String>[];
@@ -351,6 +413,7 @@ class BlockParser {
           _isBlockquote(line) ||
           _isListItem(line) ||
           _isHorizontalRule(line) ||
+          _isFootnoteDefinition(line) ||
           _isTableStart(lines, i)) {
         break;
       }

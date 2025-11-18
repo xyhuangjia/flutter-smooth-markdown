@@ -605,3 +605,72 @@ class BlockMathNode extends MarkdownNode {
   @override
   String toString() => 'BlockMathNode(latex: $latex)';
 }
+
+/// Represents a footnote reference node
+///
+/// Example: `[^1]` or `[^label]`
+class FootnoteReferenceNode extends MarkdownNode {
+  /// Creates a new footnote reference node
+  const FootnoteReferenceNode(this.label);
+
+  /// The footnote label/identifier
+  final String label;
+
+  @override
+  String get type => 'footnote_reference';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'label': label,
+      };
+
+  @override
+  FootnoteReferenceNode copyWith({String? label}) {
+    return FootnoteReferenceNode(label ?? this.label);
+  }
+
+  @override
+  String toString() => 'FootnoteReferenceNode(label: $label)';
+}
+
+/// Represents a footnote definition node
+///
+/// Example: `[^1]: This is the footnote content`
+class FootnoteDefinitionNode extends MarkdownNode {
+  /// Creates a new footnote definition node
+  const FootnoteDefinitionNode({
+    required this.label,
+    required this.children,
+  });
+
+  /// The footnote label/identifier
+  final String label;
+
+  /// The footnote content as child nodes
+  final List<MarkdownNode> children;
+
+  @override
+  String get type => 'footnote_definition';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'label': label,
+        'children': children.map((child) => child.toJson()).toList(),
+      };
+
+  @override
+  FootnoteDefinitionNode copyWith({
+    String? label,
+    List<MarkdownNode>? children,
+  }) {
+    return FootnoteDefinitionNode(
+      label: label ?? this.label,
+      children: children ?? this.children,
+    );
+  }
+
+  @override
+  String toString() => 'FootnoteDefinitionNode(label: $label, children: ${children.length})';
+}

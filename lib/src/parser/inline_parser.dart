@@ -36,6 +36,18 @@ class InlineParser {
         }
       }
 
+      // Try footnote reference (must be before link as it starts with [)
+      if (node == null && i < text.length && text[i] == '[') {
+        // Check if it's a footnote reference [^label]
+        if (i + 1 < text.length && text[i + 1] == '^') {
+          final result = _tryParseFootnoteReference(text, i);
+          if (result != null) {
+            node = result.node;
+            consumed = result.consumed;
+          }
+        }
+      }
+
       // Try link
       if (node == null && i < text.length && text[i] == '[') {
         final result = _tryParseLink(text, i);
@@ -289,6 +301,40 @@ class InlineParser {
     }
 
     return null;
+  }
+
+  /// Tries to parse a footnote reference
+  ///
+  /// Format: [^label] where label is alphanumeric
+  _InlineParseResult? _tryParseFootnoteReference(String text, int start) {
+    if (start >= text.length || text[start] != '[') {
+      return null;
+    }
+
+    if (start + 1 >= text.length || text[start + 1] != '^') {
+      return null;
+    }
+
+    // Find closing ]
+    var i = start + 2;
+    var labelEnd = -1;
+    while (i < text.length) {
+      if (text[i] == ']') {
+        labelEnd = i;
+        break;
+      }
+      i++;
+    }
+
+    if (labelEnd == -1) return null;
+
+    final label = text.substring(start + 2, labelEnd);
+    if (label.isEmpty) return null;
+
+    return _InlineParseResult(
+      node: FootnoteReferenceNode(label),
+      consumed: labelEnd - start + 1,
+    );
   }
 
   /// Tries to parse bold text

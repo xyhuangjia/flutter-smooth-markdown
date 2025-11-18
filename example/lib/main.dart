@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 
+import 'footnote_demo.dart';
 import 'math_demo.dart';
 import 'streaming_demo.dart';
 
@@ -911,6 +912,29 @@ console.log(distance); // 输出: 5
                   context,
                   MaterialPageRoute(
                     builder: (context) => StreamingMarkdownDemo(
+                      styleSheet: _getStyleSheet(),
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.note_add,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                '脚注',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FootnoteDemo(
                       styleSheet: _getStyleSheet(),
                     ),
                   ),

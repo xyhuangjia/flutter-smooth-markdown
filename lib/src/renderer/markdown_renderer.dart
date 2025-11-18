@@ -5,6 +5,8 @@ import '../parser/ast/markdown_node.dart';
 import 'builders/block_math_builder.dart';
 import 'builders/blockquote_builder.dart';
 import 'builders/code_block_builder.dart';
+import 'builders/footnote_definition_builder.dart';
+import 'builders/footnote_reference_builder.dart';
 import 'builders/header_builder.dart';
 import 'builders/horizontal_rule_builder.dart';
 import 'builders/image_builder.dart';
@@ -47,6 +49,8 @@ class MarkdownRenderer {
       ..register('inline_code', const InlineCodeBuilder())
       ..register('inline_math', const InlineMathBuilder())
       ..register('block_math', const BlockMathBuilder())
+      ..register('footnote_reference', const FootnoteReferenceBuilder())
+      ..register('footnote_definition', const FootnoteDefinitionBuilder())
       ..register('bold', const BoldBuilder())
       ..register('italic', const ItalicBuilder())
       ..register('strikethrough', const StrikethroughBuilder())
