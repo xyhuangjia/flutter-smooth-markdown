@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2025-11-18
+
+### Changed
+- Package maintenance release
+- Ensure all documentation is synchronized
+
 ## [0.1.6] - 2024-11-18
 
 ### Changed
@@ -92,7 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 87+ unit tests with comprehensive coverage
 - Flutter lints enabled for code quality
 
-[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.3...v0.1.4
