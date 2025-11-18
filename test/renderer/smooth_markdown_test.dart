@@ -9,6 +9,9 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: 'Hello World',
+            useRepaintBoundary: false,
+            enableCache: false,
+            enableCache: false,
           ),
         ),
       );
@@ -21,6 +24,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '# Header 1',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -33,6 +38,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '**Bold text**',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -45,6 +52,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '*Italic text*',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -57,6 +66,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: 'Code: `var x = 1;`',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -76,6 +87,8 @@ void main() {
 }
 ```
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -92,6 +105,8 @@ void main() {
 - Item 2
 - Item 3
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -111,6 +126,8 @@ void main() {
 2. Second
 3. Third
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -131,6 +148,8 @@ void main() {
 - [x] Completed task
 - [ ] Pending task
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -146,6 +165,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '> This is a quote',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -164,6 +185,8 @@ Text above
 
 Text below
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -177,6 +200,8 @@ Text below
         const MaterialApp(
           home: SmoothMarkdown(
             data: '[Click here](https://example.com)',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -191,6 +216,8 @@ Text below
         MaterialApp(
           home: SmoothMarkdown(
             data: '[Link](https://example.com)',
+            useRepaintBoundary: false,
+            enableCache: false,
             onTapLink: (url) {
               tappedUrl = url;
             },
@@ -203,15 +230,17 @@ Text below
     });
 
     testWidgets('should use custom style sheet', (tester) async {
-      final customStyleSheet = MarkdownStyleSheet(
-        h1Style: const TextStyle(fontSize: 48),
+      const customStyleSheet = MarkdownStyleSheet(
+        h1Style: TextStyle(fontSize: 48),
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: SmoothMarkdown(
             data: '# Big Header',
             styleSheet: customStyleSheet,
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -226,6 +255,8 @@ Text below
         MaterialApp(
           home: SmoothMarkdown(
             data: '```dart\ncode\n```',
+            useRepaintBoundary: false,
+            enableCache: false,
             codeBuilder: (code, language) {
               return Text('Custom: $code ($language)');
             },
@@ -241,6 +272,8 @@ Text below
         MaterialApp(
           home: SmoothMarkdown(
             data: '![Alt](image.png)',
+            useRepaintBoundary: false,
+            enableCache: false,
             imageBuilder: (url, alt, title) {
               return Text('Image: $url');
             },
@@ -273,6 +306,8 @@ void main() {
 
 > Quote
 ''',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -290,6 +325,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
@@ -303,6 +340,8 @@ void main() {
         const MaterialApp(
           home: SmoothMarkdown(
             data: '   \n\n   ',
+            useRepaintBoundary: false,
+            enableCache: false,
           ),
         ),
       );
