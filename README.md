@@ -5,13 +5,18 @@ A high-performance Flutter package for smooth markdown rendering with beautiful 
 ## ✨ Features
 
 - 🚀 **High Performance** - AST-based parsing with optimized rendering
-- 📝 **Full Markdown Support** - Headers, paragraphs, lists, code blocks, blockquotes, links, and more
+- 📝 **Full Markdown Support** - Headers, paragraphs, lists, code blocks, blockquotes, links, tables, and more
 - 🎨 **Customizable Styling** - Easy theming with light/dark mode support and preset themes
 - ✨ **Enhanced UI Components** - Beautiful code blocks with copy buttons, animated links, gradient blockquotes
 - 🎯 **Extensible Builder System** - Custom widget builders for any markdown element
 - 💻 **Code Blocks** - Syntax highlighting with language tags and copy functionality
 - 🔗 **Links** - Hover animations and external link indicators
 - 📐 **Flexible Theme System** - Multiple built-in themes (Default, GitHub, VS Code) with light/dark variants
+- 📊 **Table Support** - Beautiful table rendering with proper styling and borders
+- 🧮 **Math Formulas** - LaTeX equation rendering with flutter_math_fork
+- 📎 **Footnotes** - Reference and definition support for academic writing
+- 🖼️ **SVG Images** - Native SVG rendering support with flutter_svg
+- 🌐 **Internationalization** - Multi-language example app (6 languages supported)
 
 ## 🚀 Getting Started
 
@@ -76,18 +81,18 @@ Enhanced components include:
 - **Links** with hover animations and external link indicators
 - **Headers** with decorative accents and gradient borders
 
-See [使用增强组件.md](docs/使用增强组件.md) for detailed usage.
+See [使用增强组件.md](doc/使用增强组件.md) for detailed usage.
 
 ## 📚 Documentation
 
 For detailed documentation, see:
 
-- [Core Requirements](docs/核心需求文档.md) - Project requirements and specifications
-- [Development Plan](docs/开发计划.md) - Development roadmap and phases
-- [UI Optimization Guide](docs/UI优化方案.md) - UI enhancement strategies
-- [Using Enhanced Components](docs/使用增强组件.md) - Guide to enhanced UI components
-- [Theme System](docs/主题系统.md) - Theming and customization guide
-- [Phase 2 Summary](docs/Phase2完成总结.md) - Parser implementation details
+- [Core Requirements](doc/核心需求文档.md) - Project requirements and specifications
+- [Development Plan](doc/开发计划.md) - Development roadmap and phases
+- [UI Optimization Guide](doc/UI优化方案.md) - UI enhancement strategies
+- [Using Enhanced Components](doc/使用增强组件.md) - Guide to enhanced UI components
+- [Theme System](doc/主题系统.md) - Theming and customization guide
+- [Phase 2 Summary](doc/Phase2完成总结.md) - Parser implementation details
 
 ## 🎯 Supported Markdown Syntax
 
@@ -132,6 +137,28 @@ void main() {
 | Header 1 | Header 2 |
 |----------|----------|
 | Cell 1   | Cell 2   |
+```
+
+### Math Formulas
+```markdown
+Inline math: $E = mc^2$
+
+Block math:
+$$
+\int_{a}^{b} f(x) dx = F(b) - F(a)
+$$
+```
+
+### Footnotes
+```markdown
+This text has a footnote[^1].
+
+[^1]: This is the footnote content.
+```
+
+### SVG Images
+```markdown
+![SVG Image](https://example.com/image.svg)
 ```
 
 ## 🎨 Theming
@@ -193,23 +220,29 @@ This project is licensed under the MIT License.
 
 ### Completed
 - [x] Phase 1: Core project structure and AST node definitions
-- [x] Phase 2: Markdown parser implementation (87 tests passing)
+- [x] Phase 2: Markdown parser implementation (87+ tests passing)
 - [x] Phase 3: Renderer implementation with widget builder system
 - [x] Enhanced UI components (code blocks, blockquotes, links, headers)
 - [x] Theme system with multiple presets (Default, GitHub, VS Code)
 - [x] Example application with theme showcase
+- [x] Syntax highlighting for code blocks with flutter_highlight
+- [x] Table support with proper styling
+- [x] Image rendering with caching (cached_network_image)
+- [x] SVG image support (flutter_svg)
+- [x] Math formula rendering (LaTeX with flutter_math_fork)
+- [x] Footnote support (references and definitions)
+- [x] Multi-language internationalization (Chinese, English, Japanese, Spanish, French, Korean)
 
 ### In Progress
 - [ ] Phase 4: Stream support for real-time rendering
-- [ ] Syntax highlighting for code blocks
-- [ ] Table support
-- [ ] Image rendering with caching
+- [ ] Performance optimization and benchmarking
+- [ ] API documentation and code comments
 
 ### Planned
-- [ ] Advanced features (footnotes, math equations)
-- [ ] Performance optimization and benchmarking
 - [ ] More theme presets
 - [ ] Plugin system for custom parsers
+- [ ] Advanced table features (sorting, filtering)
+- [ ] Accessibility improvements (screen reader support)
 
 ---
 

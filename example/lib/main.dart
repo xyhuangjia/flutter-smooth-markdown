@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 
 import 'footnote_demo.dart';
+import 'l10n/app_localizations.dart';
 import 'math_demo.dart';
 import 'streaming_demo.dart';
 
@@ -9,8 +11,21 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale _locale = const Locale('zh');
+
+  void _changeLanguage(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,29 +36,66 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       darkTheme: ThemeData.dark(),
-      home: const MarkdownDemoPage(),
+      locale: _locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh'),
+        Locale('en'),
+        Locale('ja'),
+        Locale('es'),
+        Locale('fr'),
+        Locale('ko'),
+      ],
+      home: MarkdownDemoPage(onLanguageChange: _changeLanguage),
     );
   }
 }
 
 class MarkdownDemoPage extends StatefulWidget {
-  const MarkdownDemoPage({super.key});
+  const MarkdownDemoPage({
+    super.key,
+    required this.onLanguageChange,
+  });
+
+  final void Function(Locale) onLanguageChange;
 
   @override
   State<MarkdownDemoPage> createState() => _MarkdownDemoPageState();
 }
 
 enum MarkdownTheme {
-  defaultLight('默认亮色', Brightness.light),
-  defaultDark('默认暗色', Brightness.dark),
-  github('GitHub', Brightness.light),
-  githubDark('GitHub Dark', Brightness.dark),
-  vscode('VS Code', Brightness.light),
-  vscodeDark('VS Code Dark', Brightness.dark);
+  defaultLight(Brightness.light),
+  defaultDark(Brightness.dark),
+  github(Brightness.light),
+  githubDark(Brightness.dark),
+  vscode(Brightness.light),
+  vscodeDark(Brightness.dark);
 
-  const MarkdownTheme(this.label, this.brightness);
-  final String label;
+  const MarkdownTheme(this.brightness);
   final Brightness brightness;
+
+  String getLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    switch (this) {
+      case MarkdownTheme.defaultLight:
+        return l10n.translate('theme_default_light');
+      case MarkdownTheme.defaultDark:
+        return l10n.translate('theme_default_dark');
+      case MarkdownTheme.github:
+        return l10n.translate('theme_github');
+      case MarkdownTheme.githubDark:
+        return l10n.translate('theme_github_dark');
+      case MarkdownTheme.vscode:
+        return l10n.translate('theme_vscode');
+      case MarkdownTheme.vscodeDark:
+        return l10n.translate('theme_vscode_dark');
+    }
+  }
 }
 
 class _MarkdownDemoPageState extends State<MarkdownDemoPage> {
@@ -702,10 +754,8 @@ console.log(distance); // 输出: 5
 10. **表格** - 完整的 GFM 表格支持，带对齐
 11. **流式渲染** - 实时内容更新（侧边栏"演示"部分查看）
 12. **数学公式** - LaTeX 数学表达式（侧边栏"演示"部分查看）
-13. **主题** - 6 种预设主题
-
-### 🚧 开发中
-1. **脚注** - 文档脚注支持
+13. **脚注** - 文档脚注支持，支持自定义样式（侧边栏"演示"部分查看）
+14. **主题** - 6 种预设主题
 
 ---
 
@@ -759,7 +809,7 @@ console.log(distance); // 输出: 5
           actions: [
             PopupMenuButton<MarkdownTheme>(
               icon: const Icon(Icons.palette),
-              tooltip: '选择主题',
+              tooltip: AppLocalizations.of(context).translate('tooltip_theme'),
               color: isDark ? const Color(0xFF161B22) : null,
               onSelected: (theme) {
                 setState(() {
@@ -782,7 +832,7 @@ console.log(distance); // 输出: 5
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        theme.label,
+                        theme.getLabel(context),
                         style: TextStyle(
                           color: isDark ? Colors.white : null,
                         ),
@@ -814,15 +864,15 @@ console.log(distance); // 输出: 5
                       : [Colors.blue, Colors.purple],
                 ),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Icon(Icons.article, size: 48, color: Colors.white),
-                  SizedBox(height: 8),
+                  const Icon(Icons.article, size: 48, color: Colors.white),
+                  const SizedBox(height: 8),
                   Text(
-                    'Markdown Examples',
-                    style: TextStyle(
+                    AppLocalizations.of(context).translate('drawer_header_title'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -864,7 +914,7 @@ console.log(distance); // 输出: 5
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                '演示',
+                AppLocalizations.of(context).drawerDemos,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -878,7 +928,7 @@ console.log(distance); // 输出: 5
                 color: isDark ? Colors.white70 : null,
               ),
               title: Text(
-                '数学公式',
+                AppLocalizations.of(context).demoMath,
                 style: TextStyle(
                   color: isDark ? Colors.white : null,
                 ),
@@ -901,7 +951,7 @@ console.log(distance); // 输出: 5
                 color: isDark ? Colors.white70 : null,
               ),
               title: Text(
-                '流式渲染',
+                AppLocalizations.of(context).demoStreaming,
                 style: TextStyle(
                   color: isDark ? Colors.white : null,
                 ),
@@ -924,7 +974,7 @@ console.log(distance); // 输出: 5
                 color: isDark ? Colors.white70 : null,
               ),
               title: Text(
-                '脚注',
+                AppLocalizations.of(context).demoFootnote,
                 style: TextStyle(
                   color: isDark ? Colors.white : null,
                 ),
@@ -941,6 +991,36 @@ console.log(distance); // 输出: 5
                 );
               },
             ),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                AppLocalizations.of(context).language,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white54 : Colors.grey,
+                ),
+              ),
+            ),
+            ...AppLanguage.values.map((lang) {
+              return ListTile(
+                leading: Icon(
+                  Icons.language,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  lang.nativeName,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                onTap: () {
+                  widget.onLanguageChange(lang.locale);
+                  Navigator.pop(context);
+                },
+              );
+            }),
           ],
         ),
       ),
@@ -991,7 +1071,7 @@ console.log(distance); // 输出: 5
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _selectedTheme.label,
+                        _selectedTheme.getLabel(context),
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? Colors.white70 : Theme.of(context).colorScheme.onPrimaryContainer,
