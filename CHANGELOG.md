@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2024-11-18
+
+### Documentation
+- Replaced example.com placeholder image links with real, working URLs
+- Added Demo section showcasing package features
+- Created screenshots directory structure for future demo images
+- Updated image examples with Flutter logo and SVG icon
+- Added streaming support to features list in README
+
 ## [0.1.1] - 2024-11-18
 
 ### Documentation
@@ -50,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 87+ unit tests with comprehensive coverage
 - Flutter lints enabled for code quality
 
-[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/JackCaow/flutter-smooth-markdown/releases/tag/v0.1.0
