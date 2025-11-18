@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 
+import 'chat_list_demo.dart';
 import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
 import 'math_demo.dart';
@@ -987,6 +988,34 @@ console.log(distance); // 输出: 5
                     builder: (context) => FootnoteDemo(
                       styleSheet: _getStyleSheet(),
                     ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.chat,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                'Chat List Demo',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              subtitle: Text(
+                'Performance optimizations',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white38 : Colors.grey,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChatListDemo(),
                   ),
                 );
               },

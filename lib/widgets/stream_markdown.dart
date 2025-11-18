@@ -261,6 +261,11 @@ class StreamMarkdown extends StatefulWidget {
 class _StreamMarkdownState extends State<StreamMarkdown> {
   final StringBuffer _buffer = StringBuffer();
   String _currentText = '';
+  DateTime _lastUpdateTime = DateTime.now();
+  bool _hasPendingUpdate = false;
+
+  /// Throttle duration to batch rapid updates
+  static const _throttleDuration = Duration(milliseconds: 50);
 
   @override
   void initState() {
@@ -271,10 +276,24 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
   void _listenToStream() {
     widget.stream.listen(
       (chunk) {
-        if (mounted) {
-          setState(() {
-            _buffer.write(chunk);
-            _currentText = _buffer.toString();
+        if (!mounted) return;
+
+        _buffer.write(chunk);
+        _hasPendingUpdate = true;
+
+        // Throttle updates to improve performance
+        final now = DateTime.now();
+        final timeSinceLastUpdate = now.difference(_lastUpdateTime);
+
+        if (timeSinceLastUpdate >= _throttleDuration) {
+          // Immediate update
+          _performUpdate();
+        } else {
+          // Schedule delayed update
+          Future.delayed(_throttleDuration - timeSinceLastUpdate, () {
+            if (mounted && _hasPendingUpdate) {
+              _performUpdate();
+            }
           });
         }
       },
@@ -282,6 +301,15 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
         // Error will be handled by StreamBuilder
       },
     );
+  }
+
+  void _performUpdate() {
+    if (!mounted) return;
+    setState(() {
+      _currentText = _buffer.toString();
+      _lastUpdateTime = DateTime.now();
+      _hasPendingUpdate = false;
+    });
   }
 
   @override
@@ -303,14 +331,19 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
           );
     }
 
-    return SmoothMarkdown(
-      data: _currentText,
-      styleSheet: widget.styleSheet,
-      config: widget.config,
-      onTapLink: widget.onTapLink,
-      imageBuilder: widget.imageBuilder,
-      codeBuilder: widget.codeBuilder,
-      useEnhancedComponents: widget.useEnhancedComponents,
+    // Use RepaintBoundary and disable cache for streaming content
+    return RepaintBoundary(
+      child: SmoothMarkdown(
+        data: _currentText,
+        styleSheet: widget.styleSheet,
+        config: widget.config,
+        onTapLink: widget.onTapLink,
+        imageBuilder: widget.imageBuilder,
+        codeBuilder: widget.codeBuilder,
+        useEnhancedComponents: widget.useEnhancedComponents,
+        enableCache: false, // Disable cache for constantly changing content
+        useRepaintBoundary: false, // Already wrapped in RepaintBoundary
+      ),
     );
   }
 
