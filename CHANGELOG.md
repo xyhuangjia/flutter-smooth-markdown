@@ -7,23 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Footnote support with reference `[^label]` and definition syntax
-- Multi-language internationalization support (Chinese, English, Japanese, Spanish, French, Korean)
-- Math formula rendering with LaTeX support using flutter_math_fork
-- Table rendering support with proper styling
-- SVG image support using flutter_svg package
-- Enhanced UI components with theme system
-- Comprehensive example application with multiple demos
+## [0.1.1] - 2024-11-18
 
-### Changed
-- Improved parser performance with optimized AST structure
-- Enhanced code block styling with copy button functionality
-- Updated example app with language switching capability
-
-### Fixed
-- Inline parser handling of complex nested elements
-- Block parser multi-line content support for footnotes
+### Documentation
+- Updated README to reflect Phase 4 (Stream support) completion status
+- Clarified that streaming functionality is fully implemented with StreamMarkdown widget
+- Added streaming demo reference in roadmap
 
 ## [0.1.0] - 2024-11-18
 
@@ -61,5 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 87+ unit tests with comprehensive coverage
 - Flutter lints enabled for code quality
 
-[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/JackCaow/flutter-smooth-markdown/releases/tag/v0.1.0

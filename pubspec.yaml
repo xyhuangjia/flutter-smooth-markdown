@@ -1,6 +1,6 @@
 name: flutter_smooth_markdown
 description: A high-performance Flutter package for smooth markdown rendering with streaming support
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/JackCaow/flutter-smooth-markdown
 repository: https://github.com/JackCaow/flutter-smooth-markdown
 issue_tracker: https://github.com/JackCaow/flutter-smooth-markdown/issues
