@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
@@ -30,9 +31,32 @@ class ImageBuilder extends MarkdownWidgetBuilder {
       );
     }
 
-    // Default rendering with caching
-    if (imageNode.url.startsWith('http://') ||
-        imageNode.url.startsWith('https://')) {
+    // Check if it's an SVG
+    final isSvg = imageNode.url.toLowerCase().endsWith('.svg');
+    final isNetwork = imageNode.url.startsWith('http://') ||
+        imageNode.url.startsWith('https://');
+
+    // SVG rendering
+    if (isSvg) {
+      if (isNetwork) {
+        return SvgPicture.network(
+          imageNode.url,
+          placeholderBuilder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      } else {
+        return SvgPicture.asset(
+          imageNode.url,
+          placeholderBuilder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+    }
+
+    // Default bitmap image rendering
+    if (isNetwork) {
       return CachedNetworkImage(
         imageUrl: imageNode.url,
         placeholder: (context, url) => const Center(

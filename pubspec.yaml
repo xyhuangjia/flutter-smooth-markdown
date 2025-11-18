@@ -34,6 +34,9 @@ dependencies:
   # Math formula rendering
   flutter_math_fork: ^0.7.2
 
+  # SVG rendering
+  flutter_svg: ^2.0.10+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

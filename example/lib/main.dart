@@ -619,6 +619,12 @@ print(f"Analysis complete: {len(results)} columns processed")
 
 ![Flutter Logo](https://storage.googleapis.com/cms-storage-bucket/4fd0db61df0567c0f352.png "Flutter - 谷歌推出的跨平台 UI 框架")
 
+### 8.3 SVG 矢量图
+
+![SVG Icon](https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/flutter.svg)
+
+> SVG 图片支持自动缩放，不会失真，完美适配各种屏幕尺寸。
+
 ---
 
 ## 九、表格
@@ -690,7 +696,7 @@ console.log(distance); // 输出: 5
 5. **列表** - 无序、有序、任务列表
 6. **引用** - 单层和嵌套引用
 7. **链接** - 悬停动画和外链图标
-8. **图片** - 网络图片加载
+8. **图片** - 网络图片加载，支持 PNG/JPEG/GIF/WebP/SVG
 9. **分隔线** - 水平分隔线
 10. **表格** - 完整的 GFM 表格支持，带对齐
 11. **流式渲染** - 实时内容更新（侧边栏"演示"部分查看）
