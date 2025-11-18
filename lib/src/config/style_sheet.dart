@@ -1,8 +1,110 @@
 import 'package:flutter/material.dart';
 
-/// Defines the visual styling for Markdown elements
+/// Defines the visual styling for all Markdown elements.
+///
+/// [MarkdownStyleSheet] provides comprehensive control over the appearance of
+/// rendered markdown content. It includes text styles for different elements
+/// (headers, paragraphs, code, links, etc.) as well as decorations for containers
+/// (blockquotes, code blocks, tables).
+///
+/// ## Usage
+///
+/// Most commonly, you'll use one of the built-in factory constructors rather
+/// than creating a custom stylesheet from scratch:
+///
+/// ```dart
+/// // Use the default light theme
+/// SmoothMarkdown(
+///   data: markdownText,
+///   styleSheet: MarkdownStyleSheet.light(),
+/// )
+///
+/// // Use GitHub-style theme
+/// SmoothMarkdown(
+///   data: markdownText,
+///   styleSheet: MarkdownStyleSheet.github(),
+/// )
+///
+/// // Adapt to app's theme automatically
+/// SmoothMarkdown(
+///   data: markdownText,
+///   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+/// )
+/// ```
+///
+/// ## Customization
+///
+/// To customize a theme, use [copyWith] to override specific properties:
+///
+/// ```dart
+/// final customSheet = MarkdownStyleSheet.light().copyWith(
+///   h1Style: TextStyle(
+///     fontSize: 36,
+///     fontWeight: FontWeight.w900,
+///     color: Colors.purple,
+///   ),
+///   linkStyle: TextStyle(
+///     color: Colors.blue[700],
+///     decoration: TextDecoration.none, // Remove underline
+///   ),
+///   codeBlockDecoration: BoxDecoration(
+///     color: Colors.grey[900],
+///     borderRadius: BorderRadius.circular(12),
+///   ),
+/// );
+/// ```
+///
+/// ## Available Themes
+///
+/// - **light()**: Clean, readable light theme (default)
+/// - **dark()**: Dark theme for dark mode apps
+/// - **github()**: Mimics GitHub's markdown styling (light or dark)
+/// - **vscode()**: VS Code editor-style theme (light or dark)
+/// - **fromTheme()**: Adapts to Flutter's ThemeData automatically
+/// - **fromBrightness()**: Creates theme based on brightness setting
+///
+/// ## Styling Categories
+///
+/// The stylesheet includes properties for:
+///
+/// **Text Styles**:
+/// - Headers (h1-h6), paragraphs, blockquotes
+/// - Inline formatting (bold, italic, strikethrough, code)
+/// - Links, list bullets, table cells
+///
+/// **Container Decorations**:
+/// - Blockquotes, code blocks, tables
+/// - Table headers and alternating row colors
+/// - Horizontal rules
+///
+/// **Spacing & Layout**:
+/// - Block spacing, list indentation
+/// - Padding for blockquotes, code blocks, table cells
+///
+/// See also:
+///
+/// - [SmoothMarkdown], which uses this stylesheet for rendering
+/// - [MarkdownConfig], for configuring parsing behavior
 class MarkdownStyleSheet {
-  /// Creates a new Markdown style sheet
+  /// Creates a custom Markdown style sheet.
+  ///
+  /// All parameters are optional. Unspecified properties will inherit default
+  /// values when the stylesheet is used. It's recommended to use one of the
+  /// factory constructors ([light], [dark], [github], [vscode]) and customize
+  /// with [copyWith] rather than constructing from scratch.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// const customSheet = MarkdownStyleSheet(
+  ///   h1Style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+  ///   paragraphStyle: TextStyle(fontSize: 16, height: 1.6),
+  ///   codeBlockDecoration: BoxDecoration(
+  ///     color: Color(0xFF1E1E1E),
+  ///     borderRadius: BorderRadius.circular(8),
+  ///   ),
+  /// );
+  /// ```
   const MarkdownStyleSheet({
     this.textStyle,
     this.h1Style,
@@ -37,7 +139,33 @@ class MarkdownStyleSheet {
     this.tableCellPadding,
   });
 
-  /// Creates a default light theme style sheet
+  /// Creates a clean, readable light theme style sheet.
+  ///
+  /// This is the default theme used when no stylesheet is provided. It features:
+  /// - Black text on white background (black87 for body, black for headers)
+  /// - Clear visual hierarchy with font sizes from 16px (body) to 32px (H1)
+  /// - Subtle gray backgrounds for code blocks and blockquotes
+  /// - Blue underlined links
+  /// - Light gray borders and separators
+  ///
+  /// The [baseStyle] parameter allows you to override the base text style.
+  /// All other styles will inherit from this base.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Use default base style (16px, black87, line height 1.5)
+  /// MarkdownStyleSheet.light()
+  ///
+  /// // Custom base style
+  /// MarkdownStyleSheet.light(
+  ///   baseStyle: TextStyle(
+  ///     fontSize: 18,
+  ///     fontFamily: 'Georgia',
+  ///     color: Colors.black,
+  ///   ),
+  /// )
+  /// ```
   factory MarkdownStyleSheet.light({TextStyle? baseStyle}) {
     final base = baseStyle ??
         const TextStyle(
@@ -146,9 +274,27 @@ class MarkdownStyleSheet {
     );
   }
 
-  /// Creates a style sheet from Flutter's ThemeData
+  /// Creates a style sheet that adapts to Flutter's ThemeData.
   ///
-  /// Automatically adapts to the current brightness (light/dark mode)
+  /// This factory automatically selects between light and dark themes based on
+  /// the [theme]'s brightness setting, and uses the theme's text styles as the
+  /// base. This is the recommended approach for apps that support both light
+  /// and dark modes.
+  ///
+  /// The base text style is inherited from [theme.textTheme.bodyMedium].
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // In your widget build method
+  /// SmoothMarkdown(
+  ///   data: markdownText,
+  ///   styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+  /// )
+  /// ```
+  ///
+  /// This approach ensures your markdown rendering respects the user's
+  /// theme preferences and system dark mode settings.
   factory MarkdownStyleSheet.fromTheme(ThemeData theme) {
     final brightness = theme.brightness;
     final baseStyle = theme.textTheme.bodyMedium ?? const TextStyle();
@@ -158,7 +304,30 @@ class MarkdownStyleSheet {
         : MarkdownStyleSheet.light(baseStyle: baseStyle);
   }
 
-  /// Creates a style sheet based on brightness
+  /// Creates a style sheet based on brightness value.
+  ///
+  /// Similar to [fromTheme], but accepts a [Brightness] value directly.
+  /// Useful when you want to create a theme based on a specific brightness
+  /// setting without having a full ThemeData object.
+  ///
+  /// Parameters:
+  /// - [brightness]: The brightness to use (Brightness.light or Brightness.dark)
+  /// - [baseStyle]: Optional base text style to inherit from
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Create dark theme explicitly
+  /// MarkdownStyleSheet.fromBrightness(
+  ///   Brightness.dark,
+  ///   baseStyle: TextStyle(fontFamily: 'Roboto'),
+  /// )
+  ///
+  /// // Based on system setting
+  /// MarkdownStyleSheet.fromBrightness(
+  ///   MediaQuery.of(context).platformBrightness,
+  /// )
+  /// ```
   factory MarkdownStyleSheet.fromBrightness(
     Brightness brightness, {
     TextStyle? baseStyle,
@@ -168,7 +337,30 @@ class MarkdownStyleSheet {
         : MarkdownStyleSheet.light(baseStyle: baseStyle);
   }
 
-  /// Creates a GitHub-style theme
+  /// Creates a GitHub-style theme that mimics GitHub's markdown rendering.
+  ///
+  /// This theme closely matches the appearance of markdown on github.com,
+  /// including:
+  /// - GitHub's color palette (light: #24292F text, dark: #E6EDF3 text)
+  /// - Rounded code block backgrounds
+  /// - GitHub's link colors (light: #0969DA, dark: #58A6FF)
+  /// - Familiar spacing and sizing
+  ///
+  /// Parameters:
+  /// - [brightness]: Whether to use light or dark variant (defaults to light)
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // GitHub light theme
+  /// MarkdownStyleSheet.github()
+  ///
+  /// // GitHub dark theme
+  /// MarkdownStyleSheet.github(brightness: Brightness.dark)
+  /// ```
+  ///
+  /// Perfect for documentation apps, README viewers, or any app that wants
+  /// to match GitHub's familiar markdown aesthetic.
   factory MarkdownStyleSheet.github({Brightness brightness = Brightness.light}) {
     if (brightness == Brightness.dark) {
       return MarkdownStyleSheet.dark().copyWith(
@@ -207,7 +399,29 @@ class MarkdownStyleSheet {
     );
   }
 
-  /// Creates a VS Code-style theme
+  /// Creates a VS Code-style theme that mimics the VS Code editor.
+  ///
+  /// This theme replicates the appearance of markdown in Visual Studio Code,
+  /// featuring:
+  /// - VS Code's color scheme (light: #1E1E1E text, dark: #CCCCCC text)
+  /// - Consolas font family (when available)
+  /// - Dark borders and subtle backgrounds
+  /// - VS Code's link colors
+  ///
+  /// Parameters:
+  /// - [brightness]: Whether to use light or dark variant (defaults to light)
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // VS Code light theme
+  /// MarkdownStyleSheet.vscode()
+  ///
+  /// // VS Code dark theme
+  /// MarkdownStyleSheet.vscode(brightness: Brightness.dark)
+  /// ```
+  ///
+  /// Ideal for code-focused apps, developer tools, or editor-style interfaces.
   factory MarkdownStyleSheet.vscode({Brightness brightness = Brightness.light}) {
     if (brightness == Brightness.dark) {
       return MarkdownStyleSheet.dark().copyWith(
@@ -248,7 +462,31 @@ class MarkdownStyleSheet {
     );
   }
 
-  /// Creates a default dark theme style sheet
+  /// Creates a comfortable dark theme style sheet for dark mode apps.
+  ///
+  /// This theme features:
+  /// - White text (white70 for body, white for headers) on dark backgrounds
+  /// - Dark gray backgrounds for code blocks and blockquotes
+  /// - Muted colors to reduce eye strain
+  /// - Light blue links for visibility
+  /// - High contrast for readability in low-light conditions
+  ///
+  /// The [baseStyle] parameter allows you to override the base text style.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Use default dark theme
+  /// MarkdownStyleSheet.dark()
+  ///
+  /// // Custom base style
+  /// MarkdownStyleSheet.dark(
+  ///   baseStyle: TextStyle(
+  ///     fontSize: 18,
+  ///     fontFamily: 'Roboto',
+  ///   ),
+  /// )
+  /// ```
   factory MarkdownStyleSheet.dark({TextStyle? baseStyle}) {
     final base = baseStyle ??
         const TextStyle(

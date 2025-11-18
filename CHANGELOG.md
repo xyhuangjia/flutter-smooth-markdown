@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2025-11-18
+
+### Added
+- Comprehensive dartdoc documentation for all public APIs
+- Detailed documentation for core widgets (SmoothMarkdown, StreamMarkdown)
+- Complete documentation for MarkdownStyleSheet with all factory methods
+- Extensive documentation for MarkdownConfig with security and performance notes
+- Full documentation for MarkdownRenderer including custom builder examples
+- Multiple code examples and usage scenarios for each API
+- Performance considerations and best practices throughout
+
+### Improved
+- API documentation quality significantly enhanced
+- Better IDE code completion experience with detailed parameter descriptions
+- Added "See also" cross-references between related classes
+- Structured documentation with sections for features, usage, and examples
+
 ## [0.1.8] - 2025-11-18
 
 ### Removed

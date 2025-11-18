@@ -20,9 +20,110 @@ import 'builders/text_builder.dart';
 import 'builders/text_style_builder.dart';
 import 'widget_builder.dart';
 
-/// Main renderer that converts Markdown AST nodes to Flutter widgets
+/// Main renderer that converts Markdown AST nodes to Flutter widgets.
+///
+/// [MarkdownRenderer] is responsible for transforming a parsed markdown AST
+/// (Abstract Syntax Tree) into Flutter widgets using a builder registry system.
+/// Each markdown element type has a corresponding builder that knows how to
+/// render it.
+///
+/// ## Architecture
+///
+/// The renderer uses a builder pattern where:
+/// 1. Each AST node type (header, paragraph, code block, etc.) has a builder
+/// 2. Builders are registered in a [BuilderRegistry]
+/// 3. During rendering, the renderer looks up the appropriate builder for each node
+/// 4. Builders create widgets using the provided [MarkdownStyleSheet]
+///
+/// ## Basic Usage
+///
+/// Most users won't interact with this class directly - [SmoothMarkdown] handles
+/// it automatically. However, for advanced use cases:
+///
+/// ```dart
+/// // Parse markdown
+/// final parser = MarkdownParser();
+/// final nodes = parser.parse('# Hello **World**');
+///
+/// // Create renderer
+/// final renderer = MarkdownRenderer(
+///   styleSheet: MarkdownStyleSheet.github(),
+/// );
+///
+/// // Render to widget
+/// final widget = renderer.render(nodes);
+/// ```
+///
+/// ## Custom Builders
+///
+/// You can register custom builders to override default rendering:
+///
+/// ```dart
+/// final renderer = MarkdownRenderer();
+///
+/// // Register a custom header builder
+/// renderer.registerBuilder('header', MyCustomHeaderBuilder());
+///
+/// // Or create with custom registry
+/// final customRegistry = BuilderRegistry()
+///   ..register('header', MyCustomHeaderBuilder())
+///   ..register('code_block', MyCustomCodeBlockBuilder());
+///
+/// final customRenderer = MarkdownRenderer(
+///   builderRegistry: customRegistry,
+/// );
+/// ```
+///
+/// ## Builder Types
+///
+/// Standard builders included:
+/// - **Block elements**: header, paragraph, code_block, blockquote, list, table
+/// - **Inline elements**: bold, italic, strikethrough, inline_code, link, image
+/// - **Special**: horizontal_rule, inline_math, block_math, footnote_reference, footnote_definition
+///
+/// ## Performance
+///
+/// The renderer is optimized for efficiency:
+/// - Builders are stateless and reusable
+/// - Widget tree is built directly without intermediate representations
+/// - Spacing between blocks is calculated once
+/// - Builder lookup is O(1) via hash map
+///
+/// See also:
+///
+/// - [MarkdownParser], which creates the AST nodes that this renderer processes
+/// - [MarkdownWidgetBuilder], the base class for custom builders
+/// - [BuilderRegistry], which manages builder registration and lookup
+/// - [SmoothMarkdown], the high-level widget that uses this renderer
 class MarkdownRenderer {
-  /// Creates a new Markdown renderer
+  /// Creates a new Markdown renderer with the specified configuration.
+  ///
+  /// Parameters:
+  /// - [styleSheet]: The stylesheet to use for rendering. Defaults to
+  ///   [MarkdownStyleSheet.light] if not provided.
+  /// - [builderRegistry]: Custom builder registry. If not provided, uses
+  ///   the default registry with all standard builders.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // With default settings
+  /// final renderer = MarkdownRenderer();
+  ///
+  /// // With custom stylesheet
+  /// final renderer = MarkdownRenderer(
+  ///   styleSheet: MarkdownStyleSheet.vscode(brightness: Brightness.dark),
+  /// );
+  ///
+  /// // With custom builders
+  /// final customRegistry = BuilderRegistry()
+  ///   ..register('header', EnhancedHeaderBuilder());
+  ///
+  /// final renderer = MarkdownRenderer(
+  ///   styleSheet: MarkdownStyleSheet.github(),
+  ///   builderRegistry: customRegistry,
+  /// );
+  /// ```
   MarkdownRenderer({
     MarkdownStyleSheet? styleSheet,
     BuilderRegistry? builderRegistry,
@@ -58,7 +159,28 @@ class MarkdownRenderer {
       ..register('image', const ImageBuilder());
   }
 
-  /// Renders a list of Markdown nodes to a widget
+  /// Renders a list of Markdown AST nodes into a Flutter widget tree.
+  ///
+  /// This is the main entry point for rendering. It processes each node,
+  /// builds corresponding widgets, and combines them into a Column with
+  /// appropriate spacing.
+  ///
+  /// Parameters:
+  /// - [nodes]: The AST nodes to render (typically from [MarkdownParser.parse])
+  /// - [context]: Optional rendering context containing callbacks and custom builders
+  ///
+  /// Returns a [Widget] (usually a [Column]) containing all rendered elements.
+  /// Returns an empty [SizedBox.shrink] if the node list is empty.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// final nodes = MarkdownParser().parse('# Title\n\nParagraph');
+  /// final context = MarkdownRenderContext(
+  ///   onTapLink: (url) => launchUrl(Uri.parse(url)),
+  /// );
+  /// final widget = renderer.render(nodes, context: context);
+  /// ```
   Widget render(
     List<MarkdownNode> nodes, {
     MarkdownRenderContext? context,
@@ -152,12 +274,48 @@ class MarkdownRenderer {
     return result;
   }
 
-  /// Registers a custom builder
+  /// Registers a custom builder for a specific node type.
+  ///
+  /// This allows you to override the default rendering for any markdown element.
+  /// The builder will be used for all nodes with the specified [nodeType].
+  ///
+  /// Parameters:
+  /// - [nodeType]: The node type identifier (e.g., 'header', 'code_block', 'link')
+  /// - [builder]: The custom builder instance to use for this node type
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Override header rendering
+  /// renderer.registerBuilder('header', CustomHeaderBuilder());
+  ///
+  /// // Override code block rendering
+  /// renderer.registerBuilder('code_block', SyntaxHighlightedCodeBuilder());
+  ///
+  /// // Override link rendering
+  /// renderer.registerBuilder('link', CustomLinkBuilder());
+  /// ```
+  ///
+  /// See [MarkdownWidgetBuilder] for how to create custom builders.
   void registerBuilder(String nodeType, MarkdownWidgetBuilder builder) {
     _builderRegistry.register(nodeType, builder);
   }
 
-  /// Unregisters a builder
+  /// Removes a custom builder for a specific node type.
+  ///
+  /// After unregistering, the default builder (if any) will be used for
+  /// the specified node type. If no default exists, unknown node fallback
+  /// will be used.
+  ///
+  /// Parameters:
+  /// - [nodeType]: The node type identifier to unregister
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Remove custom header builder, revert to default
+  /// renderer.unregisterBuilder('header');
+  /// ```
   void unregisterBuilder(String nodeType) {
     _builderRegistry.unregister(nodeType);
   }

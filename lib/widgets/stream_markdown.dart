@@ -4,22 +4,139 @@ import '../src/config/markdown_config.dart';
 import '../src/config/style_sheet.dart';
 import 'smooth_markdown.dart';
 
-/// A widget that renders streaming Markdown content
+/// A widget that renders Markdown content from a stream in real-time.
 ///
-/// This widget is designed for real-time Markdown rendering, such as
-/// AI chat responses or live content updates. It accumulates text chunks
-/// from a stream and renders them progressively.
+/// [StreamMarkdown] is designed specifically for streaming scenarios where markdown
+/// content arrives incrementally, such as AI chat responses, live documentation updates,
+/// or collaborative editing. It efficiently accumulates and renders text chunks as they
+/// arrive from a stream.
 ///
-/// Example:
+/// ## Basic Usage
+///
+/// ```dart
+/// StreamController<String> controller = StreamController<String>();
+///
+/// // Display the streaming widget
+/// StreamMarkdown(
+///   stream: controller.stream,
+///   styleSheet: MarkdownStyleSheet.light(),
+/// )
+///
+/// // Later, send chunks to the stream
+/// controller.add('# Hello\n\n');
+/// await Future.delayed(Duration(milliseconds: 100));
+/// controller.add('This is **streaming** ');
+/// await Future.delayed(Duration(milliseconds: 100));
+/// controller.add('markdown!');
+/// ```
+///
+/// ## Use Cases
+///
+/// **AI Chat Applications**: Perfect for displaying streaming LLM responses
 /// ```dart
 /// StreamMarkdown(
-///   stream: chatResponseStream,
-///   styleSheet: MarkdownStyleSheet.light(),
-///   onTapLink: (url) => print('Tapped: $url'),
+///   stream: openAI.streamCompletion(prompt),
+///   styleSheet: MarkdownStyleSheet.github(),
+///   useEnhancedComponents: true,
 /// )
 /// ```
+///
+/// **Live Collaboration**: Show real-time updates from multiple users
+/// ```dart
+/// StreamMarkdown(
+///   stream: firestore
+///     .collection('documents')
+///     .doc(docId)
+///     .snapshots()
+///     .map((doc) => doc.data()['content'] as String),
+///   styleSheet: MarkdownStyleSheet.light(),
+/// )
+/// ```
+///
+/// **Progressive Loading**: Display content as it loads from network
+/// ```dart
+/// StreamMarkdown(
+///   stream: fetchLargeDocument(),
+///   loadingWidget: Center(child: CircularProgressIndicator()),
+/// )
+/// ```
+///
+/// ## How It Works
+///
+/// 1. The widget listens to the provided stream
+/// 2. Each chunk received is appended to an internal buffer
+/// 3. The accumulated text is parsed and rendered on each update
+/// 4. The UI updates smoothly as new content arrives
+///
+/// ## Performance Considerations
+///
+/// - The widget re-parses and re-renders the entire accumulated content on each chunk
+/// - For very large documents with frequent updates, consider batching chunks
+/// - The parsing is fast (AST-based), but very large documents may cause frame drops
+/// - Consider using [SmoothMarkdown] for static content instead
+///
+/// ## Error Handling
+///
+/// Currently, stream errors are silently ignored. The `errorBuilder` parameter is
+/// available but not yet fully implemented. To handle errors:
+///
+/// ```dart
+/// final stream = sourceStream.handleError((error) {
+///   print('Stream error: $error');
+///   // You can transform errors or rethrow
+/// });
+///
+/// StreamMarkdown(stream: stream)
+/// ```
+///
+/// See also:
+///
+/// - [SmoothMarkdown], for static markdown content
+/// - [MarkdownStyleSheet], for customizing the visual appearance
+/// - [MarkdownConfig], for configuring parsing behavior
 class StreamMarkdown extends StatefulWidget {
-  /// Creates a new StreamMarkdown widget
+  /// Creates a widget that renders streaming Markdown content.
+  ///
+  /// The [stream] parameter is required and should emit markdown text chunks.
+  /// Each chunk is appended to the accumulated content and the entire content
+  /// is re-rendered.
+  ///
+  /// All other parameters are optional and provide the same customization
+  /// options as [SmoothMarkdown]:
+  ///
+  /// - [styleSheet]: Controls the visual styling of markdown elements. Defaults to
+  ///   [MarkdownStyleSheet.light] if not provided.
+  /// - [config]: Configuration options for markdown parsing behavior.
+  /// - [onTapLink]: Callback function invoked when a link is tapped.
+  /// - [imageBuilder]: Custom widget builder for rendering images.
+  /// - [codeBuilder]: Custom widget builder for rendering code blocks.
+  /// - [useEnhancedComponents]: When `true`, uses enhanced UI components.
+  /// - [loadingWidget]: Widget to display while waiting for the first chunk.
+  ///   Defaults to an empty container if not provided.
+  /// - [errorBuilder]: Custom widget builder for displaying errors. Currently
+  ///   not fully implemented - errors are silently ignored.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // AI chat response streaming
+  /// StreamMarkdown(
+  ///   stream: aiService.streamResponse(prompt),
+  ///   styleSheet: MarkdownStyleSheet.github(),
+  ///   useEnhancedComponents: true,
+  ///   loadingWidget: Center(
+  ///     child: Column(
+  ///       mainAxisSize: MainAxisSize.min,
+  ///       children: [
+  ///         CircularProgressIndicator(),
+  ///         SizedBox(height: 8),
+  ///         Text('Waiting for response...'),
+  ///       ],
+  ///     ),
+  ///   ),
+  ///   onTapLink: (url) => launchUrl(Uri.parse(url)),
+  /// )
+  /// ```
   const StreamMarkdown({
     required this.stream,
     super.key,
@@ -33,33 +150,108 @@ class StreamMarkdown extends StatefulWidget {
     this.errorBuilder,
   });
 
-  /// The stream of Markdown text chunks
+  /// The stream of Markdown text chunks to render.
+  ///
+  /// Each string emitted by this stream is appended to the accumulated content.
+  /// The widget will re-render the entire accumulated content on each emission.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // Creating a simple stream
+  /// Stream<String> createMarkdownStream() async* {
+  ///   yield '# Title\n\n';
+  ///   await Future.delayed(Duration(milliseconds: 100));
+  ///   yield 'First paragraph with **bold** text.\n\n';
+  ///   await Future.delayed(Duration(milliseconds: 100));
+  ///   yield '## Subtitle\n\n';
+  ///   yield 'Second paragraph.';
+  /// }
+  ///
+  /// StreamMarkdown(stream: createMarkdownStream())
+  /// ```
+  ///
+  /// The stream can be a [StreamController], a network stream, or any other
+  /// source that emits string chunks.
   final Stream<String> stream;
 
-  /// The style sheet to use for rendering
+  /// The style sheet used to control the visual appearance of rendered markdown.
   ///
-  /// If not provided, defaults to [MarkdownStyleSheet.light()]
+  /// See [SmoothMarkdown.styleSheet] for detailed documentation and examples.
   final MarkdownStyleSheet? styleSheet;
 
-  /// Configuration for Markdown parsing
+  /// Configuration options for Markdown parsing behavior.
+  ///
+  /// See [SmoothMarkdown.config] for detailed documentation and examples.
   final MarkdownConfig? config;
 
-  /// Callback when a link is tapped
+  /// Callback function invoked when a user taps on a link.
+  ///
+  /// See [SmoothMarkdown.onTapLink] for detailed documentation and examples.
   final void Function(String url)? onTapLink;
 
-  /// Custom image widget builder
+  /// Custom widget builder for rendering images.
+  ///
+  /// See [SmoothMarkdown.imageBuilder] for detailed documentation and examples.
   final Widget Function(String url, String? alt, String? title)? imageBuilder;
 
-  /// Custom code block widget builder
+  /// Custom widget builder for rendering code blocks.
+  ///
+  /// See [SmoothMarkdown.codeBuilder] for detailed documentation and examples.
   final Widget Function(String code, String? language)? codeBuilder;
 
-  /// Whether to use enhanced UI components
+  /// Whether to use enhanced UI components with additional visual effects.
+  ///
+  /// See [SmoothMarkdown.useEnhancedComponents] for detailed documentation.
   final bool useEnhancedComponents;
 
-  /// Widget to show while waiting for the first chunk
+  /// Widget to display while waiting for the first chunk from the stream.
+  ///
+  /// This widget is shown when the stream hasn't emitted any data yet.
+  /// Once the first chunk arrives, this widget is replaced with the
+  /// rendered markdown content.
+  ///
+  /// If not provided, an empty invisible container is shown (SizedBox.shrink).
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// loadingWidget: Center(
+  ///   child: Column(
+  ///     mainAxisAlignment: MainAxisAlignment.center,
+  ///     children: [
+  ///       CircularProgressIndicator(),
+  ///       SizedBox(height: 16),
+  ///       Text('Loading content...'),
+  ///     ],
+  ///   ),
+  /// )
+  /// ```
   final Widget? loadingWidget;
 
-  /// Builder for error display
+  /// Custom widget builder for displaying stream errors.
+  ///
+  /// **Note**: This parameter is currently not fully implemented. Stream errors
+  /// are caught but not displayed. To handle errors, use stream error handling:
+  ///
+  /// ```dart
+  /// final errorHandledStream = originalStream.handleError((error) {
+  ///   print('Error: $error');
+  ///   // Return empty or error message
+  /// });
+  ///
+  /// StreamMarkdown(stream: errorHandledStream)
+  /// ```
+  ///
+  /// Future implementation may use this builder to display errors inline:
+  ///
+  /// ```dart
+  /// errorBuilder: (error) => Container(
+  ///   padding: EdgeInsets.all(16),
+  ///   color: Colors.red[100],
+  ///   child: Text('Error: $error'),
+  /// )
+  /// ```
   final Widget Function(Object error)? errorBuilder;
 
   @override
