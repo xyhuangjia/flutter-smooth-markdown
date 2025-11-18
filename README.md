@@ -1,6 +1,10 @@
 # Flutter Smooth Markdown
 
-A high-performance Flutter package for smooth markdown rendering with beautiful enhanced UI components.
+[![pub package](https://img.shields.io/pub/v/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown)
+[![popularity](https://img.shields.io/pub/popularity/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown/score)
+[![likes](https://img.shields.io/pub/likes/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown/score)
+
+A high-performance Flutter markdown renderer with syntax highlighting, LaTeX math formulas, tables, footnotes, SVG images, and real-time streaming support. Beautiful, customizable UI components for modern Flutter apps.
 
 ## ✨ Features
 
@@ -178,6 +182,16 @@ This text has a footnote[^1].
 ![Flutter Icon](https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/flutter.svg)
 ```
 
+## 💡 Use Cases
+
+Perfect for building:
+- 📱 **Documentation Apps** - Technical documentation with code examples
+- 💬 **Chat Applications** - Rich text messaging with markdown support
+- 📝 **Note-Taking Apps** - Markdown editors and viewers
+- 🎓 **Educational Platforms** - Content with LaTeX formulas and code
+- 📰 **Content Management** - Blog posts and articles with formatting
+- 🤖 **AI Chat Interfaces** - Real-time streaming markdown responses
+
 ## 🎨 Theming
 
 The package includes multiple built-in themes with light and dark variants:
@@ -227,6 +241,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+## 🔍 Keywords
+
+`flutter markdown` `markdown renderer` `markdown widget` `syntax highlighting` `code highlighting` `latex math` `math formulas` `markdown parser` `markdown viewer` `rich text` `streaming markdown` `real-time rendering` `flutter ui` `markdown editor` `documentation` `note taking` `chat app` `ai chat` `markdown to widget`
 
 ## 🔗 Links
 

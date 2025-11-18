@@ -1,9 +1,16 @@
 name: flutter_smooth_markdown
-description: A high-performance Flutter package for smooth markdown rendering with streaming support
-version: 0.1.5
+description: High-performance Flutter markdown renderer with syntax highlighting, LaTeX math, tables, footnotes, SVG images, and real-time streaming support. Beautiful UI with customizable themes.
+version: 0.1.6
 homepage: https://github.com/JackCaow/flutter-smooth-markdown
 repository: https://github.com/JackCaow/flutter-smooth-markdown
 issue_tracker: https://github.com/JackCaow/flutter-smooth-markdown/issues
+
+topics:
+  - markdown
+  - renderer
+  - syntax-highlighting
+  - latex
+  - streaming
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
