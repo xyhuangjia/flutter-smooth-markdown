@@ -128,7 +128,7 @@ class InlineParser {
     }
 
     // Find closing )
-    var urlStart = altEnd + 2;
+    final urlStart = altEnd + 2;
     var urlEnd = -1;
     i = urlStart;
     while (i < text.length) {
@@ -182,7 +182,7 @@ class InlineParser {
     }
 
     // Find closing )
-    var urlStart = textEnd + 2;
+    final urlStart = textEnd + 2;
     var urlEnd = -1;
     i = urlStart;
     while (i < text.length) {
