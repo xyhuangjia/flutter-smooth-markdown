@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/github.dart' as highlight_github;
+import 'package:flutter_highlight/themes/vs2015.dart' as highlight_dark;
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
@@ -12,10 +15,12 @@ class EnhancedCodeBlockBuilder extends MarkdownWidgetBuilder {
   const EnhancedCodeBlockBuilder({
     this.showCopyButton = true,
     this.showLanguageTag = true,
+    this.enableSyntaxHighlighting = true,
   });
 
   final bool showCopyButton;
   final bool showLanguageTag;
+  final bool enableSyntaxHighlighting;
 
   @override
   bool canBuild(MarkdownNode node) => node is CodeBlockNode;
@@ -42,6 +47,7 @@ class EnhancedCodeBlockBuilder extends MarkdownWidgetBuilder {
       styleSheet: styleSheet,
       showCopyButton: showCopyButton,
       showLanguageTag: showLanguageTag,
+      enableSyntaxHighlighting: enableSyntaxHighlighting,
     );
   }
 }
@@ -53,6 +59,7 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
     required this.styleSheet,
     required this.showCopyButton,
     required this.showLanguageTag,
+    required this.enableSyntaxHighlighting,
   });
 
   final String code;
@@ -60,6 +67,7 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
   final MarkdownStyleSheet styleSheet;
   final bool showCopyButton;
   final bool showLanguageTag;
+  final bool enableSyntaxHighlighting;
 
   @override
   State<_EnhancedCodeBlockWidget> createState() =>
@@ -69,6 +77,20 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
 class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
   bool _copied = false;
   bool _isHovered = false;
+
+  /// Get the appropriate highlight theme based on the brightness
+  Map<String, TextStyle> _getHighlightTheme(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final backgroundColor = widget.styleSheet.codeBlockDecoration?.color;
+
+    // Determine if we're in a dark theme
+    if (brightness == Brightness.dark ||
+        (backgroundColor != null && backgroundColor.computeLuminance() < 0.5)) {
+      return highlight_dark.vs2015Theme;
+    }
+
+    return highlight_github.githubTheme;
+  }
 
   Future<void> _copyToClipboard() async {
     await Clipboard.setData(ClipboardData(text: widget.code));
@@ -114,10 +136,18 @@ class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
               padding: widget.styleSheet.codeBlockPadding,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: SelectableText(
-                  widget.code,
-                  style: widget.styleSheet.codeBlockStyle,
-                ),
+                child: widget.enableSyntaxHighlighting && widget.language != null
+                    ? HighlightView(
+                        widget.code,
+                        language: widget.language!,
+                        theme: _getHighlightTheme(context),
+                        padding: EdgeInsets.zero,
+                        textStyle: widget.styleSheet.codeBlockStyle,
+                      )
+                    : SelectableText(
+                        widget.code,
+                        style: widget.styleSheet.codeBlockStyle,
+                      ),
               ),
             ),
 

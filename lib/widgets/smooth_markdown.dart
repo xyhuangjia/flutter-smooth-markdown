@@ -16,6 +16,7 @@ import '../src/renderer/builders/inline_code_builder.dart';
 import '../src/renderer/builders/link_builder.dart';
 import '../src/renderer/builders/list_builder.dart';
 import '../src/renderer/builders/paragraph_builder.dart';
+import '../src/renderer/builders/table_builder.dart';
 import '../src/renderer/builders/text_builder.dart';
 import '../src/renderer/builders/text_style_builder.dart';
 import '../src/renderer/markdown_renderer.dart';
@@ -98,6 +99,7 @@ class SmoothMarkdown extends StatelessWidget {
         ..register('italic', const ItalicBuilder())
         ..register('strikethrough', const StrikethroughBuilder())
         ..register('image', const ImageBuilder())
+        ..register('table', const TableBuilder())
         // Enhanced builders (override standard ones)
         ..register('code_block', const EnhancedCodeBlockBuilder())
         ..register('blockquote', const EnhancedBlockquoteBuilder())

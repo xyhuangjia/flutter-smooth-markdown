@@ -25,6 +25,9 @@ class MarkdownStyleSheet {
     this.blockquoteDecoration,
     this.codeBlockDecoration,
     this.tableBorder,
+    this.tableHeaderDecoration,
+    this.tableOddRowDecoration,
+    this.tableEvenRowDecoration,
     this.horizontalRuleColor,
     this.horizontalRuleThickness,
     this.blockSpacing,
@@ -120,6 +123,15 @@ class MarkdownStyleSheet {
       tableBorder: TableBorder.all(
         color: Colors.grey[400]!,
         width: 1,
+      ),
+      tableHeaderDecoration: BoxDecoration(
+        color: Colors.grey[200],
+      ),
+      tableOddRowDecoration: BoxDecoration(
+        color: Colors.white,
+      ),
+      tableEvenRowDecoration: BoxDecoration(
+        color: Colors.grey[50],
       ),
       horizontalRuleColor: Colors.grey[400],
       horizontalRuleThickness: 1,
@@ -335,6 +347,15 @@ class MarkdownStyleSheet {
         color: Colors.grey[700]!,
         width: 1,
       ),
+      tableHeaderDecoration: BoxDecoration(
+        color: Colors.grey[850],
+      ),
+      tableOddRowDecoration: BoxDecoration(
+        color: Colors.grey[900],
+      ),
+      tableEvenRowDecoration: BoxDecoration(
+        color: Colors.grey[800],
+      ),
       horizontalRuleColor: Colors.grey[700],
       horizontalRuleThickness: 1,
       blockSpacing: 16,
@@ -411,6 +432,15 @@ class MarkdownStyleSheet {
   /// Border for tables
   final TableBorder? tableBorder;
 
+  /// Decoration for table header row
+  final BoxDecoration? tableHeaderDecoration;
+
+  /// Decoration for odd table rows
+  final BoxDecoration? tableOddRowDecoration;
+
+  /// Decoration for even table rows
+  final BoxDecoration? tableEvenRowDecoration;
+
   /// Color for horizontal rules
   final Color? horizontalRuleColor;
 
@@ -455,6 +485,9 @@ class MarkdownStyleSheet {
     BoxDecoration? blockquoteDecoration,
     BoxDecoration? codeBlockDecoration,
     TableBorder? tableBorder,
+    BoxDecoration? tableHeaderDecoration,
+    BoxDecoration? tableOddRowDecoration,
+    BoxDecoration? tableEvenRowDecoration,
     Color? horizontalRuleColor,
     double? horizontalRuleThickness,
     double? blockSpacing,
@@ -485,6 +518,9 @@ class MarkdownStyleSheet {
       blockquoteDecoration: blockquoteDecoration ?? this.blockquoteDecoration,
       codeBlockDecoration: codeBlockDecoration ?? this.codeBlockDecoration,
       tableBorder: tableBorder ?? this.tableBorder,
+      tableHeaderDecoration: tableHeaderDecoration ?? this.tableHeaderDecoration,
+      tableOddRowDecoration: tableOddRowDecoration ?? this.tableOddRowDecoration,
+      tableEvenRowDecoration: tableEvenRowDecoration ?? this.tableEvenRowDecoration,
       horizontalRuleColor: horizontalRuleColor ?? this.horizontalRuleColor,
       horizontalRuleThickness:
           horizontalRuleThickness ?? this.horizontalRuleThickness,

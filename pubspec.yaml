@@ -31,6 +31,9 @@ dependencies:
   # URL handling
   url_launcher: ^6.2.0
 
+  # Math formula rendering
+  flutter_math_fork: ^0.7.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

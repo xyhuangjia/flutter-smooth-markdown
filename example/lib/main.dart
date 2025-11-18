@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 
+import 'math_demo.dart';
+import 'streaming_demo.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -618,7 +621,7 @@ print(f"Analysis complete: {len(results)} columns processed")
 
 ---
 
-## 九、表格（规划中）
+## 九、表格
 
 | 功能 | 标准组件 | 增强组件 | 说明 |
 |------|---------|---------|------|
@@ -626,6 +629,23 @@ print(f"Analysis complete: {len(results)} columns processed")
 | 引用 | ✅ | ✅ 图标装饰 | 渐变背景 |
 | 链接 | ✅ | ✅ 悬停动画 | 外链图标 |
 | 标题 | ✅ | ✅ 彩色标记 | 渐变边框 |
+
+### 表格对齐示例
+
+| 左对齐 | 居中对齐 | 右对齐 |
+|:-------|:-------:|-------:|
+| 左     | 中      | 右     |
+| Left   | Center  | Right  |
+| 数据1  | 数据2   | 数据3  |
+
+### 复杂表格示例
+
+| 编程语言 | 类型 | 发布年份 | 主要用途 |
+|---------|:----:|:--------:|---------|
+| **Python** | 动态 | 1991 | AI、数据科学、Web |
+| **JavaScript** | 动态 | 1995 | Web 前端、后端 |
+| **Dart** | 静态 | 2011 | Flutter 应用开发 |
+| **Rust** | 静态 | 2010 | 系统编程、性能 |
 
 ---
 
@@ -666,19 +686,19 @@ console.log(distance); // 输出: 5
 1. **标题** - 6 级标题，H1/H2 带装饰
 2. **文本样式** - 粗体、斜体、删除线、行内代码
 3. **代码块** - 带复制按钮和语言标签
-4. **列表** - 无序、有序、任务列表
-5. **引用** - 单层和嵌套引用
-6. **链接** - 悬停动画和外链图标
-7. **图片** - 网络图片加载
-8. **分隔线** - 水平分隔线
-9. **主题** - 6 种预设主题
+4. **语法高亮** - 代码块语法着色（支持 Dart、JavaScript、Python 等）
+5. **列表** - 无序、有序、任务列表
+6. **引用** - 单层和嵌套引用
+7. **链接** - 悬停动画和外链图标
+8. **图片** - 网络图片加载
+9. **分隔线** - 水平分隔线
+10. **表格** - 完整的 GFM 表格支持，带对齐
+11. **流式渲染** - 实时内容更新（侧边栏"演示"部分查看）
+12. **数学公式** - LaTeX 数学表达式（侧边栏"演示"部分查看）
+13. **主题** - 6 种预设主题
 
 ### 🚧 开发中
-1. **表格** - 完整的表格支持
-2. **语法高亮** - 代码块语法着色
-3. **流式渲染** - 实时内容更新
-4. **数学公式** - LaTeX 数学表达式
-5. **脚注** - 文档脚注支持
+1. **脚注** - 文档脚注支持
 
 ---
 
@@ -833,6 +853,64 @@ console.log(distance); // 输出: 5
                 },
               );
             }),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                '演示',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white54 : Colors.grey,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.calculate,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                '数学公式',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MathDemo(
+                      styleSheet: _getStyleSheet(),
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.stream,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                '流式渲染',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StreamingMarkdownDemo(
+                      styleSheet: _getStyleSheet(),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

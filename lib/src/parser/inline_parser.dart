@@ -54,6 +54,15 @@ class InlineParser {
         }
       }
 
+      // Try inline math
+      if (node == null && i < text.length && text[i] == '\$') {
+        final result = _tryParseInlineMath(text, i);
+        if (result != null) {
+          node = result.node;
+          consumed = result.consumed;
+        }
+      }
+
       // Try strikethrough
       if (node == null && i + 1 < text.length &&
           text[i] == '~' && text[i + 1] == '~') {
@@ -244,6 +253,35 @@ class InlineParser {
         final code = text.substring(start + 1, i);
         return _InlineParseResult(
           node: InlineCodeNode(code),
+          consumed: i - start + 1,
+        );
+      }
+      i++;
+    }
+
+    return null;
+  }
+
+  /// Tries to parse inline math (LaTeX)
+  _InlineParseResult? _tryParseInlineMath(String text, int start) {
+    if (start >= text.length || text[start] != '\$') {
+      return null;
+    }
+
+    // Make sure it's not block math ($$)
+    if (start + 1 < text.length && text[start + 1] == '\$') {
+      return null;
+    }
+
+    // Find closing $
+    var i = start + 1;
+    while (i < text.length) {
+      if (text[i] == '\$') {
+        final latex = text.substring(start + 1, i);
+        if (latex.isEmpty) return null;
+
+        return _InlineParseResult(
+          node: InlineMathNode(latex),
           consumed: i - start + 1,
         );
       }
