@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-11-18
+
+### Major Improvements
+- 📚 **Complete API Documentation** - Comprehensive dartdoc for all public APIs
+- 🎯 **Developer Experience** - Significantly improved IDE code completion
+- 📖 **Production Ready** - Professional-grade documentation quality
+
+### Added
+- Extensive documentation for SmoothMarkdown and StreamMarkdown widgets
+- Complete MarkdownStyleSheet documentation with all factory methods
+- Detailed MarkdownConfig documentation with security and performance notes
+- Full MarkdownRenderer documentation including custom builder examples
+- Multiple code examples and usage scenarios throughout the codebase
+- Performance considerations and best practices in documentation
+- Cross-references between related classes for better navigation
+
+### Improved
+- API documentation quality elevated to production standards
+- Better IDE experience with detailed parameter descriptions
+- Structured documentation with clear sections and examples
+- Enhanced developer onboarding experience
+
 ## [0.1.9] - 2025-11-18
 
 ### Added
