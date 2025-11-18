@@ -21,9 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package maintenance release
 - Ensure all documentation is synchronized
 
-### Removed
-- Removed unused `markdown: ^7.0.0` dependency (package uses custom parser implementation)
-
 ## [0.1.6] - 2024-11-18
 
 ### Changed
