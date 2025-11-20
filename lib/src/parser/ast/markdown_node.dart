@@ -674,3 +674,57 @@ class FootnoteDefinitionNode extends MarkdownNode {
   @override
   String toString() => 'FootnoteDefinitionNode(label: $label, children: ${children.length})';
 }
+
+/// Represents a details/summary collapsible block
+///
+/// Example:
+/// ```html
+/// <details>
+/// <summary>Click to expand</summary>
+/// Hidden content here
+/// </details>
+/// ```
+class DetailsNode extends MarkdownNode {
+  /// Creates a new details node
+  const DetailsNode({
+    required this.summary,
+    required this.children,
+    this.isOpen = false,
+  });
+
+  /// The summary text (clickable header)
+  final List<MarkdownNode> summary;
+
+  /// The collapsible content
+  final List<MarkdownNode> children;
+
+  /// Whether the details block is open by default
+  final bool isOpen;
+
+  @override
+  String get type => 'details';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'summary': summary.map((node) => node.toJson()).toList(),
+        'children': children.map((child) => child.toJson()).toList(),
+        'isOpen': isOpen,
+      };
+
+  @override
+  DetailsNode copyWith({
+    List<MarkdownNode>? summary,
+    List<MarkdownNode>? children,
+    bool? isOpen,
+  }) {
+    return DetailsNode(
+      summary: summary ?? this.summary,
+      children: children ?? this.children,
+      isOpen: isOpen ?? this.isOpen,
+    );
+  }
+
+  @override
+  String toString() => 'DetailsNode(summary: ${summary.length}, children: ${children.length}, isOpen: $isOpen)';
+}

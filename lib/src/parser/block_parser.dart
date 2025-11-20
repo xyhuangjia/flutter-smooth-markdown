@@ -80,6 +80,12 @@ class BlockParser {
         node = result.node;
         consumed = result.linesConsumed;
       }
+      // Try details block
+      else if (_isDetailsStart(line)) {
+        final result = _parseDetails(lines, i);
+        node = result.node;
+        consumed = result.linesConsumed;
+      }
       // Try table
       else if (_isTableStart(lines, i)) {
         final result = _parseTable(lines, i);
@@ -554,6 +560,107 @@ class BlockParser {
         return null; // Default alignment
       }
     }).toList();
+  }
+
+  /// Checks if a line starts a details block
+  ///
+  /// Format: `<details>` or `<details open>`
+  bool _isDetailsStart(String line) {
+    final trimmed = line.trim().toLowerCase();
+    return trimmed == '<details>' || trimmed == '<details open>';
+  }
+
+  /// Parses a details block
+  ///
+  /// Format:
+  /// `<details>`
+  /// `<summary>`Summary text`</summary>`
+  /// Content here
+  /// `</details>`
+  _ParseResult _parseDetails(List<String> lines, int startIndex) {
+    final firstLine = lines[startIndex].trim().toLowerCase();
+    final isOpen = firstLine.contains('open');
+
+    var i = startIndex + 1;
+    var summary = <MarkdownNode>[const TextNode('')];
+    final contentLines = <String>[];
+    var foundSummary = false;
+    var inSummary = false;
+
+    // Parse the details block
+    while (i < lines.length) {
+      final line = lines[i];
+      final trimmedLower = line.trim().toLowerCase();
+
+      // Check for closing details tag
+      if (trimmedLower == '</details>') {
+        break;
+      }
+
+      // Check for summary tag
+      if (trimmedLower.startsWith('<summary>')) {
+        inSummary = true;
+        foundSummary = true;
+
+        // Extract summary content from same line if present
+        final summaryContent = line.trim().substring(9); // Remove <summary>
+        if (summaryContent.toLowerCase().contains('</summary>')) {
+          // Summary closes on same line
+          final endIndex = summaryContent.toLowerCase().indexOf('</summary>');
+          final summaryText = summaryContent.substring(0, endIndex).trim();
+          summary = _inlineParser.parse(summaryText);
+          inSummary = false;
+        } else if (summaryContent.isNotEmpty) {
+          // Summary continues
+          summary = _inlineParser.parse(summaryContent);
+        }
+        i++;
+        continue;
+      }
+
+      // Check for closing summary tag
+      if (inSummary && trimmedLower.contains('</summary>')) {
+        final endIndex = line.toLowerCase().indexOf('</summary>');
+        final summaryText = line.substring(0, endIndex).trim();
+        if (summaryText.isNotEmpty) {
+          summary = _inlineParser.parse(summaryText);
+        }
+        inSummary = false;
+        i++;
+        continue;
+      }
+
+      // If still in summary, add to summary
+      if (inSummary) {
+        var existingSummary = '';
+        if (summary.isNotEmpty && summary.first is TextNode) {
+          existingSummary = (summary.first as TextNode).content;
+        }
+        summary = _inlineParser.parse('$existingSummary ${line.trim()}');
+        i++;
+        continue;
+      }
+
+      // Otherwise, add to content
+      if (foundSummary) {
+        contentLines.add(line);
+      }
+      i++;
+    }
+
+    // Parse the content
+    final children = contentLines.isEmpty
+        ? <MarkdownNode>[]
+        : parse(contentLines.join('\n'));
+
+    return _ParseResult(
+      node: DetailsNode(
+        summary: summary,
+        children: children,
+        isOpen: isOpen,
+      ),
+      linesConsumed: i - startIndex + 1,
+    );
   }
 }
 

@@ -5,6 +5,7 @@ import '../src/config/style_sheet.dart';
 import '../src/parser/ast/markdown_node.dart';
 import '../src/parser/markdown_parser.dart';
 import '../src/parser/parse_cache.dart';
+import '../src/renderer/builders/details_builder.dart';
 import '../src/renderer/builders/enhanced_blockquote_builder.dart';
 import '../src/renderer/builders/enhanced_code_block_builder.dart';
 import '../src/renderer/builders/enhanced_header_builder.dart';
@@ -510,6 +511,7 @@ class SmoothMarkdown extends StatelessWidget {
         ..register('strikethrough', const StrikethroughBuilder())
         ..register('image', const ImageBuilder())
         ..register('table', const TableBuilder())
+        ..register('details', const DetailsBuilder())
         // Enhanced builders (override standard ones)
         ..register('code_block', const EnhancedCodeBlockBuilder())
         ..register('blockquote', const EnhancedBlockquoteBuilder())

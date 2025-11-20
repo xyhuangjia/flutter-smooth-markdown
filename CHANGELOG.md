@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2025-11-20
+
+### Added
+- ✅ **Details & Summary Support** - Collapsible content sections with interactive expand/collapse
+  - Support for HTML `<details>` and `<summary>` tags
+  - Automatic parsing of nested markdown content
+  - Click-to-expand/collapse functionality with animated arrow icons
+  - Default open state via `open` attribute
+  - Seamless integration with both standard and enhanced component modes
+
+### Implementation
+- Added `DetailsNode` to AST for representing collapsible sections
+- Implemented `DetailsBuilder` widget with stateful expand/collapse behavior
+- Parser logic for `<details>` and `<summary>` HTML tags
+- Registered builder in both default and enhanced component registries
+- Comprehensive test coverage (11 parser tests + 7 renderer tests)
+
+### Examples
+```markdown
+<details>
+<summary>Click to expand</summary>
+Hidden content that shows on click
+</details>
+
+<details open>
+<summary>Expanded by default</summary>
+This section starts expanded
+</details>
+```
+
 ## [0.3.1] - 2025-11-18
 
 ### Fixed

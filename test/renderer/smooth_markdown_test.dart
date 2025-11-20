@@ -11,7 +11,6 @@ void main() {
             data: 'Hello World',
             useRepaintBoundary: false,
             enableCache: false,
-            enableCache: false,
           ),
         ),
       );

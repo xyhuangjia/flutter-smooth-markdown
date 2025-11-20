@@ -20,6 +20,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 - 🧮 **Math Formulas** - LaTeX equation rendering with flutter_math_fork
 - 📎 **Footnotes** - Reference and definition support for academic writing
 - 🖼️ **SVG Images** - Native SVG rendering support with flutter_svg
+- 📋 **Details & Summary** - Collapsible content sections with interactive expand/collapse
 - 🌐 **Internationalization** - Multi-language example app (6 languages supported)
 - 🎬 **Streaming Support** - Real-time markdown rendering with StreamMarkdown widget
 
@@ -182,6 +183,19 @@ This text has a footnote[^1].
 ![Flutter Icon](https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/flutter.svg)
 ```
 
+### Details & Summary (Collapsible Sections)
+```markdown
+<details>
+<summary>Click to expand</summary>
+This content is hidden by default and will only show when the user clicks the summary.
+</details>
+
+<details open>
+<summary>Expanded by default</summary>
+This section is expanded by default using the `open` attribute.
+</details>
+```
+
 ## 💡 Use Cases
 
 Perfect for building:
@@ -269,6 +283,7 @@ This project is licensed under the MIT License.
 - [x] Multi-language internationalization (Chinese, English, Japanese, Spanish, French, Korean)
 - [x] Phase 4: Stream support for real-time rendering with StreamMarkdown widget
 - [x] Streaming demo in example app
+- [x] Details & Summary support for collapsible content sections
 
 ### In Progress
 - [ ] Performance optimization and benchmarking

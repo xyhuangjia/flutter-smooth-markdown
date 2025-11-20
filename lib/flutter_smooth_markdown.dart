@@ -12,6 +12,7 @@ export 'src/parser/markdown_parser.dart';
 export 'src/parser/parse_cache.dart';
 // Export renderer
 export 'src/renderer/builders/block_math_builder.dart';
+export 'src/renderer/builders/details_builder.dart';
 export 'src/renderer/builders/enhanced_blockquote_builder.dart';
 export 'src/renderer/builders/enhanced_code_block_builder.dart';
 export 'src/renderer/builders/enhanced_header_builder.dart';
