@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 
+import 'ai_chat_demo.dart';
 import 'chat_list_demo.dart';
 import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
 import 'math_demo.dart';
+import 'plugin_demo.dart';
 import 'streaming_demo.dart';
 
-void main() {
+Future<void> main() async {
+  // 加载 .env 文件
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
@@ -1139,6 +1144,64 @@ console.log(distance); // 输出: 5
                   context,
                   MaterialPageRoute(
                     builder: (context) => const ChatListDemo(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.auto_awesome,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                'AI Chat Demo',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              subtitle: Text(
+                'Qwen API + Thinking/Artifact/Tool',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white38 : Colors.grey,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AIChatDemo(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.extension,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                'Plugin System',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              subtitle: Text(
+                '@mention #hashtag :emoji:',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white38 : Colors.grey,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PluginDemo(
+                      styleSheet: _getStyleSheet(),
+                    ),
                   ),
                 );
               },

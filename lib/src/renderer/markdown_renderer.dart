@@ -187,7 +187,15 @@ class MarkdownRenderer {
     List<MarkdownNode> nodes, {
     MarkdownRenderContext? context,
   }) {
-    final renderContext = context ?? const MarkdownRenderContext();
+    // Create context with renderer references for nested rendering
+    final baseContext = context ?? const MarkdownRenderContext();
+    final renderContext = baseContext.copyWith(
+      inlineRenderer: (childNodes, baseStyle) =>
+          renderInline(childNodes, baseStyle, baseContext),
+      blockRenderer: (childNodes) =>
+          render(childNodes, context: baseContext),
+      styleSheet: styleSheet,
+    );
 
     final widgets = nodes
         .map((node) => _renderNode(node, renderContext))
@@ -219,6 +227,9 @@ class MarkdownRenderer {
   }
 
   /// Renders inline nodes (used by builders)
+  ///
+  /// This method uses the registered builders to render inline content,
+  /// preserving any custom builder registrations for plugin nodes.
   Widget renderInline(
     List<MarkdownNode> nodes,
     TextStyle? baseStyle,
@@ -228,13 +239,22 @@ class MarkdownRenderer {
       return const SizedBox.shrink();
     }
 
+    // Ensure context has inlineRenderer for nested rendering
+    final renderContext = context.inlineRenderer == null
+        ? context.copyWith(
+            inlineRenderer: (childNodes, style) =>
+                renderInline(childNodes, style, context),
+            styleSheet: styleSheet,
+          )
+        : context;
+
     final spans = nodes.map((node) {
       final builder = _builderRegistry.findBuilder(node);
       if (builder == null) {
         return TextSpan(text: 'Unknown: ${node.type}');
       }
 
-      final widget = builder.build(node, styleSheet, context);
+      final widget = builder.build(node, styleSheet, renderContext);
 
       // If it's a text-based node, extract the TextSpan
       if (widget is Text) {
@@ -244,7 +264,10 @@ class MarkdownRenderer {
       }
 
       // For non-text widgets (like images), wrap in WidgetSpan
-      return WidgetSpan(child: widget);
+      return WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: widget,
+      );
     }).toList();
 
     return RichText(

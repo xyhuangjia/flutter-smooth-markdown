@@ -23,6 +23,8 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 - 📋 **Details & Summary** - Collapsible content sections with interactive expand/collapse
 - 🌐 **Internationalization** - Multi-language example app (6 languages supported)
 - 🎬 **Streaming Support** - Real-time markdown rendering with StreamMarkdown widget
+- 🔌 **Plugin System** - Extensible parser plugins for custom syntax (Mention, Hashtag, Emoji, AI blocks)
+- 🤖 **AI Chat Support** - Built-in plugins for AI responses (Thinking, Artifact, Tool Call blocks)
 
 ## 📺 Demo
 
@@ -48,7 +50,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.2.0
+  flutter_smooth_markdown: ^0.4.0
 ```
 
 Then run:
@@ -196,6 +198,34 @@ This section is expanded by default using the `open` attribute.
 </details>
 ```
 
+### Plugin System (Custom Syntax)
+```dart
+// Register custom parser plugins
+final registry = ParserPluginRegistry();
+registry.register(const MentionPlugin());    // @username
+registry.register(const HashtagPlugin());    // #topic
+registry.register(const EmojiPlugin());      // :smile:
+
+// Use with parser
+final parser = MarkdownParser(plugins: registry);
+final nodes = parser.parse('@john mentioned #flutter :rocket:');
+```
+
+### AI Chat Plugins
+```dart
+// Built-in AI response plugins
+final registry = ParserPluginRegistry();
+registry.register(const ThinkingPlugin());   // <thinking>...</thinking>
+registry.register(const ArtifactPlugin());   // <artifact>...</artifact>
+registry.register(const ToolCallPlugin());   // <tool_use>...</tool_use>
+
+// Render AI responses with thinking process
+SmoothMarkdown(
+  data: aiResponse,
+  plugins: registry,
+)
+```
+
 ## 💡 Use Cases
 
 Perfect for building:
@@ -284,6 +314,9 @@ This project is licensed under the MIT License.
 - [x] Phase 4: Stream support for real-time rendering with StreamMarkdown widget
 - [x] Streaming demo in example app
 - [x] Details & Summary support for collapsible content sections
+- [x] Plugin system for custom parsers (MentionPlugin, HashtagPlugin, EmojiPlugin, AdmonitionPlugin)
+- [x] AI Chat plugins (ThinkingPlugin, ArtifactPlugin, ToolCallPlugin)
+- [x] AI Chat Demo with Qwen3 Max integration and thinking mode
 
 ### In Progress
 - [ ] Performance optimization and benchmarking
@@ -291,7 +324,6 @@ This project is licensed under the MIT License.
 
 ### Planned
 - [ ] More theme presets
-- [ ] Plugin system for custom parsers
 - [ ] Advanced table features (sorting, filtering)
 - [ ] Accessibility improvements (screen reader support)
 

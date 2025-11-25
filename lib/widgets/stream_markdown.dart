@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../src/config/markdown_config.dart';
 import '../src/config/style_sheet.dart';
+import '../src/parser/parser_plugin.dart';
+import '../src/renderer/widget_builder.dart';
 import 'smooth_markdown.dart';
 
 /// A widget that renders Markdown content from a stream in real-time.
@@ -148,6 +150,8 @@ class StreamMarkdown extends StatefulWidget {
     this.useEnhancedComponents = false,
     this.loadingWidget,
     this.errorBuilder,
+    this.plugins,
+    this.builderRegistry,
   });
 
   /// The stream of Markdown text chunks to render.
@@ -254,6 +258,16 @@ class StreamMarkdown extends StatefulWidget {
   /// ```
   final Widget Function(Object error)? errorBuilder;
 
+  /// Parser plugins for extending markdown syntax.
+  ///
+  /// See [SmoothMarkdown.plugins] for detailed documentation.
+  final ParserPluginRegistry? plugins;
+
+  /// Custom widget builder registry for rendering plugin nodes.
+  ///
+  /// See [SmoothMarkdown.builderRegistry] for detailed documentation.
+  final BuilderRegistry? builderRegistry;
+
   @override
   State<StreamMarkdown> createState() => _StreamMarkdownState();
 }
@@ -343,6 +357,8 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
         useEnhancedComponents: widget.useEnhancedComponents,
         enableCache: false, // Disable cache for constantly changing content
         useRepaintBoundary: false, // Already wrapped in RepaintBoundary
+        plugins: widget.plugins,
+        builderRegistry: widget.builderRegistry,
       ),
     );
   }

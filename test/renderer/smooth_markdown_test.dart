@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Custom finder that finds RichText widgets containing the specified text
+Finder findRichTextContaining(String text) {
+  return find.byWidgetPredicate(
+    (widget) {
+      if (widget is RichText) {
+        final textSpan = widget.text;
+        return textSpan.toPlainText().contains(text);
+      }
+      return false;
+    },
+    description: 'RichText containing "$text"',
+  );
+}
+
 void main() {
   group('SmoothMarkdown Widget Tests', () {
     testWidgets('should render simple text', (tester) async {
@@ -15,7 +29,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Hello World'), findsOneWidget);
+      expect(findRichTextContaining('Hello World'), findsOneWidget);
     });
 
     testWidgets('should render header', (tester) async {
@@ -43,7 +57,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Bold text'), findsOneWidget);
+      expect(findRichTextContaining('Bold text'), findsOneWidget);
     });
 
     testWidgets('should render italic text', (tester) async {
@@ -57,7 +71,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Italic text'), findsOneWidget);
+      expect(findRichTextContaining('Italic text'), findsOneWidget);
     });
 
     testWidgets('should render inline code', (tester) async {
@@ -71,8 +85,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Code: '), findsOneWidget);
-      expect(find.text('var x = 1;'), findsOneWidget);
+      expect(findRichTextContaining('Code:'), findsOneWidget);
+      expect(findRichTextContaining('var x = 1;'), findsOneWidget);
     });
 
     testWidgets('should render code block', (tester) async {
@@ -110,9 +124,9 @@ void main() {
         ),
       );
 
-      expect(find.text('Item 1'), findsOneWidget);
-      expect(find.text('Item 2'), findsOneWidget);
-      expect(find.text('Item 3'), findsOneWidget);
+      expect(findRichTextContaining('Item 1'), findsOneWidget);
+      expect(findRichTextContaining('Item 2'), findsOneWidget);
+      expect(findRichTextContaining('Item 3'), findsOneWidget);
       expect(find.text('• '), findsNWidgets(3));
     });
 
@@ -131,9 +145,9 @@ void main() {
         ),
       );
 
-      expect(find.text('First'), findsOneWidget);
-      expect(find.text('Second'), findsOneWidget);
-      expect(find.text('Third'), findsOneWidget);
+      expect(findRichTextContaining('First'), findsOneWidget);
+      expect(findRichTextContaining('Second'), findsOneWidget);
+      expect(findRichTextContaining('Third'), findsOneWidget);
       expect(find.text('1. '), findsOneWidget);
       expect(find.text('2. '), findsOneWidget);
       expect(find.text('3. '), findsOneWidget);
@@ -153,8 +167,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Completed task'), findsOneWidget);
-      expect(find.text('Pending task'), findsOneWidget);
+      expect(findRichTextContaining('Completed task'), findsOneWidget);
+      expect(findRichTextContaining('Pending task'), findsOneWidget);
       expect(find.byIcon(Icons.check_box), findsOneWidget);
       expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
     });
@@ -170,7 +184,7 @@ void main() {
         ),
       );
 
-      expect(find.text('This is a quote'), findsOneWidget);
+      expect(findRichTextContaining('This is a quote'), findsOneWidget);
     });
 
     testWidgets('should render horizontal rule', (tester) async {
@@ -190,8 +204,8 @@ Text below
         ),
       );
 
-      expect(find.text('Text above'), findsOneWidget);
-      expect(find.text('Text below'), findsOneWidget);
+      expect(findRichTextContaining('Text above'), findsOneWidget);
+      expect(findRichTextContaining('Text below'), findsOneWidget);
     });
 
     testWidgets('should render link', (tester) async {
@@ -205,7 +219,7 @@ Text below
         ),
       );
 
-      expect(find.text('Click here'), findsOneWidget);
+      expect(findRichTextContaining('Click here'), findsOneWidget);
     });
 
     testWidgets('should call onTapLink callback', (tester) async {
@@ -224,7 +238,7 @@ Text below
         ),
       );
 
-      await tester.tap(find.text('Link'));
+      await tester.tap(findRichTextContaining('Link'));
       expect(tappedUrl, 'https://example.com');
     });
 
@@ -247,6 +261,42 @@ Text below
       expect(find.text('Big Header'), findsOneWidget);
       final textWidget = tester.widget<Text>(find.text('Big Header'));
       expect(textWidget.style?.fontSize, 48);
+    });
+
+    testWidgets('should render complex markdown', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SmoothMarkdown(
+            data: '''
+# Title
+
+This is a paragraph with **bold** and *italic* text.
+
+## List
+
+- Item 1
+- Item 2
+
+```dart
+void main() {
+  print('Hello');
+}
+```
+
+> Quote
+''',
+            useRepaintBoundary: false,
+            enableCache: false,
+          ),
+        ),
+      );
+
+      expect(find.text('Title'), findsOneWidget);
+      expect(findRichTextContaining('bold'), findsOneWidget);
+      expect(findRichTextContaining('italic'), findsOneWidget);
+      expect(find.text('List'), findsOneWidget);
+      expect(findRichTextContaining('Item 1'), findsOneWidget);
+      expect(findRichTextContaining('Quote'), findsOneWidget);
     });
 
     testWidgets('should use custom code builder', (tester) async {
@@ -280,43 +330,8 @@ Text below
         ),
       );
 
-      expect(find.text('Image: image.png'), findsOneWidget);
-    });
-
-    testWidgets('should render complex markdown', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: SmoothMarkdown(
-            data: '''
-# Title
-
-This is a paragraph with **bold** and *italic* text.
-
-## List
-
-- Item 1
-- Item 2
-
-```dart
-void main() {
-  print('Hello');
-}
-```
-
-> Quote
-''',
-            useRepaintBoundary: false,
-            enableCache: false,
-          ),
-        ),
-      );
-
-      expect(find.text('Title'), findsOneWidget);
-      expect(find.text('bold'), findsOneWidget);
-      expect(find.text('italic'), findsOneWidget);
-      expect(find.text('List'), findsOneWidget);
-      expect(find.text('Item 1'), findsOneWidget);
-      expect(find.text('Quote'), findsOneWidget);
+      // Image is rendered via WidgetSpan inside RichText
+      expect(findRichTextContaining('Image: image.png'), findsOneWidget);
     });
 
     testWidgets('should handle empty markdown', (tester) async {

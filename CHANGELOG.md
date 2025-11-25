@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-11-25
+
+### Added
+- 🔌 **Plugin System** - Extensible parser plugins for custom markdown syntax
+  - `ParserPluginRegistry` for managing and registering plugins
+  - `BlockParserPlugin` and `InlineParserPlugin` base classes
+  - Built-in plugins: `MentionPlugin`, `HashtagPlugin`, `EmojiPlugin`, `AdmonitionPlugin`
+  - Full documentation in `doc/插件系统.md`
+
+- 🤖 **AI Chat Plugins** - Specialized plugins for AI response parsing
+  - `ThinkingPlugin` - Parse `<thinking>` blocks for AI reasoning process
+  - `ArtifactPlugin` - Parse `<artifact>` blocks for code/document artifacts
+  - `ToolCallPlugin` - Parse `<tool_use>` blocks for AI tool invocations
+  - Custom widget builders: `ThinkingBuilder`, `ArtifactBuilder`, `ToolCallBuilder`
+
+- 🎯 **AI Chat Demo** - Production-ready AI chat interface
+  - Qwen3 Max model integration with thinking mode (`enable_thinking`)
+  - Real-time streaming response with SSE support
+  - Model selection dropdown (Qwen3 Max, Qwen Max, Qwen Plus, Qwen Turbo)
+  - Thinking mode toggle for Qwen3 models
+  - Quick prompt buttons for testing AI plugins
+  - Dark/light theme support
+
+- 🔐 **Environment Variables** - Secure API key management
+  - `.env` file support via `flutter_dotenv`
+  - API keys excluded from version control
+
+### Changed
+- Enhanced `SmoothMarkdown` and `StreamMarkdown` widgets to accept `plugins` parameter
+- Updated example app with AI Chat Demo entry
+
+### Documentation
+- Added plugin system documentation (`doc/插件系统.md`)
+- Updated README with plugin system and AI chat features
+- Added code examples for custom plugin creation
+
 ## [0.3.2] - 2025-11-20
 
 ### Added

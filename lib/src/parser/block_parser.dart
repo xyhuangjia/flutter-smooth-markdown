@@ -1,5 +1,6 @@
 import 'ast/markdown_node.dart';
 import 'inline_parser.dart';
+import 'parser_plugin.dart';
 
 /// Parser for block-level Markdown elements
 ///
@@ -11,11 +12,21 @@ import 'inline_parser.dart';
 /// - Code blocks
 /// - Horizontal rules
 /// - Tables
+///
+/// Supports custom block plugins through [ParserPluginRegistry].
 class BlockParser {
-  /// The inline parser for parsing cell contents
-  final InlineParser _inlineParser = InlineParser();
   /// Creates a new block parser
-  BlockParser();
+  ///
+  /// Optionally accepts a [ParserPluginRegistry] for custom block plugins.
+  BlockParser({ParserPluginRegistry? plugins})
+      : _plugins = plugins,
+        _inlineParser = InlineParser(plugins: plugins);
+
+  /// The inline parser for parsing cell contents
+  final InlineParser _inlineParser;
+
+  /// Plugin registry for custom block parsers
+  final ParserPluginRegistry? _plugins;
 
   /// Parses a markdown text into a list of block-level nodes
   List<MarkdownNode> parse(String markdown) {
@@ -40,60 +51,69 @@ class BlockParser {
       MarkdownNode? node;
       var consumed = 0;
 
+      // Try plugins first (they have higher priority)
+      if (_plugins != null) {
+        final pluginResult = _tryParseWithPlugins(line, lines, i);
+        if (pluginResult != null) {
+          node = pluginResult.node;
+          consumed = pluginResult.linesConsumed;
+        }
+      }
+
       // Try horizontal rule
-      if (_isHorizontalRule(line)) {
+      if (node == null && _isHorizontalRule(line)) {
         node = const HorizontalRuleNode();
         consumed = 1;
       }
       // Try header
-      else if (_isHeader(line)) {
+      if (node == null && _isHeader(line)) {
         node = _parseHeader(line);
         consumed = 1;
       }
       // Try code block
-      else if (_isCodeBlockStart(line)) {
+      if (node == null && _isCodeBlockStart(line)) {
         final result = _parseCodeBlock(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try block math
-      else if (_isBlockMathStart(line)) {
+      if (node == null && _isBlockMathStart(line)) {
         final result = _parseBlockMath(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try blockquote
-      else if (_isBlockquote(line)) {
+      if (node == null && _isBlockquote(line)) {
         final result = _parseBlockquote(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try list
-      else if (_isListItem(line)) {
+      if (node == null && _isListItem(line)) {
         final result = _parseList(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try footnote definition
-      else if (_isFootnoteDefinition(line)) {
+      if (node == null && _isFootnoteDefinition(line)) {
         final result = _parseFootnoteDefinition(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try details block
-      else if (_isDetailsStart(line)) {
+      if (node == null && _isDetailsStart(line)) {
         final result = _parseDetails(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Try table
-      else if (_isTableStart(lines, i)) {
+      if (node == null && _isTableStart(lines, i)) {
         final result = _parseTable(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
       }
       // Default: paragraph
-      else {
+      if (node == null) {
         final result = _parseParagraph(lines, i);
         node = result.node;
         consumed = result.linesConsumed;
@@ -470,7 +490,7 @@ class BlockParser {
   /// Parses a table
   _ParseResult _parseTable(List<String> lines, int startIndex) {
     if (startIndex + 1 >= lines.length) {
-      throw FormatException('Invalid table: missing separator line');
+      throw const FormatException('Invalid table: missing separator line');
     }
 
     // Parse header row
@@ -661,6 +681,28 @@ class BlockParser {
       ),
       linesConsumed: i - startIndex + 1,
     );
+  }
+
+  /// Tries to parse using registered plugins
+  ///
+  /// Returns null if no plugin can parse the current line.
+  BlockParseResult? _tryParseWithPlugins(
+    String line,
+    List<String> lines,
+    int index,
+  ) {
+    final plugins = _plugins;
+    if (plugins == null) return null;
+
+    for (final plugin in plugins.blockPlugins) {
+      if (plugin.canParse(line, lines, index)) {
+        final result = plugin.parse(lines, index);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
   }
 }
 

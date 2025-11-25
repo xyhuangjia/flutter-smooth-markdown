@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Enhanced builder for link nodes with hover effects
@@ -24,12 +23,10 @@ class EnhancedLinkBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final linkNode = node as LinkNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
 
     return _EnhancedLinkWidget(
       url: linkNode.url,
       children: linkNode.children,
-      renderer: renderer,
       styleSheet: styleSheet,
       context: context,
       showExternalIcon: showExternalIcon,
@@ -41,7 +38,6 @@ class _EnhancedLinkWidget extends StatefulWidget {
   const _EnhancedLinkWidget({
     required this.url,
     required this.children,
-    required this.renderer,
     required this.styleSheet,
     required this.context,
     required this.showExternalIcon,
@@ -49,7 +45,6 @@ class _EnhancedLinkWidget extends StatefulWidget {
 
   final String url;
   final List<MarkdownNode> children;
-  final MarkdownRenderer renderer;
   final MarkdownStyleSheet styleSheet;
   final MarkdownRenderContext context;
   final bool showExternalIcon;
@@ -86,6 +81,19 @@ class _EnhancedLinkWidgetState extends State<_EnhancedLinkWidget>
         widget.url.startsWith('https://');
   }
 
+  Widget _renderLinkContent() {
+    final inlineRenderer = widget.context.inlineRenderer;
+    if (inlineRenderer != null) {
+      return inlineRenderer(widget.children, widget.styleSheet.linkStyle);
+    }
+    // Fallback: extract text
+    final text = widget.children
+        .whereType<TextNode>()
+        .map((n) => n.content)
+        .join();
+    return Text(text, style: widget.styleSheet.linkStyle);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -115,11 +123,7 @@ class _EnhancedLinkWidgetState extends State<_EnhancedLinkWidget>
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Flexible(
-                    child: widget.renderer.renderInline(
-                      widget.children,
-                      widget.styleSheet.linkStyle,
-                      widget.context,
-                    ),
+                    child: _renderLinkContent(),
                   ),
                   if (widget.showExternalIcon && _isExternalLink())
                     Padding(

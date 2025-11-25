@@ -1,4 +1,5 @@
 import 'ast/markdown_node.dart';
+import 'parser_plugin.dart';
 
 /// Parser for inline-level Markdown elements
 ///
@@ -9,9 +10,16 @@ import 'ast/markdown_node.dart';
 /// - Links ([text](url))
 /// - Images (![alt](url))
 /// - Strikethrough (~~text~~)
+///
+/// Supports custom inline plugins through [ParserPluginRegistry].
 class InlineParser {
   /// Creates a new inline parser
-  InlineParser();
+  ///
+  /// Optionally accepts a [ParserPluginRegistry] for custom inline plugins.
+  InlineParser({ParserPluginRegistry? plugins}) : _plugins = plugins;
+
+  /// Plugin registry for custom inline parsers
+  final ParserPluginRegistry? _plugins;
 
   /// Parses inline elements from text
   List<MarkdownNode> parse(String text) {
@@ -27,8 +35,17 @@ class InlineParser {
       MarkdownNode? node;
       var consumed = 0;
 
+      // Try plugins first (they have higher priority)
+      if (_plugins != null) {
+        final pluginResult = _tryParseWithPlugins(text, i);
+        if (pluginResult != null) {
+          node = pluginResult.node;
+          consumed = pluginResult.consumed;
+        }
+      }
+
       // Try image first (must be before link as it starts with !)
-      if (i < text.length && text[i] == '!') {
+      if (node == null && i < text.length && text[i] == '!') {
         final result = _tryParseImage(text, i);
         if (result != null) {
           node = result.node;
@@ -438,7 +455,14 @@ class InlineParser {
           char == '`' ||
           char == '~' ||
           char == '[' ||
-          char == '!') {
+          char == '!' ||
+          char == '\$') {
+        break;
+      }
+
+      // Stop at plugin trigger characters
+      final plugins = _plugins;
+      if (plugins != null && plugins.isInlineTrigger(char)) {
         break;
       }
 
@@ -451,6 +475,25 @@ class InlineParser {
       text: result.isEmpty ? text[start] : result,
       length: result.isEmpty ? 1 : result.length,
     );
+  }
+
+  /// Tries to parse using registered plugins
+  ///
+  /// Returns null if no plugin can parse at the current position.
+  InlineParseResult? _tryParseWithPlugins(String text, int index) {
+    final plugins = _plugins;
+    if (plugins == null || index >= text.length) return null;
+
+    final char = text[index];
+    for (final plugin in plugins.inlinePlugins) {
+      if (plugin.triggerCharacter == char && plugin.canParse(text, index)) {
+        final result = plugin.parse(text, index);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
   }
 
   /// Merges consecutive TextNode instances

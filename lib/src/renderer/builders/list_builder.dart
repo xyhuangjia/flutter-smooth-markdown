@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for list nodes
@@ -20,7 +19,6 @@ class ListBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final listNode = node as ListNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
     final indent = styleSheet.listIndent ?? 24.0;
 
     final listItems = <Widget>[];
@@ -33,7 +31,6 @@ class ListBuilder extends MarkdownWidgetBuilder {
           item,
           index,
           indent,
-          renderer,
           styleSheet,
           context,
         ),
@@ -51,7 +48,6 @@ class ListBuilder extends MarkdownWidgetBuilder {
     ListItemNode item,
     int? index,
     double indent,
-    MarkdownRenderer renderer,
     MarkdownStyleSheet styleSheet,
     MarkdownRenderContext context,
   ) {
@@ -77,12 +73,16 @@ class ListBuilder extends MarkdownWidgetBuilder {
       );
     }
 
-    // Render item content
-    final content = renderer.renderInline(
-      item.children,
-      styleSheet.textStyle,
-      context,
-    );
+    // Render item content using inlineRenderer from context
+    final inlineRenderer = context.inlineRenderer;
+    Widget content;
+    if (inlineRenderer != null) {
+      content = inlineRenderer(item.children, styleSheet.textStyle);
+    } else {
+      // Fallback
+      final text = _extractText(item.children);
+      content = Text(text, style: styleSheet.textStyle);
+    }
 
     return Padding(
       padding: EdgeInsets.only(left: context.listLevel * indent),
@@ -95,5 +95,15 @@ class ListBuilder extends MarkdownWidgetBuilder {
         ],
       ),
     );
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    final buffer = StringBuffer();
+    for (final node in nodes) {
+      if (node is TextNode) {
+        buffer.write(node.content);
+      }
+    }
+    return buffer.toString();
   }
 }

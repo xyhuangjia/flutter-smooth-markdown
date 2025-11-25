@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for blockquote nodes
@@ -20,12 +19,35 @@ class BlockquoteBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final quoteNode = node as BlockquoteNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final blockRenderer = context.blockRenderer;
+
+    Widget content;
+    if (blockRenderer != null) {
+      content = blockRenderer(quoteNode.children);
+    } else {
+      // Fallback: extract text
+      content = Text(_extractText(quoteNode.children));
+    }
 
     return Container(
       decoration: styleSheet.blockquoteDecoration,
       padding: styleSheet.blockquotePadding,
-      child: renderer.render(quoteNode.children, context: context),
+      child: content,
     );
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    final buffer = StringBuffer();
+    for (final node in nodes) {
+      if (node is ParagraphNode) {
+        for (final child in node.children) {
+          if (child is TextNode) {
+            buffer.write(child.content);
+          }
+        }
+        buffer.write('\n');
+      }
+    }
+    return buffer.toString().trim();
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for footnote definition nodes
@@ -23,14 +22,18 @@ class FootnoteDefinitionBuilder extends MarkdownWidgetBuilder {
   ) {
     final footnoteNode = node as FootnoteDefinitionNode;
 
-    // Create a temporary renderer to render inline content
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
-
-    final content = renderer.renderInline(
-      footnoteNode.children,
-      styleSheet.textStyle,
-      context,
-    );
+    Widget content;
+    final inlineRenderer = context.inlineRenderer;
+    if (inlineRenderer != null) {
+      content = inlineRenderer(footnoteNode.children, styleSheet.textStyle);
+    } else {
+      // Fallback: extract text
+      final text = footnoteNode.children
+          .whereType<TextNode>()
+          .map((n) => n.content)
+          .join();
+      content = Text(text, style: styleSheet.textStyle);
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8, left: 16),

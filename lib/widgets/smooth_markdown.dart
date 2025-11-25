@@ -5,6 +5,8 @@ import '../src/config/style_sheet.dart';
 import '../src/parser/ast/markdown_node.dart';
 import '../src/parser/markdown_parser.dart';
 import '../src/parser/parse_cache.dart';
+import '../src/parser/parser_plugin.dart';
+import '../src/renderer/builders/artifact_builder.dart';
 import '../src/renderer/builders/details_builder.dart';
 import '../src/renderer/builders/enhanced_blockquote_builder.dart';
 import '../src/renderer/builders/enhanced_code_block_builder.dart';
@@ -18,6 +20,8 @@ import '../src/renderer/builders/paragraph_builder.dart';
 import '../src/renderer/builders/table_builder.dart';
 import '../src/renderer/builders/text_builder.dart';
 import '../src/renderer/builders/text_style_builder.dart';
+import '../src/renderer/builders/thinking_builder.dart';
+import '../src/renderer/builders/tool_call_builder.dart';
 import '../src/renderer/markdown_renderer.dart';
 import '../src/renderer/widget_builder.dart';
 
@@ -200,6 +204,8 @@ class SmoothMarkdown extends StatelessWidget {
     this.useEnhancedComponents = false,
     this.enableCache = true,
     this.useRepaintBoundary = true,
+    this.plugins,
+    this.builderRegistry,
   });
 
   /// The Markdown text to render.
@@ -475,24 +481,75 @@ class SmoothMarkdown extends StatelessWidget {
   /// See also: [enableCache] for parsing performance optimization.
   final bool useRepaintBoundary;
 
+  /// Parser plugins for extending markdown syntax.
+  ///
+  /// Use this to add custom inline and block-level syntax extensions like
+  /// @mentions, #hashtags, :emoji: shortcodes, or custom callout blocks.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// final plugins = ParserPluginRegistry()
+  ///   ..register(MentionPlugin())
+  ///   ..register(HashtagPlugin())
+  ///   ..register(EmojiPlugin());
+  ///
+  /// SmoothMarkdown(
+  ///   data: 'Hello @user :wave:',
+  ///   plugins: plugins,
+  ///   builderRegistry: customBuilders, // Register builders for plugin nodes
+  /// )
+  /// ```
+  ///
+  /// Note: When using plugins, you also need to register custom builders
+  /// via [builderRegistry] to render the plugin nodes.
+  final ParserPluginRegistry? plugins;
+
+  /// Custom widget builder registry for rendering plugin nodes.
+  ///
+  /// When using parser [plugins], you need to register custom builders here
+  /// to define how the plugin nodes should be rendered.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// final builders = BuilderRegistry()
+  ///   ..register('mention', MentionBuilder())
+  ///   ..register('hashtag', HashtagBuilder())
+  ///   ..register('emoji', EmojiBuilder());
+  ///
+  /// SmoothMarkdown(
+  ///   data: '@user #tag :smile:',
+  ///   plugins: plugins,
+  ///   builderRegistry: builders,
+  /// )
+  /// ```
+  ///
+  /// If provided, these builders will be merged with the default/enhanced builders.
+  /// Plugin builders take precedence.
+  final BuilderRegistry? builderRegistry;
+
   /// Global shared parse cache for all SmoothMarkdown instances
   static final _parseCache = MarkdownParseCache(maxSize: 100);
 
   @override
   Widget build(BuildContext context) {
+    // Create parser (with plugins if provided)
+    final parser = MarkdownParser(plugins: plugins);
+
     // Parse markdown with optional caching
+    // Note: When plugins are used, caching is based on data only.
+    // If plugin configuration changes, you should disable caching.
     final List<MarkdownNode> nodes;
-    if (enableCache) {
+    if (enableCache && plugins == null) {
       final cached = _parseCache.get(data);
       if (cached != null) {
         nodes = cached;
       } else {
-        final parser = MarkdownParser();
         nodes = parser.parse(data);
         _parseCache.put(data, nodes);
       }
     } else {
-      final parser = MarkdownParser();
       nodes = parser.parse(data);
     }
 
@@ -516,7 +573,11 @@ class SmoothMarkdown extends StatelessWidget {
         ..register('code_block', const EnhancedCodeBlockBuilder())
         ..register('blockquote', const EnhancedBlockquoteBuilder())
         ..register('link', const EnhancedLinkBuilder())
-        ..register('header', const EnhancedHeaderBuilder());
+        ..register('header', const EnhancedHeaderBuilder())
+        // AI chat builders
+        ..register('thinking', const ThinkingBuilder())
+        ..register('artifact', const ArtifactBuilder())
+        ..register('tool_call', const ToolCallBuilder());
     }
 
     // Render nodes
@@ -524,6 +585,13 @@ class SmoothMarkdown extends StatelessWidget {
       styleSheet: styleSheet ?? MarkdownStyleSheet.light(),
       builderRegistry: customRegistry,
     );
+
+    // Register custom builders from plugins on top of the default/enhanced builders
+    if (builderRegistry != null) {
+      for (final entry in builderRegistry!.entries) {
+        renderer.registerBuilder(entry.key, entry.value);
+      }
+    }
 
     final renderContext = MarkdownRenderContext(
       onTapLink: onTapLink,

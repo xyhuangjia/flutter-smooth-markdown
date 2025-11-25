@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for link nodes
@@ -20,14 +19,17 @@ class LinkBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final linkNode = node as LinkNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final inlineRenderer = context.inlineRenderer;
 
     // Render link text with link style
-    final linkWidget = renderer.renderInline(
-      linkNode.children,
-      styleSheet.linkStyle,
-      context,
-    );
+    Widget linkWidget;
+    if (inlineRenderer != null) {
+      linkWidget = inlineRenderer(linkNode.children, styleSheet.linkStyle);
+    } else {
+      // Fallback
+      final text = linkNode.children.whereType<TextNode>().map((n) => n.content).join();
+      linkWidget = Text(text, style: styleSheet.linkStyle);
+    }
 
     // Wrap in GestureDetector for tap handling
     return GestureDetector(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for table nodes
@@ -20,7 +19,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final tableNode = node as TableNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
 
     // Determine the column count - use the maximum of headers, alignments, and all row cell counts
     var columnCount = tableNode.alignments.length;
@@ -48,7 +46,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
       tableNode.alignments,
       columnCount,
       styleSheet,
-      renderer,
       context,
       isHeader: true,
     );
@@ -60,7 +57,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
         tableNode.alignments,
         columnCount,
         styleSheet,
-        renderer,
         context,
         isHeader: false,
       );
@@ -83,7 +79,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
     List<TableAlignment?> alignments,
     int columnCount,
     MarkdownStyleSheet styleSheet,
-    MarkdownRenderer renderer,
     MarkdownRenderContext context, {
     required bool isHeader,
   }) {
@@ -99,7 +94,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
           cellContent,
           alignment,
           styleSheet,
-          renderer,
           context,
           isHeader: isHeader,
         ),
@@ -117,7 +111,6 @@ class TableBuilder extends MarkdownWidgetBuilder {
     List<MarkdownNode> content,
     TableAlignment? alignment,
     MarkdownStyleSheet styleSheet,
-    MarkdownRenderer renderer,
     MarkdownRenderContext context, {
     required bool isHeader,
   }) {
@@ -125,11 +118,15 @@ class TableBuilder extends MarkdownWidgetBuilder {
         ? styleSheet.tableHeaderStyle ?? styleSheet.textStyle
         : styleSheet.tableCellStyle ?? styleSheet.textStyle;
 
-    final cellWidget = renderer.renderInline(
-      content,
-      textStyle,
-      context,
-    );
+    final inlineRenderer = context.inlineRenderer;
+    Widget cellWidget;
+    if (inlineRenderer != null) {
+      cellWidget = inlineRenderer(content, textStyle);
+    } else {
+      // Fallback
+      final text = content.whereType<TextNode>().map((n) => n.content).join();
+      cellWidget = Text(text, style: textStyle);
+    }
 
     final alignmentValue = _getAlignment(alignment);
 

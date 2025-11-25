@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for details/summary collapsible blocks
@@ -20,16 +19,47 @@ class DetailsBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final detailsNode = node as DetailsNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final blockRenderer = context.blockRenderer;
+
+    Widget summaryWidget;
+    Widget? childrenWidget;
+
+    if (blockRenderer != null) {
+      summaryWidget = blockRenderer(detailsNode.summary);
+      childrenWidget = detailsNode.children.isEmpty
+          ? null
+          : blockRenderer(detailsNode.children);
+    } else {
+      // Fallback: extract text
+      summaryWidget = Text(_extractText(detailsNode.summary));
+      childrenWidget = detailsNode.children.isEmpty
+          ? null
+          : Text(_extractText(detailsNode.children));
+    }
 
     return _DetailsWidget(
-      summary: renderer.render(detailsNode.summary, context: context),
+      summary: summaryWidget,
       isOpen: detailsNode.isOpen,
       styleSheet: styleSheet,
-      children: detailsNode.children.isEmpty
-          ? null
-          : renderer.render(detailsNode.children, context: context),
+      children: childrenWidget,
     );
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    final buffer = StringBuffer();
+    for (final node in nodes) {
+      if (node is ParagraphNode) {
+        for (final child in node.children) {
+          if (child is TextNode) {
+            buffer.write(child.content);
+          }
+        }
+        buffer.write('\n');
+      } else if (node is TextNode) {
+        buffer.write(node.content);
+      }
+    }
+    return buffer.toString().trim();
   }
 }
 

@@ -10,7 +10,18 @@ export 'src/parser/ast/markdown_node.dart';
 // Export parser
 export 'src/parser/markdown_parser.dart';
 export 'src/parser/parse_cache.dart';
+// Export plugin system
+export 'src/parser/parser_plugin.dart';
+// Export built-in plugins
+export 'src/parser/plugins/admonition_plugin.dart';
+export 'src/parser/plugins/artifact_plugin.dart';
+export 'src/parser/plugins/emoji_plugin.dart';
+export 'src/parser/plugins/hashtag_plugin.dart';
+export 'src/parser/plugins/mention_plugin.dart';
+export 'src/parser/plugins/thinking_plugin.dart';
+export 'src/parser/plugins/tool_call_plugin.dart';
 // Export renderer
+export 'src/renderer/builders/artifact_builder.dart';
 export 'src/renderer/builders/block_math_builder.dart';
 export 'src/renderer/builders/details_builder.dart';
 export 'src/renderer/builders/enhanced_blockquote_builder.dart';
@@ -18,6 +29,8 @@ export 'src/renderer/builders/enhanced_code_block_builder.dart';
 export 'src/renderer/builders/enhanced_header_builder.dart';
 export 'src/renderer/builders/enhanced_link_builder.dart';
 export 'src/renderer/builders/inline_math_builder.dart';
+export 'src/renderer/builders/thinking_builder.dart';
+export 'src/renderer/builders/tool_call_builder.dart';
 export 'src/renderer/markdown_renderer.dart';
 export 'src/renderer/widget_builder.dart';
 // Export widgets

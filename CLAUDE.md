@@ -195,7 +195,33 @@ flutter run
 
 ## Common Tasks
 
-### Adding a New Markdown Element
+### Adding a New Markdown Element (via Plugin System)
+
+The recommended way to add custom markdown syntax is through the plugin system:
+
+1. Define AST node extending `MarkdownNode`
+2. Create plugin extending `BlockParserPlugin` or `InlineParserPlugin`
+3. Register plugin with `ParserPluginRegistry`
+4. Create builder in `lib/src/renderer/builders/`
+5. Register builder in `MarkdownRenderer`
+6. Add tests in `test/parser/`
+
+**Example:**
+```dart
+// Create registry and register plugins
+final registry = ParserPluginRegistry();
+registry.register(const MentionPlugin());
+registry.register(const HashtagPlugin());
+
+// Create parser with plugins
+final parser = MarkdownParser(plugins: registry);
+```
+
+See `doc/插件系统.md` for detailed documentation.
+
+### Adding a New Markdown Element (Core Parser)
+
+For built-in syntax extensions:
 
 1. Define AST node in `lib/src/parser/ast/markdown_node.dart`
 2. Add parsing logic in `BlockParser` or `InlineParser`
@@ -223,7 +249,7 @@ Key areas for optimization:
 
 ## Project Status
 
-**Completed Features** (as of v0.2.0):
+**Completed Features** (as of v0.3.2):
 - ✅ Complete AST-based parser (block + inline)
 - ✅ Widget builder system with registry
 - ✅ All standard markdown syntax (CommonMark)
@@ -236,10 +262,11 @@ Key areas for optimization:
 - ✅ SVG images
 - ✅ Streaming support
 - ✅ Comprehensive API documentation
+- ✅ Details/Summary collapsible blocks
+- ✅ Plugin system for custom parsers (MentionPlugin, HashtagPlugin, EmojiPlugin, AdmonitionPlugin)
 
 **Future Enhancements**:
 - Performance optimization and benchmarking
 - More theme presets
-- Plugin system for custom parsers
 - Advanced table features
 - Accessibility improvements

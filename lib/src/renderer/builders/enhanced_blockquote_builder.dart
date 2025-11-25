@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Enhanced builder for blockquote nodes with icon and gradient
@@ -24,11 +23,9 @@ class EnhancedBlockquoteBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final blockquoteNode = node as BlockquoteNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
 
     return _EnhancedBlockquoteWidget(
       children: blockquoteNode.children,
-      renderer: renderer,
       styleSheet: styleSheet,
       context: context,
       showIcon: showIcon,
@@ -39,17 +36,33 @@ class EnhancedBlockquoteBuilder extends MarkdownWidgetBuilder {
 class _EnhancedBlockquoteWidget extends StatelessWidget {
   const _EnhancedBlockquoteWidget({
     required this.children,
-    required this.renderer,
     required this.styleSheet,
     required this.context,
     required this.showIcon,
   });
 
   final List<MarkdownNode> children;
-  final MarkdownRenderer renderer;
   final MarkdownStyleSheet styleSheet;
   final MarkdownRenderContext context;
   final bool showIcon;
+
+  List<Widget> _renderChildren() {
+    final blockRenderer = context.blockRenderer;
+    if (blockRenderer != null) {
+      return children.map((child) => blockRenderer([child])).toList();
+    }
+    // Fallback: extract text
+    return children.map((child) {
+      if (child is ParagraphNode) {
+        final text = child.children
+            .whereType<TextNode>()
+            .map((n) => n.content)
+            .join();
+        return Text(text, style: styleSheet.textStyle);
+      }
+      return Text('Unknown: ${child.type}');
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext buildContext) {
@@ -98,9 +111,7 @@ class _EnhancedBlockquoteWidget extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: children
-                  .map((child) => renderer.render([child], context: context))
-                  .toList(),
+              children: _renderChildren(),
             ),
           ),
         ],

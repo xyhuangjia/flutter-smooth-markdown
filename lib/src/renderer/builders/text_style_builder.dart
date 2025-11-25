@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
-import '../markdown_renderer.dart';
 import '../widget_builder.dart';
 
 /// Builder for bold text nodes
@@ -20,13 +19,18 @@ class BoldBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final boldNode = node as BoldNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final inlineRenderer = context.inlineRenderer;
 
-    return renderer.renderInline(
-      boldNode.children,
-      styleSheet.boldStyle,
-      context,
-    );
+    if (inlineRenderer != null) {
+      return inlineRenderer(boldNode.children, styleSheet.boldStyle);
+    }
+
+    // Fallback
+    return Text(_extractText(boldNode.children), style: styleSheet.boldStyle);
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    return nodes.whereType<TextNode>().map((n) => n.content).join();
   }
 }
 
@@ -45,13 +49,18 @@ class ItalicBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final italicNode = node as ItalicNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final inlineRenderer = context.inlineRenderer;
 
-    return renderer.renderInline(
-      italicNode.children,
-      styleSheet.italicStyle,
-      context,
-    );
+    if (inlineRenderer != null) {
+      return inlineRenderer(italicNode.children, styleSheet.italicStyle);
+    }
+
+    // Fallback
+    return Text(_extractText(italicNode.children), style: styleSheet.italicStyle);
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    return nodes.whereType<TextNode>().map((n) => n.content).join();
   }
 }
 
@@ -70,12 +79,17 @@ class StrikethroughBuilder extends MarkdownWidgetBuilder {
     MarkdownRenderContext context,
   ) {
     final strikeNode = node as StrikethroughNode;
-    final renderer = MarkdownRenderer(styleSheet: styleSheet);
+    final inlineRenderer = context.inlineRenderer;
 
-    return renderer.renderInline(
-      strikeNode.children,
-      styleSheet.strikethroughStyle,
-      context,
-    );
+    if (inlineRenderer != null) {
+      return inlineRenderer(strikeNode.children, styleSheet.strikethroughStyle);
+    }
+
+    // Fallback
+    return Text(_extractText(strikeNode.children), style: styleSheet.strikethroughStyle);
+  }
+
+  String _extractText(List<MarkdownNode> nodes) {
+    return nodes.whereType<TextNode>().map((n) => n.content).join();
   }
 }

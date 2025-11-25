@@ -1,6 +1,7 @@
 import 'ast/markdown_node.dart';
 import 'block_parser.dart';
 import 'inline_parser.dart';
+import 'parser_plugin.dart';
 
 /// Main Markdown parser that combines block and inline parsing
 ///
@@ -12,14 +13,39 @@ import 'inline_parser.dart';
 /// final parser = MarkdownParser();
 /// final nodes = parser.parse('# Hello **World**');
 /// ```
+///
+/// ## Using Plugins
+///
+/// The parser supports custom syntax through plugins. Register plugins
+/// using a [ParserPluginRegistry]:
+///
+/// ```dart
+/// final registry = ParserPluginRegistry();
+/// registry.register(MentionPlugin());
+/// registry.register(AdmonitionPlugin());
+///
+/// final parser = MarkdownParser(plugins: registry);
+/// ```
+///
+/// See [BlockParserPlugin] and [InlineParserPlugin] for creating
+/// custom plugins.
 class MarkdownParser {
   /// Creates a new Markdown parser
-  MarkdownParser()
-      : _blockParser = BlockParser(),
-        _inlineParser = InlineParser();
+  ///
+  /// Optionally accepts a [ParserPluginRegistry] for custom syntax plugins.
+  MarkdownParser({ParserPluginRegistry? plugins})
+      : _plugins = plugins,
+        _blockParser = BlockParser(plugins: plugins),
+        _inlineParser = InlineParser(plugins: plugins);
 
   final BlockParser _blockParser;
   final InlineParser _inlineParser;
+  final ParserPluginRegistry? _plugins;
+
+  /// The plugin registry used by this parser
+  ///
+  /// Returns null if no plugins are registered.
+  ParserPluginRegistry? get plugins => _plugins;
 
   /// Parses markdown text into a list of nodes
   ///

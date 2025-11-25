@@ -3,6 +3,17 @@ import 'package:flutter/widgets.dart';
 import '../config/style_sheet.dart';
 import '../parser/ast/markdown_node.dart';
 
+// Forward declaration to avoid circular imports
+typedef InlineRenderer = Widget Function(
+  List<MarkdownNode> nodes,
+  TextStyle? baseStyle,
+);
+
+/// Function type for rendering block-level nodes
+typedef BlockRenderer = Widget Function(
+  List<MarkdownNode> nodes,
+);
+
 /// Base class for building widgets from Markdown nodes
 ///
 /// Each type of Markdown element (header, paragraph, list, etc.)
@@ -28,7 +39,8 @@ abstract class MarkdownWidgetBuilder {
 
 /// Context passed to builders during rendering
 ///
-/// Contains information needed during the rendering process
+/// Contains information needed during the rendering process,
+/// including references to renderers for nested content.
 class MarkdownRenderContext {
   /// Creates a new render context
   const MarkdownRenderContext({
@@ -36,6 +48,9 @@ class MarkdownRenderContext {
     this.imageBuilder,
     this.codeBuilder,
     this.listLevel = 0,
+    this.inlineRenderer,
+    this.blockRenderer,
+    this.styleSheet,
   });
 
   /// Callback for link taps
@@ -50,18 +65,39 @@ class MarkdownRenderContext {
   /// Current list nesting level (for indentation)
   final int listLevel;
 
+  /// Inline renderer function for rendering inline child nodes
+  ///
+  /// This allows builders to render inline content using the same
+  /// renderer instance, preserving custom builder registrations.
+  final InlineRenderer? inlineRenderer;
+
+  /// Block renderer function for rendering block-level child nodes
+  ///
+  /// This allows builders to render block content (like blockquote children)
+  /// using the same renderer instance, preserving custom builder registrations.
+  final BlockRenderer? blockRenderer;
+
+  /// The style sheet being used for rendering
+  final MarkdownStyleSheet? styleSheet;
+
   /// Creates a copy with updated fields
   MarkdownRenderContext copyWith({
     void Function(String url)? onTapLink,
     Widget Function(String url, String? alt, String? title)? imageBuilder,
     Widget Function(String code, String? language)? codeBuilder,
     int? listLevel,
+    InlineRenderer? inlineRenderer,
+    BlockRenderer? blockRenderer,
+    MarkdownStyleSheet? styleSheet,
   }) {
     return MarkdownRenderContext(
       onTapLink: onTapLink ?? this.onTapLink,
       imageBuilder: imageBuilder ?? this.imageBuilder,
       codeBuilder: codeBuilder ?? this.codeBuilder,
       listLevel: listLevel ?? this.listLevel,
+      inlineRenderer: inlineRenderer ?? this.inlineRenderer,
+      blockRenderer: blockRenderer ?? this.blockRenderer,
+      styleSheet: styleSheet ?? this.styleSheet,
     );
   }
 }
@@ -79,6 +115,12 @@ class BuilderRegistry {
   }
 
   final Map<String, MarkdownWidgetBuilder> _builders;
+
+  /// Returns an iterable of all registered builder entries.
+  ///
+  /// Useful for merging registries or iterating over all builders.
+  Iterable<MapEntry<String, MarkdownWidgetBuilder>> get entries =>
+      _builders.entries;
 
   /// Registers a builder for a specific node type
   void register(String nodeType, MarkdownWidgetBuilder builder) {
