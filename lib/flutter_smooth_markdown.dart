@@ -20,6 +20,10 @@ export 'src/parser/plugins/hashtag_plugin.dart';
 export 'src/parser/plugins/mention_plugin.dart';
 export 'src/parser/plugins/thinking_plugin.dart';
 export 'src/parser/plugins/tool_call_plugin.dart';
+// Export Mermaid plugin
+export 'src/parser/plugins/mermaid_plugin.dart';
+// Export Mermaid renderer
+export 'src/mermaid/mermaid.dart';
 // Export renderer
 export 'src/renderer/builders/artifact_builder.dart';
 export 'src/renderer/builders/block_math_builder.dart';
@@ -31,6 +35,7 @@ export 'src/renderer/builders/enhanced_link_builder.dart';
 export 'src/renderer/builders/inline_math_builder.dart';
 export 'src/renderer/builders/thinking_builder.dart';
 export 'src/renderer/builders/tool_call_builder.dart';
+export 'src/renderer/builders/mermaid_builder.dart';
 export 'src/renderer/markdown_renderer.dart';
 export 'src/renderer/widget_builder.dart';
 // Export widgets

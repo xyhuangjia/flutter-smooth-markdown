@@ -25,6 +25,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 - 🎬 **Streaming Support** - Real-time markdown rendering with StreamMarkdown widget
 - 🔌 **Plugin System** - Extensible parser plugins for custom syntax (Mention, Hashtag, Emoji, AI blocks)
 - 🤖 **AI Chat Support** - Built-in plugins for AI responses (Thinking, Artifact, Tool Call blocks)
+- 📊 **Mermaid Diagrams** - Native rendering of flowcharts, sequence diagrams, pie charts, and Gantt charts
 
 ## 📺 Demo
 
@@ -50,7 +51,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.4.0
+  flutter_smooth_markdown: ^0.5.0
 ```
 
 Then run:
@@ -226,6 +227,39 @@ SmoothMarkdown(
 )
 ```
 
+### Mermaid Diagrams (Flowcharts, Gantt Charts, etc.)
+```dart
+import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
+
+// Render Mermaid diagrams natively
+MermaidDiagram(
+  code: '''
+gantt
+    title Project Timeline
+    dateFormat YYYY-MM-DD
+
+    section Planning
+        Requirements :done, req, 2024-01-01, 14d
+        Design :done, des, after req, 10d
+
+    section Development
+        Frontend :active, front, 2024-01-25, 30d
+        Backend :crit, back, 2024-01-20, 35d
+
+    section Release
+        Testing :test, 2024-02-25, 10d
+        Launch :milestone, launch, 2024-03-07, 0d
+  ''',
+  style: MermaidStyle.dark(),
+)
+```
+
+Supported diagram types:
+- **Flowcharts** - `graph TD/LR/BT/RL` with various node shapes
+- **Sequence Diagrams** - Message flows between participants
+- **Pie Charts** - Data visualization with labels and percentages
+- **Gantt Charts** - Project timelines with tasks, sections, dependencies, and milestones
+
 ## 💡 Use Cases
 
 Perfect for building:
@@ -317,6 +351,7 @@ This project is licensed under the MIT License.
 - [x] Plugin system for custom parsers (MentionPlugin, HashtagPlugin, EmojiPlugin, AdmonitionPlugin)
 - [x] AI Chat plugins (ThinkingPlugin, ArtifactPlugin, ToolCallPlugin)
 - [x] AI Chat Demo with Qwen3 Max integration and thinking mode
+- [x] Mermaid diagram support (Flowcharts, Sequence, Pie Charts, Gantt Charts)
 
 ### In Progress
 - [ ] Performance optimization and benchmarking

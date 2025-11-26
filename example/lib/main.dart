@@ -8,6 +8,7 @@ import 'chat_list_demo.dart';
 import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
 import 'math_demo.dart';
+import 'mermaid_demo.dart';
 import 'plugin_demo.dart';
 import 'streaming_demo.dart';
 
@@ -1202,6 +1203,34 @@ console.log(distance); // 输出: 5
                     builder: (context) => PluginDemo(
                       styleSheet: _getStyleSheet(),
                     ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.schema,
+                color: isDark ? Colors.white70 : null,
+              ),
+              title: Text(
+                'Mermaid 图表',
+                style: TextStyle(
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              subtitle: Text(
+                '流程图、时序图',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.white38 : Colors.grey,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MermaidDemo(),
                   ),
                 );
               },

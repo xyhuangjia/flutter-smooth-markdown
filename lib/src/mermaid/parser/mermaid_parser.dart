@@ -1,0 +1,213 @@
+import '../models/diagram.dart';
+import '../models/gantt.dart';
+import '../models/pie_chart.dart';
+import 'flowchart_parser.dart';
+import 'gantt_parser.dart';
+import 'pie_chart_parser.dart';
+import 'sequence_parser.dart';
+
+/// Result of parsing a Mermaid diagram
+class MermaidParseResult {
+  /// Creates a parse result
+  const MermaidParseResult({
+    required this.diagram,
+    this.pieChartData,
+    this.ganttChartData,
+  });
+
+  /// The parsed diagram data
+  final MermaidDiagramData diagram;
+
+  /// Pie chart specific data (only set for pie charts)
+  final PieChartData? pieChartData;
+
+  /// Gantt chart specific data (only set for Gantt charts)
+  final GanttChartData? ganttChartData;
+}
+
+/// Main parser for Mermaid diagrams
+///
+/// This parser detects the diagram type and delegates to the
+/// appropriate specialized parser.
+class MermaidParser {
+  /// Creates a new Mermaid parser
+  const MermaidParser();
+
+  /// Parses a Mermaid diagram string
+  ///
+  /// Returns null if the diagram cannot be parsed
+  MermaidDiagramData? parse(String source) {
+    final result = parseWithData(source);
+    return result?.diagram;
+  }
+
+  /// Parses a Mermaid diagram string and returns additional data
+  ///
+  /// Returns a [MermaidParseResult] containing the diagram and any
+  /// type-specific data (like [PieChartData] for pie charts)
+  MermaidParseResult? parseWithData(String source) {
+    if (source.trim().isEmpty) return null;
+
+    final lines = source.split('\n');
+    final cleanedLines = _cleanLines(lines);
+
+    if (cleanedLines.isEmpty) return null;
+
+    final firstLine = cleanedLines.first.trim().toLowerCase();
+
+    // Detect diagram type
+    final type = _detectDiagramType(firstLine);
+
+    switch (type) {
+      case DiagramType.flowchart:
+        final diagram = FlowchartParser().parse(cleanedLines);
+        if (diagram != null) {
+          return MermaidParseResult(diagram: diagram);
+        }
+        return null;
+      case DiagramType.sequence:
+        final diagram = SequenceParser().parse(cleanedLines);
+        if (diagram != null) {
+          return MermaidParseResult(diagram: diagram);
+        }
+        return null;
+      case DiagramType.pieChart:
+        final result = PieChartParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            pieChartData: result.$2,
+          );
+        }
+        return null;
+      case DiagramType.ganttChart:
+        final result = GanttParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            ganttChartData: result.$2,
+          );
+        }
+        return null;
+      case DiagramType.classDiagram:
+      case DiagramType.stateDiagram:
+        // TODO: Implement class and state diagram parsers
+        return null;
+      case DiagramType.unknown:
+        return null;
+    }
+  }
+
+  /// Detects the diagram type from the first line
+  DiagramType _detectDiagramType(String firstLine) {
+    // Flowchart patterns
+    if (firstLine.startsWith('graph ') ||
+        firstLine.startsWith('flowchart ')) {
+      return DiagramType.flowchart;
+    }
+
+    // Sequence diagram
+    if (firstLine.startsWith('sequencediagram')) {
+      return DiagramType.sequence;
+    }
+
+    // Pie chart
+    if (firstLine.startsWith('pie')) {
+      return DiagramType.pieChart;
+    }
+
+    // Gantt chart
+    if (firstLine.startsWith('gantt')) {
+      return DiagramType.ganttChart;
+    }
+
+    // Class diagram
+    if (firstLine.startsWith('classdiagram')) {
+      return DiagramType.classDiagram;
+    }
+
+    // State diagram
+    if (firstLine.startsWith('statediagram') ||
+        firstLine.startsWith('statediagram-v2')) {
+      return DiagramType.stateDiagram;
+    }
+
+    return DiagramType.unknown;
+  }
+
+  /// Cleans and filters input lines
+  List<String> _cleanLines(List<String> lines) {
+    final result = <String>[];
+
+    for (var line in lines) {
+      // Remove comments
+      final commentIndex = line.indexOf('%%');
+      if (commentIndex != -1) {
+        line = line.substring(0, commentIndex);
+      }
+
+      // Skip empty lines
+      if (line.trim().isNotEmpty) {
+        result.add(line);
+      }
+    }
+
+    return result;
+  }
+}
+
+/// Result of parsing a token
+class ParseToken {
+  /// Creates a parse token
+  const ParseToken({
+    required this.type,
+    required this.value,
+    this.start = 0,
+    this.end = 0,
+  });
+
+  /// Type of token
+  final TokenType type;
+
+  /// Token value
+  final String value;
+
+  /// Start position in source
+  final int start;
+
+  /// End position in source
+  final int end;
+}
+
+/// Token types for lexical analysis
+enum TokenType {
+  /// Node identifier
+  nodeId,
+
+  /// Node label
+  nodeLabel,
+
+  /// Arrow/edge
+  arrow,
+
+  /// Edge label
+  edgeLabel,
+
+  /// Keyword (graph, subgraph, etc)
+  keyword,
+
+  /// Style definition
+  style,
+
+  /// Class definition
+  classDef,
+
+  /// Subgraph start
+  subgraphStart,
+
+  /// Subgraph end
+  subgraphEnd,
+
+  /// End of input
+  eof,
+}

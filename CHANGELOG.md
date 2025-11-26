@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-11-26
+
+### Added
+- 📊 **Mermaid Gantt Chart Support** - Complete Gantt chart diagram rendering
+  - `GanttTask` model with id, name, start/end dates, status, and dependencies
+  - `GanttSection` for organizing tasks into groups
+  - `GanttChartData` for complete chart configuration
+  - Task status support: `done`, `active`, `critical`, `milestone`, `normal`
+  - Task dependencies with `after` keyword
+  - Multiple date formats and duration formats (30d, 2w, 1M)
+  - Timeline header with automatic day/week/month view switching
+  - Today marker line
+  - Responsive layout support for mobile/tablet/desktop
+
+- 🎨 **Gantt Chart Painter** - Native Flutter rendering
+  - Color-coded task bars by status
+  - Diamond markers for milestones
+  - Section-based alternating row backgrounds
+  - Grid lines and timeline headers
+
+- 📱 **Mermaid Demo Updates** - 4 new Gantt chart examples
+  - Basic Gantt chart
+  - Gantt chart with sections
+  - Task status demonstration
+  - Product release timeline
+
+### Changed
+- Updated topics in pubspec.yaml to include `mermaid` and `charts`
+- Added `DiagramType.ganttChart` to diagram type enum
+- Integrated Gantt parser and painter into MermaidDiagram widget
+
+### Tests
+- 13 comprehensive Gantt chart tests covering parser, data model, and integration
+
 ## [0.4.1] - 2025-11-26
 
 ### Fixed
