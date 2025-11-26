@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2025-11-26
+
+### Added
+- 🎯 **Mermaid Diagram Interactive Mode** - Pan/zoom support for embedded Mermaid diagrams
+  - Adaptive height based on diagram content (no fixed 400px)
+  - Two-phase rendering: measure first, then apply InteractiveViewer
+  - Zoom range: 0.5x to 3.0x scale
+  - Infinite boundary margin for free pan/drag movement
+
+### Improved
+- 📊 **MermaidBuilder** - Enhanced diagram rendering in markdown
+  - `_ScrollableMermaidDiagram` now auto-measures diagram height
+  - `_EnhancedMermaidContainer._buildDiagramView()` with same adaptive behavior
+  - Better UX for Complex Example demo with all 4 Mermaid types
+
+### Fixed
+- Fixed lint warning for unnecessary double literal (5.0 → 5)
+
 ## [0.5.0] - 2025-11-26
 
 ### Added

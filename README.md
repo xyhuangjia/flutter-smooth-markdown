@@ -51,7 +51,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.5.0
+  flutter_smooth_markdown: ^0.5.1
 ```
 
 Then run:
@@ -259,6 +259,7 @@ Supported diagram types:
 - **Sequence Diagrams** - Message flows between participants
 - **Pie Charts** - Data visualization with labels and percentages
 - **Gantt Charts** - Project timelines with tasks, sections, dependencies, and milestones
+- **Interactive Mode** - Pan/zoom support with adaptive height for diagram containers
 
 ## 💡 Use Cases
 

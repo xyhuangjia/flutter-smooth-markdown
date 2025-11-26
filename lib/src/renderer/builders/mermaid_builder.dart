@@ -16,7 +16,6 @@ class MermaidBuilder extends MarkdownWidgetBuilder {
   const MermaidBuilder({
     this.defaultTheme,
     this.onNodeTap,
-    this.interactive = false,
     this.minScale = 0.5,
     this.maxScale = 3.0,
   });
@@ -26,9 +25,6 @@ class MermaidBuilder extends MarkdownWidgetBuilder {
 
   /// Callback when a node is tapped
   final void Function(String nodeId)? onNodeTap;
-
-  /// Whether to enable pan and zoom
-  final bool interactive;
 
   /// Minimum zoom scale (when interactive)
   final double minScale;
@@ -49,50 +45,56 @@ class MermaidBuilder extends MarkdownWidgetBuilder {
       return const SizedBox.shrink();
     }
 
-    // Determine theme based on stylesheet brightness
-    MermaidStyle style;
-    if (node.theme != null) {
-      style = _getThemeByName(node.theme!);
-    } else if (defaultTheme != null) {
-      style = MermaidThemes.getTheme(defaultTheme!);
-    } else {
-      // Try to match markdown stylesheet brightness
-      final bgColor = styleSheet.codeBlockDecoration?.color;
-      final isDark = bgColor != null && bgColor.computeLuminance() < 0.5;
-      style = isDark ? MermaidStyle.dark() : const MermaidStyle();
-    }
-
-    Widget diagram;
-
-    if (interactive) {
-      diagram = InteractiveMermaidDiagram(
-        code: node.code,
-        style: style,
-        minScale: minScale,
-        maxScale: maxScale,
-        onNodeTap: onNodeTap,
-      );
-    } else {
-      diagram = MermaidDiagram(
-        code: node.code,
-        style: style,
-        onNodeTap: onNodeTap,
-      );
-    }
-
-    // Wrap in container with styling
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Color(style.backgroundColor),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.3),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: diagram,
+    return _ScrollableMermaidDiagram(
+      node: node,
+      styleSheet: styleSheet,
+      defaultTheme: defaultTheme,
+      onNodeTap: onNodeTap,
+      minScale: minScale,
+      maxScale: maxScale,
     );
+  }
+}
+
+/// Interactive Mermaid diagram with pan/zoom support
+/// Uses adaptive height based on diagram content
+class _ScrollableMermaidDiagram extends StatefulWidget {
+  const _ScrollableMermaidDiagram({
+    required this.node,
+    required this.styleSheet,
+    this.defaultTheme,
+    this.onNodeTap,
+    this.minScale = 0.5,
+    this.maxScale = 3.0,
+  });
+
+  final MermaidDiagramNode node;
+  final MarkdownStyleSheet styleSheet;
+  final MermaidThemeMode? defaultTheme;
+  final void Function(String nodeId)? onNodeTap;
+  final double minScale;
+  final double maxScale;
+
+  @override
+  State<_ScrollableMermaidDiagram> createState() =>
+      _ScrollableMermaidDiagramState();
+}
+
+class _ScrollableMermaidDiagramState extends State<_ScrollableMermaidDiagram> {
+  final TransformationController _transformationController =
+      TransformationController();
+  final GlobalKey _diagramKey = GlobalKey();
+  double? _diagramHeight;
+
+  MermaidStyle get _style {
+    if (widget.node.theme != null) {
+      return _getThemeByName(widget.node.theme!);
+    } else if (widget.defaultTheme != null) {
+      return MermaidThemes.getTheme(widget.defaultTheme!);
+    }
+    final bgColor = widget.styleSheet.codeBlockDecoration?.color;
+    final isDark = bgColor != null && bgColor.computeLuminance() < 0.5;
+    return isDark ? MermaidStyle.dark() : const MermaidStyle();
   }
 
   MermaidStyle _getThemeByName(String name) {
@@ -103,10 +105,81 @@ class MermaidBuilder extends MarkdownWidgetBuilder {
         return MermaidStyle.forest();
       case 'neutral':
         return MermaidStyle.neutral();
-      case 'light':
       default:
         return const MermaidStyle();
     }
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _measureDiagram() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox =
+          _diagramKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null && mounted) {
+        final newHeight = renderBox.size.height;
+        if (_diagramHeight != newHeight) {
+          setState(() {
+            _diagramHeight = newHeight;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // First render: measure diagram size using offstage
+    if (_diagramHeight == null) {
+      _measureDiagram();
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Color(_style.backgroundColor),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.grey.withValues(alpha: 0.3),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: MermaidDiagram(
+          key: _diagramKey,
+          code: widget.node.code,
+          style: _style,
+          onNodeTap: widget.onNodeTap,
+        ),
+      );
+    }
+
+    // Subsequent renders: use measured height with InteractiveViewer
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      height: _diagramHeight,
+      decoration: BoxDecoration(
+        color: Color(_style.backgroundColor),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.withValues(alpha: 0.3),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InteractiveViewer(
+        transformationController: _transformationController,
+        minScale: widget.minScale,
+        maxScale: widget.maxScale,
+        boundaryMargin: const EdgeInsets.all(double.infinity),
+        constrained: false,
+        child: MermaidDiagram(
+          code: widget.node.code,
+          style: _style,
+          onNodeTap: widget.onNodeTap,
+        ),
+      ),
+    );
   }
 }
 
@@ -116,7 +189,6 @@ class EnhancedMermaidBuilder extends MermaidBuilder {
   const EnhancedMermaidBuilder({
     super.defaultTheme,
     super.onNodeTap,
-    super.interactive = true,
     super.minScale,
     super.maxScale,
     this.showCopyButton = true,
@@ -148,7 +220,6 @@ class EnhancedMermaidBuilder extends MermaidBuilder {
       styleSheet: styleSheet,
       defaultTheme: defaultTheme,
       onNodeTap: onNodeTap,
-      interactive: interactive,
       minScale: minScale,
       maxScale: maxScale,
       showCopyButton: showCopyButton,
@@ -164,7 +235,6 @@ class _EnhancedMermaidContainer extends StatefulWidget {
     required this.styleSheet,
     this.defaultTheme,
     this.onNodeTap,
-    this.interactive = true,
     this.minScale = 0.5,
     this.maxScale = 3.0,
     this.showCopyButton = true,
@@ -176,7 +246,6 @@ class _EnhancedMermaidContainer extends StatefulWidget {
   final MarkdownStyleSheet styleSheet;
   final MermaidThemeMode? defaultTheme;
   final void Function(String nodeId)? onNodeTap;
-  final bool interactive;
   final double minScale;
   final double maxScale;
   final bool showCopyButton;
@@ -191,6 +260,31 @@ class _EnhancedMermaidContainer extends StatefulWidget {
 class _EnhancedMermaidContainerState extends State<_EnhancedMermaidContainer> {
   bool _showSource = false;
   bool _copied = false;
+  final TransformationController _transformationController =
+      TransformationController();
+  final GlobalKey _diagramKey = GlobalKey();
+  double? _diagramHeight;
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _measureDiagram() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox =
+          _diagramKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null && mounted) {
+        final newHeight = renderBox.size.height;
+        if (_diagramHeight != newHeight) {
+          setState(() {
+            _diagramHeight = newHeight;
+          });
+        }
+      }
+    });
+  }
 
   MermaidStyle get _style {
     if (widget.node.theme != null) {
@@ -238,7 +332,7 @@ class _EnhancedMermaidContainerState extends State<_EnhancedMermaidContainer> {
             code: widget.node.code,
             style: _style,
             minScale: 0.1,
-            maxScale: 5.0,
+            maxScale: 5,
             onNodeTap: widget.onNodeTap,
           ),
         ),
@@ -318,19 +412,32 @@ class _EnhancedMermaidContainerState extends State<_EnhancedMermaidContainer> {
   }
 
   Widget _buildDiagramView() {
-    if (widget.interactive) {
-      return InteractiveMermaidDiagram(
+    // First render: measure diagram size
+    if (_diagramHeight == null) {
+      _measureDiagram();
+      return MermaidDiagram(
+        key: _diagramKey,
         code: widget.node.code,
         style: _style,
-        minScale: widget.minScale,
-        maxScale: widget.maxScale,
         onNodeTap: widget.onNodeTap,
       );
     }
-    return MermaidDiagram(
-      code: widget.node.code,
-      style: _style,
-      onNodeTap: widget.onNodeTap,
+
+    // Subsequent renders: use measured height with InteractiveViewer
+    return SizedBox(
+      height: _diagramHeight,
+      child: InteractiveViewer(
+        transformationController: _transformationController,
+        minScale: widget.minScale,
+        maxScale: widget.maxScale,
+        boundaryMargin: const EdgeInsets.all(double.infinity),
+        constrained: false,
+        child: MermaidDiagram(
+          code: widget.node.code,
+          style: _style,
+          onNodeTap: widget.onNodeTap,
+        ),
+      ),
     );
   }
 

@@ -109,6 +109,10 @@ class _MarkdownDemoPageState extends State<MarkdownDemoPage> {
   int _selectedIndex = 0;
   MarkdownTheme _selectedTheme = MarkdownTheme.defaultLight;
 
+  // Mermaid plugin and builder for rendering mermaid diagrams
+  final _mermaidPlugins = ParserPluginRegistry()..register(const MermaidPlugin());
+  final _mermaidBuilders = BuilderRegistry()..register('mermaid', const MermaidBuilder());
+
   final List<MarkdownExample> _examples = [
     MarkdownExample(
       title: 'Basic Formatting',
@@ -867,6 +871,85 @@ console.log(distance); // 输出: 5
 
 ---
 
+## 十、Mermaid 图表
+
+Mermaid 是一种基于文本的图表绘制工具，支持流程图、时序图、饼图、甘特图等多种类型。
+
+### 10.1 流程图 (Flowchart)
+
+展示软件开发流程：
+
+```mermaid
+graph TD
+    A[需求分析] --> B{可行吗?}
+    B -->|是| C[系统设计]
+    B -->|否| D[重新评估]
+    D --> A
+    C --> E[编码实现]
+    E --> F[代码审查]
+    F --> G{通过?}
+    G -->|是| H[测试]
+    G -->|否| E
+    H --> I[部署上线]
+    I --> J[维护监控]
+```
+
+### 10.2 时序图 (Sequence Diagram)
+
+展示用户认证流程：
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant C as 客户端
+    participant S as 服务器
+    participant D as 数据库
+    U->>C: 输入账号密码
+    C->>S: POST /api/login
+    S->>D: 查询用户信息
+    D-->>S: 返回用户数据
+    S-->>C: JWT Token
+    C-->>U: 登录成功
+```
+
+### 10.3 饼图 (Pie Chart)
+
+展示项目时间分配：
+
+```mermaid
+pie showData
+    title 开发时间分配
+    "编码开发" : 45
+    "测试调试" : 25
+    "文档编写" : 15
+    "会议沟通" : 10
+    "其他" : 5
+```
+
+### 10.4 甘特图 (Gantt Chart)
+
+展示项目里程碑：
+
+```mermaid
+gantt
+    title Flutter App 开发计划
+    dateFormat YYYY-MM-DD
+
+    section 设计阶段
+        需求分析 :done, req, 2024-01-01, 7d
+        UI设计 :done, ui, after req, 10d
+
+    section 开发阶段
+        核心功能 :active, core, 2024-01-18, 20d
+        API集成 :api, after core, 10d
+
+    section 发布阶段
+        测试 :test, 2024-02-17, 7d
+        上线 :milestone, launch, 2024-02-24, 0d
+```
+
+---
+
 ## 十一、功能总结
 
 本页面展示了以下所有功能：
@@ -886,6 +969,7 @@ console.log(distance); // 输出: 5
 12. **数学公式** - LaTeX 数学表达式（侧边栏"演示"部分查看）
 13. **脚注** - 文档脚注支持，支持自定义样式（侧边栏"演示"部分查看）
 14. **主题** - 6 种预设主题
+15. **Mermaid 图表** - 流程图、时序图、饼图、甘特图
 
 ---
 
@@ -1335,6 +1419,8 @@ console.log(distance); // 输出: 5
                 child: SmoothMarkdown(
                   data: example.markdown,
                   styleSheet: styleSheet,
+                  plugins: _mermaidPlugins,
+                  builderRegistry: _mermaidBuilders,
                   onTapLink: (url) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
