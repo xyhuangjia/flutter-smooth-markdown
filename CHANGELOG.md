@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-11-26
+
+### Fixed
+- 📝 Fixed package description length to meet pub.dev requirements (60-180 characters)
+
 ## [0.4.0] - 2025-11-25
 
 ### Added
