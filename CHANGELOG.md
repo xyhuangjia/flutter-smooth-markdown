@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2025-12-04
+
+### Added
+- 📅 **Mermaid Timeline Support** - Timeline diagram rendering
+  - `TimelineChartData` model with sections, periods, and events
+  - `TimelineParser` for parsing timeline syntax
+  - `TimelinePainter` for native Flutter rendering
+  - Support for timeline titles and period labels
+  - Multiple events per period
+  - 5 new timeline examples in demo app
+
+### Fixed
+- 🎯 **Mermaid Diagram Centering** - Fixed initial position not centered
+  - Auto-scale diagram to fit viewport while maintaining aspect ratio
+  - Proper centering calculation for InteractiveMermaidDiagram
+  - Diagram now displays centered on initial load
+
+### Improved
+- Better UX for interactive diagrams with smart initial zoom level
+
 ## [0.5.1] - 2025-11-26
 
 ### Added
