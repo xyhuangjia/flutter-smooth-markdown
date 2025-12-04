@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import '../config/responsive_config.dart';
 import '../models/diagram.dart';
 import '../models/node.dart';
+import '../models/timeline.dart';
 import '../models/style.dart';
 
 /// Abstract base class for layout engines
@@ -127,5 +129,55 @@ class SimpleLayoutEngine extends LayoutEngine {
       maxWidth + style.padding,
       maxHeight + style.padding,
     );
+  }
+}
+
+/// Layout engine for timeline diagrams
+class TimelineChartLayout {
+  /// Creates a timeline chart layout engine
+  const TimelineChartLayout({this.deviceConfig});
+
+  /// Responsive device configuration
+  final MermaidDeviceConfig? deviceConfig;
+
+  /// Computes the layout size for a timeline chart
+  Size computeLayout(
+    TimelineChartData timelineData,
+    MermaidStyle style,
+    Size availableSize,
+  ) {
+    if (timelineData.sections.isEmpty) return Size.zero;
+
+    final padding = style.padding;
+    final titleHeight = timelineData.title != null ? 60.0 : 20.0;
+
+    // Calculate maximum events in any section
+    var maxEvents = 0;
+    for (final section in timelineData.sections) {
+      if (section.events.length > maxEvents) {
+        maxEvents = section.events.length;
+      }
+    }
+
+    // Layout constants
+    final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
+    final eventHeight = isMobile ? 50.0 : 60.0;
+    final verticalSpacing = isMobile ? 30.0 : 40.0;
+    final timelineMargin = 20.0;
+
+    // Calculate total height
+    // Structure: padding + title + spacing + period labels + timeline + spacing + events + padding
+    final totalHeight = padding +
+        titleHeight +
+        verticalSpacing +  // Space for period labels above timeline
+        timelineMargin +   // Space around timeline
+        verticalSpacing +  // Space before events
+        (maxEvents * eventHeight) +
+        padding;
+
+    // Width should be based on available space
+    final totalWidth = availableSize.width;
+
+    return Size(totalWidth, totalHeight);
   }
 }

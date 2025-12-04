@@ -8,6 +8,8 @@
 /// - Flowchart (graph TD/LR/BT/RL)
 /// - Sequence diagram
 /// - Pie chart
+/// - Gantt chart
+/// - Timeline
 /// - Class diagram (basic)
 /// - State diagram (basic)
 ///
@@ -35,6 +37,21 @@
 ///   ''',
 /// )
 /// ```
+///
+/// Timeline example:
+/// ```dart
+/// MermaidDiagram(
+///   code: '''
+///   timeline
+///     title History of Social Media Platform
+///     2002 : LinkedIn
+///     2004 : Facebook
+///          : Google
+///     2005 : Youtube
+///     2006 : Twitter
+///   ''',
+/// )
+/// ```
 
 export 'config/responsive_config.dart';
 export 'layout/layout_engine.dart';
@@ -44,15 +61,18 @@ export 'models/edge.dart';
 export 'models/gantt.dart';
 export 'models/node.dart';
 export 'models/pie_chart.dart';
+export 'models/timeline.dart';
 export 'models/style.dart';
 export 'painter/flowchart_painter.dart';
 export 'painter/gantt_painter.dart';
 export 'painter/mermaid_painter.dart';
 export 'painter/pie_chart_painter.dart';
 export 'painter/sequence_painter.dart';
+export 'painter/timeline_painter.dart';
 export 'parser/flowchart_parser.dart';
 export 'parser/gantt_parser.dart';
 export 'parser/mermaid_parser.dart';
 export 'parser/pie_chart_parser.dart';
 export 'parser/sequence_parser.dart';
+export 'parser/timeline_parser.dart';
 export 'widgets/mermaid_diagram.dart';

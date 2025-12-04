@@ -37,6 +37,9 @@ enum DiagramType {
   /// Gantt chart diagram
   ganttChart,
 
+  /// Timeline diagram
+  timeline,
+
   /// Unknown/unsupported type
   unknown,
 }

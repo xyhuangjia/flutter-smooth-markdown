@@ -268,6 +268,89 @@ class _MermaidDemoState extends State<MermaidDemo> {
         正式发布 :milestone, rel, 2024-04-16, 0d''',
     ),
 
+    // Timeline examples
+    MermaidExample(
+      title: '时间线 - 基础',
+      description: '社交媒体平台发展历史',
+      code: '''timeline
+    title History of Social Media Platform
+    2002 : LinkedIn
+    2004 : Facebook
+         : Google
+    2005 : Youtube
+    2006 : Twitter''',
+    ),
+    MermaidExample(
+      title: '时间线 - 编程语言',
+      description: '编程语言发展历史',
+      code: '''timeline
+    title History of Programming Languages
+    1950s : Fortran
+          : LISP
+    1960s : COBOL
+          : BASIC
+    1970s : C
+          : SQL
+    1980s : C++
+          : Perl
+    1990s : Python
+          : Java
+          : JavaScript
+    2000s : C#
+          : Go
+    2010s : Rust
+          : Swift
+          : Kotlin''',
+    ),
+    MermaidExample(
+      title: '时间线 - 技术发展',
+      description: '计算机技术发展历程',
+      code: '''timeline
+    title Technology Evolution
+    1970-1980 : Personal Computing Era
+              : Apple II
+              : IBM PC
+    1990-2000 : Internet Revolution
+              : World Wide Web
+              : Google Founded
+    2000-2010 : Mobile Era
+              : iPhone Launch
+              : Android Release
+    2010-2020 : Cloud Computing
+              : AWS Dominance
+              : AI Breakthrough''',
+    ),
+    MermaidExample(
+      title: '时间线 - 产品路线图',
+      description: '产品发布时间线',
+      code: '''timeline
+    title Product Roadmap 2024
+    Q1 2024 : Feature A Release
+            : User Authentication
+    Q2 2024 : Feature B Release
+            : Payment Integration
+    Q3 2024 : Feature C Release
+            : Mobile App Launch
+    Q4 2024 : Feature D Release
+            : AI Assistant''',
+    ),
+    MermaidExample(
+      title: '时间线 - 公司发展',
+      description: '公司里程碑',
+      code: '''timeline
+    title Company Milestones
+    2015 : Company Founded
+         : First Product Launch
+    2017 : Series A Funding
+         : Team Expansion
+    2019 : Series B Funding
+         : International Expansion
+    2021 : IPO
+         : 1000+ Employees
+    2023 : Acquisition
+         : Market Leader''',
+    ),
+
     // Mixed/Complex examples
     MermaidExample(
       title: 'Git 工作流',

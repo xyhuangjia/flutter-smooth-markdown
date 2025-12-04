@@ -1,10 +1,12 @@
 import '../models/diagram.dart';
 import '../models/gantt.dart';
 import '../models/pie_chart.dart';
+import '../models/timeline.dart';
 import 'flowchart_parser.dart';
 import 'gantt_parser.dart';
 import 'pie_chart_parser.dart';
 import 'sequence_parser.dart';
+import 'timeline_parser.dart';
 
 /// Result of parsing a Mermaid diagram
 class MermaidParseResult {
@@ -13,6 +15,7 @@ class MermaidParseResult {
     required this.diagram,
     this.pieChartData,
     this.ganttChartData,
+    this.timelineChartData,
   });
 
   /// The parsed diagram data
@@ -23,6 +26,9 @@ class MermaidParseResult {
 
   /// Gantt chart specific data (only set for Gantt charts)
   final GanttChartData? ganttChartData;
+
+  /// Timeline chart specific data (only set for timeline charts)
+  final TimelineChartData? timelineChartData;
 }
 
 /// Main parser for Mermaid diagrams
@@ -89,6 +95,15 @@ class MermaidParser {
           );
         }
         return null;
+      case DiagramType.timeline:
+        final result = TimelineParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            timelineChartData: result.$2,
+          );
+        }
+        return null;
       case DiagramType.classDiagram:
       case DiagramType.stateDiagram:
         // TODO: Implement class and state diagram parsers
@@ -119,6 +134,11 @@ class MermaidParser {
     // Gantt chart
     if (firstLine.startsWith('gantt')) {
       return DiagramType.ganttChart;
+    }
+
+    // Timeline
+    if (firstLine.startsWith('timeline')) {
+      return DiagramType.timeline;
     }
 
     // Class diagram
