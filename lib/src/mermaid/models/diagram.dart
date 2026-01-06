@@ -40,6 +40,9 @@ enum DiagramType {
   /// Timeline diagram
   timeline,
 
+  /// Kanban board diagram
+  kanban,
+
   /// Unknown/unsupported type
   unknown,
 }

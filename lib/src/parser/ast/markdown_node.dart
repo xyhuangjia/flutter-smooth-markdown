@@ -51,13 +51,18 @@ class HeaderNode extends MarkdownNode {
   const HeaderNode({
     required this.level,
     required this.content,
+    this.children,
   }) : assert(level >= 1 && level <= 6, 'Header level must be between 1 and 6');
 
   /// The header level (1-6)
   final int level;
 
-  /// The header content
+  /// The header content (plain text, used as fallback if children is null)
   final String content;
+
+  /// Parsed inline children (bold, italic, links, etc.)
+  /// If null, content should be used as plain text
+  final List<MarkdownNode>? children;
 
   @override
   String get type => 'header';
@@ -67,18 +72,26 @@ class HeaderNode extends MarkdownNode {
         'type': type,
         'level': level,
         'content': content,
+        if (children != null)
+          'children': children!.map((child) => child.toJson()).toList(),
       };
 
   @override
-  HeaderNode copyWith({int? level, String? content}) {
+  HeaderNode copyWith({
+    int? level,
+    String? content,
+    List<MarkdownNode>? children,
+  }) {
     return HeaderNode(
       level: level ?? this.level,
       content: content ?? this.content,
+      children: children ?? this.children,
     );
   }
 
   @override
-  String toString() => 'HeaderNode(level: $level, content: $content)';
+  String toString() => 'HeaderNode(level: $level, content: $content, '
+      'children: ${children?.length ?? 0})';
 }
 
 /// Represents a paragraph node

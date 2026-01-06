@@ -6,11 +6,13 @@ import '../layout/layout_engine.dart';
 import '../layout/sugiyama_layout.dart';
 import '../models/diagram.dart';
 import '../models/gantt.dart';
+import '../models/kanban.dart';
 import '../models/pie_chart.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
 import '../painter/flowchart_painter.dart';
 import '../painter/gantt_painter.dart';
+import '../painter/kanban_painter.dart';
 import '../painter/pie_chart_painter.dart';
 import '../painter/sequence_painter.dart';
 import '../painter/timeline_painter.dart';
@@ -88,6 +90,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
   PieChartData? _pieChartData;
   GanttChartData? _ganttChartData;
   TimelineChartData? _timelineChartData;
+  KanbanChartData? _kanbanChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -163,6 +166,14 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
           _style,
           Size(widget.width ?? availableWidth, widget.height ?? 600),
         );
+      } else if (diagram.type == DiagramType.kanban && result.kanbanChartData != null) {
+        // Use Kanban chart layout with responsive config
+        final kanbanLayout = KanbanChartLayout(deviceConfig: _deviceConfig);
+        size = kanbanLayout.computeLayout(
+          result.kanbanChartData!,
+          _style,
+          Size(widget.width ?? availableWidth, widget.height ?? 600),
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -176,6 +187,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
       _pieChartData = result.pieChartData;
       _ganttChartData = result.ganttChartData;
       _timelineChartData = result.timelineChartData;
+      _kanbanChartData = result.kanbanChartData;
       _computedSize = size;
       _error = null;
       _isLoading = false;
@@ -245,6 +257,15 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
         if (_timelineChartData != null) {
           return TimelinePainter(
             timelineData: _timelineChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.kanban:
+        if (_kanbanChartData != null) {
+          return KanbanPainter(
+            kanbanData: _kanbanChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );
@@ -576,6 +597,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
   PieChartData? _pieChartData;
   GanttChartData? _ganttChartData;
   TimelineChartData? _timelineChartData;
+  KanbanChartData? _kanbanChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -635,6 +657,14 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
           _style,
           widget.viewportSize,
         );
+      } else if (diagram.type == DiagramType.kanban &&
+          result.kanbanChartData != null) {
+        final kanbanLayout = KanbanChartLayout(deviceConfig: _deviceConfig);
+        size = kanbanLayout.computeLayout(
+          result.kanbanChartData!,
+          _style,
+          widget.viewportSize,
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -649,6 +679,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         _pieChartData = result.pieChartData;
         _ganttChartData = result.ganttChartData;
         _timelineChartData = result.timelineChartData;
+        _kanbanChartData = result.kanbanChartData;
         _computedSize = size;
         _error = null;
         _isLoading = false;
@@ -713,6 +744,15 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         if (_timelineChartData != null) {
           return TimelinePainter(
             timelineData: _timelineChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.kanban:
+        if (_kanbanChartData != null) {
+          return KanbanPainter(
+            kanbanData: _kanbanChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );

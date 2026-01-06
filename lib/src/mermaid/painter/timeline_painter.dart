@@ -29,7 +29,6 @@ class TimelinePainter extends CustomPainter {
     final padding = style.padding;
     final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
     final eventRadius = isMobile ? 6.0 : 8.0;
-    final verticalSpacing = isMobile ? 30.0 : 40.0;
 
     // Calculate positions
     var currentY = padding;
@@ -40,15 +39,34 @@ class TimelinePainter extends CustomPainter {
       currentY += 40.0;
     }
 
+    // Calculate layout - keep sections evenly distributed for continuous timeline
+    final totalSections = timelineData.sections.length;
+    final availableWidth = size.width - padding * 2;
+    final sectionWidth = availableWidth / totalSections;
+
+    // Adjust vertical spacing based on section density
+    final verticalSpacing = isMobile ? 35.0 : 50.0;
+
     // Timeline Y position
     final timelineY = currentY + verticalSpacing + 20;
 
-    // Calculate layout
-    final totalSections = timelineData.sections.length;
-    final sectionWidth = (size.width - padding * 2) / totalSections;
-
-    // Draw timeline line
+    // Draw timeline line (continuous from start to end)
     _drawTimelineLine(canvas, padding, size.width - padding, timelineY);
+
+    // Calculate event box width dynamically to prevent overlap
+    // Use progressively smaller ratios for denser timelines
+    double widthRatio;
+    if (sectionWidth < 60) {
+      widthRatio = 0.50; // Very dense timeline
+    } else if (sectionWidth < 80) {
+      widthRatio = 0.55; // Dense timeline
+    } else if (sectionWidth < 120) {
+      widthRatio = 0.60; // Medium density
+    } else {
+      widthRatio = 0.65; // Sparse timeline
+    }
+
+    final eventBoxWidth = sectionWidth * widthRatio;
 
     // Draw sections and events
     for (var i = 0; i < totalSections; i++) {
@@ -74,7 +92,7 @@ class TimelinePainter extends CustomPainter {
         section.events,
         sectionX,
         timelineY + verticalSpacing,
-        sectionWidth * 0.9,
+        eventBoxWidth,
         color,
       );
 
@@ -172,9 +190,24 @@ class TimelinePainter extends CustomPainter {
     int color,
   ) {
     var currentY = startY;
-    final eventSpacing = 15.0;
-    final fontSize = deviceConfig?.fontSize ?? 11.0;
-    final boxPadding = 8.0;
+    final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
+    // Increase event spacing to prevent vertical overlap
+    final eventSpacing = isMobile ? 18.0 : 22.0;
+
+    // Adjust font size and padding based on available width
+    var baseFontSize = deviceConfig?.fontSize ?? 11.0;
+    var fontSize = baseFontSize;
+    double boxPadding;
+
+    if (maxWidth < 50) {
+      fontSize = baseFontSize - 2; // Smaller font for very tight spaces
+      boxPadding = 4.0; // Minimal padding
+    } else if (maxWidth < 80) {
+      fontSize = baseFontSize - 1; // Slightly smaller for tight spaces
+      boxPadding = 6.0; // Reduced padding
+    } else {
+      boxPadding = isMobile ? 6.0 : 10.0; // Normal padding
+    }
 
     for (var i = 0; i < events.length; i++) {
       final event = events[i];
@@ -187,10 +220,11 @@ class TimelinePainter extends CustomPainter {
             fontSize: fontSize,
             color: Color(TimelineChartColors.textColor),
             fontWeight: FontWeight.w500,
+            height: 1.2, // Line height for better readability
           ),
         ),
         textDirection: TextDirection.ltr,
-        maxLines: 3,
+        maxLines: 4, // Allow more lines for long titles
         textAlign: TextAlign.center,
       );
       titlePainter.layout(maxWidth: maxWidth);
@@ -236,10 +270,11 @@ class TimelinePainter extends CustomPainter {
               fontSize: fontSize - 1,
               color: Color(TimelineChartColors.textColor).withOpacity(0.7),
               fontStyle: FontStyle.italic,
+              height: 1.2, // Line height for better readability
             ),
           ),
           textDirection: TextDirection.ltr,
-          maxLines: 2,
+          maxLines: 3, // Allow more lines for descriptions
           textAlign: TextAlign.center,
         );
         descPainter.layout(maxWidth: maxWidth);
@@ -247,7 +282,7 @@ class TimelinePainter extends CustomPainter {
           canvas,
           Offset(centerX - descPainter.width / 2, currentY),
         );
-        currentY += descPainter.height + 5;
+        currentY += descPainter.height + 8; // Increase spacing after description
       }
     }
   }

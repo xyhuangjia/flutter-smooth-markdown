@@ -28,8 +28,10 @@ class EnhancedHeaderBuilder extends MarkdownWidgetBuilder {
     return _EnhancedHeaderWidget(
       level: headerNode.level,
       content: headerNode.content,
+      children: headerNode.children,
       style: style,
       showBottomBorder: showBottomBorder,
+      inlineRenderer: context.inlineRenderer,
     );
   }
 
@@ -59,16 +61,28 @@ class _EnhancedHeaderWidget extends StatelessWidget {
     required this.content,
     required this.style,
     required this.showBottomBorder,
+    this.children,
+    this.inlineRenderer,
   });
 
   final int level;
   final String content;
   final TextStyle? style;
   final bool showBottomBorder;
+  final List<MarkdownNode>? children;
+  final Widget Function(List<MarkdownNode>, TextStyle?)? inlineRenderer;
 
   @override
   Widget build(BuildContext context) {
     final showBorder = showBottomBorder && level <= 2;
+
+    // Render header content with inline formatting if available
+    Widget headerText;
+    if (children != null && children!.isNotEmpty && inlineRenderer != null) {
+      headerText = inlineRenderer!(children!, style);
+    } else {
+      headerText = Text(content, style: style);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -96,10 +110,7 @@ class _EnhancedHeaderWidget extends StatelessWidget {
                   ),
                 ),
               Expanded(
-                child: Text(
-                  content,
-                  style: style,
-                ),
+                child: headerText,
               ),
             ],
           ),
@@ -111,7 +122,7 @@ class _EnhancedHeaderWidget extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0),
                 ],
               ),
             ),

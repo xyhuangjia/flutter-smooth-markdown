@@ -156,7 +156,14 @@ class BlockParser {
     final level = match.group(1)!.length;
     final content = match.group(2)!.trim();
 
-    return HeaderNode(level: level, content: content);
+    // Parse inline formatting (bold, italic, links, etc.) in header content
+    final children = _inlineParser.parse(content);
+
+    return HeaderNode(
+      level: level,
+      content: content,
+      children: children,
+    );
   }
 
   /// Checks if a line starts a code block
