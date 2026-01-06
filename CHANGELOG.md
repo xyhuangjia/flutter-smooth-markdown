@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-01-06
+
+### Added
+- ✨ **Header Inline Formatting** - Headers now support all inline formats
+  - Headers (H1-H6) can now contain **bold**, *italic*, `code`, [links](url), and ~~strikethrough~~
+  - Works with both standard and enhanced header builders
+  - Example: `## 📝 **My Suggestion**` renders with proper bold formatting
+  - Added comprehensive test coverage for header inline formatting
+  - Updated demo examples to showcase the feature
+
+- 📊 **Mermaid Kanban Support** - Full Kanban board diagram rendering
+  - `KanbanChartData` model with columns, tasks, and WIP limits
+  - `KanbanParser` for parsing Kanban syntax with YAML frontmatter support
+  - `KanbanPainter` for native Flutter rendering with card-style design
+  - Support for task priorities, assignments, and ticket IDs
+  - Visual WIP limit indicators with color-coded warnings
+  - 6 comprehensive Kanban examples in demo app
+  - Responsive layout for mobile, tablet, and desktop
+
+### Fixed
+- 🐛 **Mermaid YAML Frontmatter** - Fixed diagram type detection with YAML config
+  - Kanban diagrams with YAML frontmatter now parse correctly
+  - Type detection now skips YAML blocks to find actual diagram type
+  - Added integration tests for YAML frontmatter support
+
+### Improved
+- Enhanced demo app with new header formatting examples
+- Better documentation for inline formatting features
+- Improved test coverage for parser and renderer components
+
 ## [0.5.2] - 2025-12-04
 
 ### Added

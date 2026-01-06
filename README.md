@@ -11,8 +11,8 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 | Category | Features |
 |----------|----------|
 | **Rendering** | AST-based parsing, syntax highlighting, real-time streaming |
-| **Markdown** | Headers, lists, tables, code blocks, blockquotes, links, images |
-| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, pie, sequence) |
+| **Markdown** | Headers (with inline formatting), lists, tables, code blocks, blockquotes, links, images |
+| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, pie, sequence) |
 | **Extras** | Footnotes, SVG support, collapsible sections, task lists |
 | **Theming** | Light/dark modes, GitHub/VS Code presets, custom themes |
 | **Plugins** | Mentions, hashtags, emojis, AI chat blocks (thinking, artifacts) |
@@ -42,7 +42,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.5.2
+  flutter_smooth_markdown: ^0.6.0
 ```
 
 ```bash
@@ -138,7 +138,7 @@ MermaidDiagram(
 )
 ```
 
-Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Timeline Diagrams
+Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Kanban Boards, Timeline Diagrams
 
 ## Markdown Syntax
 

@@ -43,7 +43,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Header 1'), findsOneWidget);
+      expect(findRichTextContaining('Header 1'), findsOneWidget);
     });
 
     testWidgets('should render bold text', (tester) async {
@@ -258,9 +258,10 @@ Text below
         ),
       );
 
-      expect(find.text('Big Header'), findsOneWidget);
-      final textWidget = tester.widget<Text>(find.text('Big Header'));
-      expect(textWidget.style?.fontSize, 48);
+      expect(findRichTextContaining('Big Header'), findsOneWidget);
+      final richTextWidget = tester.widget<RichText>(findRichTextContaining('Big Header'));
+      final textSpan = richTextWidget.text as TextSpan;
+      expect(textSpan.style?.fontSize, 48);
     });
 
     testWidgets('should render complex markdown', (tester) async {
@@ -291,10 +292,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Title'), findsOneWidget);
+      expect(findRichTextContaining('Title'), findsOneWidget);
       expect(findRichTextContaining('bold'), findsOneWidget);
       expect(findRichTextContaining('italic'), findsOneWidget);
-      expect(find.text('List'), findsOneWidget);
+      expect(findRichTextContaining('List'), findsOneWidget);
       expect(findRichTextContaining('Item 1'), findsOneWidget);
       expect(findRichTextContaining('Quote'), findsOneWidget);
     });

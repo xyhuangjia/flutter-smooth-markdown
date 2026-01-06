@@ -22,6 +22,15 @@ class HeaderBuilder extends MarkdownWidgetBuilder {
 
     final style = _getHeaderStyle(headerNode.level, styleSheet);
 
+    // If header has parsed inline children, use inlineRenderer to support formatting
+    if (headerNode.children != null && headerNode.children!.isNotEmpty) {
+      final inlineRenderer = context.inlineRenderer;
+      if (inlineRenderer != null) {
+        return inlineRenderer(headerNode.children!, style);
+      }
+    }
+
+    // Fallback: render as plain text
     return Text(
       headerNode.content,
       style: style,
