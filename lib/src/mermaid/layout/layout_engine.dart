@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import '../config/responsive_config.dart';
 import '../models/diagram.dart';
+import '../models/kanban.dart';
 import '../models/node.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
@@ -177,6 +178,77 @@ class TimelineChartLayout {
 
     // Width should be based on available space
     final totalWidth = availableSize.width;
+
+    return Size(totalWidth, totalHeight);
+  }
+}
+
+/// Layout engine for Kanban diagrams
+class KanbanChartLayout {
+  /// Creates a Kanban chart layout engine
+  const KanbanChartLayout({this.deviceConfig});
+
+  /// Responsive device configuration
+  final MermaidDeviceConfig? deviceConfig;
+
+  /// Computes layout size for Kanban chart
+  Size computeLayout(
+    KanbanChartData kanbanData,
+    MermaidStyle style,
+    Size availableSize,
+  ) {
+    if (kanbanData.columns.isEmpty) return Size.zero;
+
+    final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
+    final isTablet = deviceConfig?.deviceType == DeviceType.tablet;
+
+    // Responsive constants
+    final padding = style.padding;
+    final titleHeight = kanbanData.title != null ? 60.0 : 20.0;
+    final columnHeaderHeight = isMobile ? 50.0 : 60.0;
+    final columnSpacing = isMobile ? 12.0 : 16.0;
+    final cardHeight = isMobile ? 90.0 : 110.0; // Base card height
+    final cardSpacing = isMobile ? 8.0 : 12.0;
+
+    // Calculate column width strategy
+    final totalColumns = kanbanData.columns.length;
+    double columnWidth;
+
+    if (isMobile) {
+      // Mobile: Single column visible, horizontal scroll
+      columnWidth = availableSize.width - (padding * 2) - columnSpacing;
+      columnWidth = columnWidth.clamp(250.0, 350.0);
+    } else if (isTablet && totalColumns > 3) {
+      // Tablet: Max 3 columns, scroll if more
+      columnWidth = (availableSize.width - padding * 2 - columnSpacing * 2) / 3;
+    } else {
+      // Desktop: Fit all columns if possible
+      final availableWidth = availableSize.width - padding * 2;
+      columnWidth = (availableWidth - columnSpacing * (totalColumns - 1)) / totalColumns;
+      columnWidth = columnWidth.clamp(200.0, 350.0);
+    }
+
+    // Calculate maximum cards in any column
+    var maxCards = 0;
+    for (final column in kanbanData.columns) {
+      if (column.tasks.length > maxCards) {
+        maxCards = column.tasks.length;
+      }
+    }
+
+    // Calculate total height
+    final cardsAreaHeight = (maxCards * cardHeight) + ((maxCards + 1) * cardSpacing);
+
+    final totalHeight = padding +
+        titleHeight +
+        columnHeaderHeight +
+        cardsAreaHeight +
+        padding;
+
+    // Calculate total width
+    final totalWidth = isMobile
+        ? (columnWidth + columnSpacing) * totalColumns + padding * 2
+        : availableSize.width;
 
     return Size(totalWidth, totalHeight);
   }

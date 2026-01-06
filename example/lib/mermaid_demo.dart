@@ -351,6 +351,144 @@ class _MermaidDemoState extends State<MermaidDemo> {
          : Market Leader''',
     ),
 
+    // Kanban examples
+    MermaidExample(
+      title: '看板 - 基础',
+      description: '简单的任务看板',
+      code: '''kanban
+  title 我的任务看板
+
+  todo[待办事项]
+    task1[学习 Flutter]
+    task2[完成项目文档]
+
+  doing[进行中]
+    task3[开发新功能]
+
+  done[已完成]
+    task4[代码审查]''',
+    ),
+    MermaidExample(
+      title: '看板 - 带优先级',
+      description: '展示任务优先级的看板',
+      code: '''kanban
+  title 项目任务看板
+
+  backlog[需求池]
+    task1[数据库优化] @{ priority: "Low" }
+    task2[性能测试] @{ priority: "Very Low" }
+
+  todo[待开始]
+    task3[用户认证] @{ priority: "Very High" }
+    task4[API设计] @{ priority: "High" }
+
+  doing[开发中]
+    task5[登录界面] @{ priority: "High" }
+
+  done[完成]
+    task6[环境搭建] @{ priority: "Normal" }''',
+    ),
+    MermaidExample(
+      title: '看板 - 团队协作',
+      description: '分配负责人的团队看板',
+      code: '''kanban
+  title 团队协作看板
+
+  todo[待办]
+    task1[需求分析] @{ assigned: "张三" }
+    task2[UI设计] @{ assigned: "李四" }
+
+  doing[进行中]
+    task3[前端开发] @{ assigned: "王五", priority: "High" }
+    task4[后端开发] @{ assigned: "赵六", priority: "High" }
+
+  review[代码审查]
+    task5[功能A] @{ assigned: "张三", priority: "Normal" }
+
+  done[已完成]
+    task6[项目初始化] @{ assigned: "李四" }''',
+    ),
+    MermaidExample(
+      title: '看板 - WIP 限制',
+      description: '设置在制品限制的看板',
+      code: '''kanban
+  title WIP 限制示例
+
+  backlog[需求池] wip:10
+    task1[需求A]
+    task2[需求B]
+    task3[需求C]
+
+  todo[待开始] wip:5
+    task4[任务1]
+    task5[任务2]
+
+  doing[开发中] wip:3
+    task6[开发任务A]
+    task7[开发任务B]
+    task8[开发任务C]
+    task9[开发任务D]
+
+  review[审查] wip:2
+    task10[审查1]
+
+  done[完成]
+    task11[已完成任务]''',
+    ),
+    MermaidExample(
+      title: '看板 - 完整示例',
+      description: '包含所有功能的看板',
+      code: '''---
+config:
+  kanban:
+    ticketBaseUrl: 'https://jira.example.com/browse/#TICKET#'
+---
+kanban
+  title 产品开发看板
+
+  backlog[产品待办] wip:10
+    task1[用户认证系统] @{ assigned: "张三", ticket: "PROJ-101", priority: "High" }
+    task2[数据库设计] @{ assigned: "李四", ticket: "PROJ-102", priority: "Normal" }
+    task3[API文档] @{ assigned: "王五", priority: "Low" }
+
+  todo[准备开始] wip:5
+    task4[登录界面] @{ assigned: "赵六", priority: "Very High" }
+    task5[注册流程] @{ assigned: "张三", ticket: "PROJ-105", priority: "High" }
+
+  doing[开发中] wip:3
+    task6[用户仪表板] @{ assigned: "李四", ticket: "PROJ-104", priority: "High" }
+    task7[权限管理] @{ assigned: "王五", ticket: "PROJ-106", priority: "Normal" }
+
+  review[代码审查] wip:2
+    task8[支付集成] @{ assigned: "赵六", ticket: "PROJ-108", priority: "Very High" }
+
+  done[已完成]
+    task9[CI/CD配置] @{ assigned: "张三", ticket: "PROJ-103" }
+    task10[环境搭建] @{ assigned: "李四" }''',
+    ),
+    MermaidExample(
+      title: '看板 - 敏捷开发',
+      description: 'Scrum 敏捷开发看板',
+      code: '''kanban
+  title Sprint 23 - 敏捷开发
+
+  sprint_backlog[Sprint待办] wip:8
+    story1[用户故事1] @{ assigned: "Alice", priority: "Very High" }
+    story2[用户故事2] @{ assigned: "Bob", priority: "High" }
+    story3[用户故事3] @{ assigned: "Carol", priority: "Normal" }
+
+  in_progress[进行中] wip:4
+    story4[开发功能A] @{ assigned: "Alice", priority: "Very High" }
+    story5[开发功能B] @{ assigned: "Bob", priority: "High" }
+
+  testing[测试中] wip:3
+    story6[测试功能C] @{ assigned: "David", priority: "High" }
+
+  done[本Sprint完成]
+    story7[功能D已上线] @{ assigned: "Carol" }
+    story8[Bug修复] @{ assigned: "Alice" }''',
+    ),
+
     // Mixed/Complex examples
     MermaidExample(
       title: 'Git 工作流',
@@ -473,9 +611,17 @@ class _MermaidDemoState extends State<MermaidDemo> {
             _buildSectionHeader('甘特图 (Gantt Chart)', _isDarkMode),
             ..._buildExampleTiles(15, 19),
             const Divider(),
+            // Timeline section
+            _buildSectionHeader('时间线 (Timeline)', _isDarkMode),
+            ..._buildExampleTiles(19, 24),
+            const Divider(),
+            // Kanban section
+            _buildSectionHeader('看板 (Kanban)', _isDarkMode),
+            ..._buildExampleTiles(24, 30),
+            const Divider(),
             // Complex examples
             _buildSectionHeader('复杂示例', _isDarkMode),
-            ..._buildExampleTiles(19, _examples.length),
+            ..._buildExampleTiles(30, _examples.length),
           ],
         ),
       ),
@@ -785,6 +931,10 @@ class _MermaidDemoState extends State<MermaidDemo> {
       return Icons.pie_chart; // Pie chart
     } else if (index < 19) {
       return Icons.view_timeline; // Gantt chart
+    } else if (index < 24) {
+      return Icons.timeline; // Timeline
+    } else if (index < 30) {
+      return Icons.view_kanban; // Kanban board
     } else {
       return Icons.hub; // Complex
     }

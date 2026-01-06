@@ -1,9 +1,11 @@
 import '../models/diagram.dart';
 import '../models/gantt.dart';
+import '../models/kanban.dart';
 import '../models/pie_chart.dart';
 import '../models/timeline.dart';
 import 'flowchart_parser.dart';
 import 'gantt_parser.dart';
+import 'kanban_parser.dart';
 import 'pie_chart_parser.dart';
 import 'sequence_parser.dart';
 import 'timeline_parser.dart';
@@ -16,6 +18,7 @@ class MermaidParseResult {
     this.pieChartData,
     this.ganttChartData,
     this.timelineChartData,
+    this.kanbanChartData,
   });
 
   /// The parsed diagram data
@@ -29,6 +32,9 @@ class MermaidParseResult {
 
   /// Timeline chart specific data (only set for timeline charts)
   final TimelineChartData? timelineChartData;
+
+  /// Kanban chart specific data (only set for Kanban charts)
+  final KanbanChartData? kanbanChartData;
 }
 
 /// Main parser for Mermaid diagrams
@@ -59,7 +65,20 @@ class MermaidParser {
 
     if (cleanedLines.isEmpty) return null;
 
-    final firstLine = cleanedLines.first.trim().toLowerCase();
+    // Skip YAML frontmatter if present (used by some diagram types like Kanban)
+    var firstContentLine = cleanedLines.first.trim().toLowerCase();
+    if (firstContentLine == '---') {
+      // Find the closing --- and get the first line after it
+      for (var i = 1; i < cleanedLines.length; i++) {
+        if (cleanedLines[i].trim() == '---') {
+          if (i + 1 < cleanedLines.length) {
+            firstContentLine = cleanedLines[i + 1].trim().toLowerCase();
+          }
+          break;
+        }
+      }
+    }
+    final firstLine = firstContentLine;
 
     // Detect diagram type
     final type = _detectDiagramType(firstLine);
@@ -78,7 +97,7 @@ class MermaidParser {
         }
         return null;
       case DiagramType.pieChart:
-        final result = PieChartParser().parse(cleanedLines);
+        final result = const PieChartParser().parse(cleanedLines);
         if (result != null) {
           return MermaidParseResult(
             diagram: result.$1,
@@ -87,7 +106,7 @@ class MermaidParser {
         }
         return null;
       case DiagramType.ganttChart:
-        final result = GanttParser().parse(cleanedLines);
+        final result = const GanttParser().parse(cleanedLines);
         if (result != null) {
           return MermaidParseResult(
             diagram: result.$1,
@@ -96,11 +115,20 @@ class MermaidParser {
         }
         return null;
       case DiagramType.timeline:
-        final result = TimelineParser().parse(cleanedLines);
+        final result = const TimelineParser().parse(cleanedLines);
         if (result != null) {
           return MermaidParseResult(
             diagram: result.$1,
             timelineChartData: result.$2,
+          );
+        }
+        return null;
+      case DiagramType.kanban:
+        final result = const KanbanParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            kanbanChartData: result.$2,
           );
         }
         return null;
@@ -139,6 +167,11 @@ class MermaidParser {
     // Timeline
     if (firstLine.startsWith('timeline')) {
       return DiagramType.timeline;
+    }
+
+    // Kanban
+    if (firstLine.startsWith('kanban')) {
+      return DiagramType.kanban;
     }
 
     // Class diagram
