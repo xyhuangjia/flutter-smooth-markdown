@@ -261,4 +261,4 @@ MIT License
 
 ---
 
-Made with love for the Flutter community.
+Made with love for the Flutter community
