@@ -5,6 +5,7 @@ import '../config/responsive_config.dart';
 import '../models/diagram.dart';
 import '../models/kanban.dart';
 import '../models/node.dart';
+import '../models/radar.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
 
@@ -253,3 +254,42 @@ class KanbanChartLayout {
     return Size(totalWidth, totalHeight);
   }
 }
+
+/// Layout engine for Radar charts
+class RadarChartLayout {
+  /// Creates a Radar chart layout engine
+  const RadarChartLayout({this.deviceConfig});
+
+  /// Responsive device configuration
+  final MermaidDeviceConfig? deviceConfig;
+
+  /// Computes layout size for Radar chart
+  Size computeLayout(
+    RadarChartData radarData,
+    MermaidStyle style,
+    Size availableSize,
+  ) {
+    if (radarData.axes.isEmpty) return Size.zero;
+
+    final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
+    final padding = style.padding;
+    final titleHeight = radarData.title != null ? (isMobile ? 40.0 : 50.0) : 0.0;
+    final legendHeight = radarData.showLegend && radarData.curves.length > 1 ? 60.0 : 0.0;
+
+    // Calculate chart size based on available space
+    final availableChartWidth = availableSize.width - padding * 2;
+    final availableChartHeight = availableSize.height - titleHeight - legendHeight - padding * 2;
+
+    // Use square aspect ratio, fitting within available space
+    final chartSize = math.min(
+      math.min(availableChartWidth, availableChartHeight),
+      isMobile ? 350.0 : 500.0,
+    );
+
+    final totalWidth = chartSize + padding * 2;
+    final totalHeight = titleHeight + chartSize + legendHeight + padding * 2;
+
+    return Size(totalWidth, totalHeight);
+  }
+}
+

@@ -8,12 +8,14 @@ import '../models/diagram.dart';
 import '../models/gantt.dart';
 import '../models/kanban.dart';
 import '../models/pie_chart.dart';
+import '../models/radar.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
 import '../painter/flowchart_painter.dart';
 import '../painter/gantt_painter.dart';
 import '../painter/kanban_painter.dart';
 import '../painter/pie_chart_painter.dart';
+import '../painter/radar_painter.dart';
 import '../painter/sequence_painter.dart';
 import '../painter/timeline_painter.dart';
 import '../parser/mermaid_parser.dart';
@@ -91,6 +93,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
   GanttChartData? _ganttChartData;
   TimelineChartData? _timelineChartData;
   KanbanChartData? _kanbanChartData;
+  RadarChartData? _radarChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -174,6 +177,14 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
           _style,
           Size(widget.width ?? availableWidth, widget.height ?? 600),
         );
+      } else if (diagram.type == DiagramType.radar && result.radarChartData != null) {
+        // Use Radar chart layout with responsive config
+        final radarLayout = RadarChartLayout(deviceConfig: _deviceConfig);
+        size = radarLayout.computeLayout(
+          result.radarChartData!,
+          _style,
+          Size(widget.width ?? availableWidth, widget.height ?? 600),
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -188,6 +199,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
       _ganttChartData = result.ganttChartData;
       _timelineChartData = result.timelineChartData;
       _kanbanChartData = result.kanbanChartData;
+      _radarChartData = result.radarChartData;
       _computedSize = size;
       _error = null;
       _isLoading = false;
@@ -266,6 +278,15 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
         if (_kanbanChartData != null) {
           return KanbanPainter(
             kanbanData: _kanbanChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.radar:
+        if (_radarChartData != null) {
+          return RadarPainter(
+            radarData: _radarChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );
@@ -598,6 +619,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
   GanttChartData? _ganttChartData;
   TimelineChartData? _timelineChartData;
   KanbanChartData? _kanbanChartData;
+  RadarChartData? _radarChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -665,6 +687,14 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
           _style,
           widget.viewportSize,
         );
+      } else if (diagram.type == DiagramType.radar &&
+          result.radarChartData != null) {
+        final radarLayout = RadarChartLayout(deviceConfig: _deviceConfig);
+        size = radarLayout.computeLayout(
+          result.radarChartData!,
+          _style,
+          widget.viewportSize,
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -680,6 +710,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         _ganttChartData = result.ganttChartData;
         _timelineChartData = result.timelineChartData;
         _kanbanChartData = result.kanbanChartData;
+        _radarChartData = result.radarChartData;
         _computedSize = size;
         _error = null;
         _isLoading = false;
@@ -753,6 +784,15 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         if (_kanbanChartData != null) {
           return KanbanPainter(
             kanbanData: _kanbanChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.radar:
+        if (_radarChartData != null) {
+          return RadarPainter(
+            radarData: _radarChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );

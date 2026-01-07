@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-01-07
+
+### Added
+- 📊 **Mermaid Radar Chart Support** - Full radar chart diagram rendering
+  - `RadarChartData` model with axes, curves, and configuration options
+  - `RadarParser` for parsing Mermaid radar-beta syntax
+  - `RadarPainter` for native Flutter rendering with polygon/circle graticules
+  - Support for multiple data curves with customizable colors
+  - Support for labeled axes (e.g., `axis A["Label A"]`)
+  - Support for labeled curves (e.g., `curve c1["Dataset 1"]`)
+  - Configuration options: title, showLegend, max, min, graticule (circle/polygon), ticks
+  - Full Unicode support including Chinese characters (编程, 设计, etc.)
+  - 3 comprehensive radar chart examples in demo app
+  - Responsive layout with mobile/tablet/desktop support
+  - 14 unit tests covering parsing and data model functionality
+
+### Fixed
+- 🐛 **Radar Chart Parsing** - Fixed Unicode character support
+  - Changed regex from `\w+` to `.+?` to support non-ASCII characters
+  - Now correctly parses Chinese labels (张三, 李四, etc.)
+  - Fixed demo app code examples with proper string formatting
+
+### Improved
+- Enhanced demo app sidebar with dedicated "Radar Chart" section
+- Updated README with radar chart examples and features
+- Comprehensive test coverage for Chinese/Unicode label parsing
+
 ## [0.6.0] - 2026-01-06
 
 ### Added

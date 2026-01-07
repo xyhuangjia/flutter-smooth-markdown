@@ -534,6 +534,44 @@ kanban
     B --> G((退款中))
     G --> F''',
     ),
+    MermaidExample(
+      title: '雷达图 - 技能评估',
+      description: '展示多维度技能水平对比',
+      code: '''radar-beta
+    title 技能评估
+    axis 编程, 设计, 沟通, 管理, 创新
+    curve 张三{5, 3, 4, 2, 4}
+    curve 李四{3, 5, 3, 4, 3}
+    showLegend true
+    max 5
+    graticule polygon
+    ticks 5''',
+    ),
+    MermaidExample(
+      title: '雷达图 - 产品特性',
+      description: '产品竞争力分析',
+      code: '''radar-beta
+    title 产品竞争力分析
+    axis 性能["Performance"], 易用性["Usability"], 稳定性["Stability"], 扩展性["Scalability"], 安全性["Security"]
+    curve 产品A{90, 85, 95, 70, 88}
+    curve 产品B{85, 90, 80, 85, 75}
+    curve 竞品C{70, 75, 85, 90, 80}
+    showLegend true
+    max 100
+    graticule circle
+    ticks 5''',
+    ),
+    MermaidExample(
+      title: '雷达图 - 简单圆形',
+      description: '使用圆形网格的雷达图',
+      code: '''radar-beta
+    title 能力雷达
+    axis A, B, C, D, E, F
+    curve data1{1, 2, 3, 4, 5, 4}
+    curve data2{5, 4, 3, 2, 1, 2}
+    graticule circle
+    max 5''',
+    ),
   ];
 
   @override
@@ -619,9 +657,13 @@ kanban
             _buildSectionHeader('看板 (Kanban)', _isDarkMode),
             ..._buildExampleTiles(24, 30),
             const Divider(),
+            // Radar chart section
+            _buildSectionHeader('雷达图 (Radar Chart)', _isDarkMode),
+            ..._buildExampleTiles(30, 33),
+            const Divider(),
             // Complex examples
             _buildSectionHeader('复杂示例', _isDarkMode),
-            ..._buildExampleTiles(30, _examples.length),
+            ..._buildExampleTiles(33, _examples.length),
           ],
         ),
       ),

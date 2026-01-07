@@ -12,7 +12,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 |----------|----------|
 | **Rendering** | AST-based parsing, syntax highlighting, real-time streaming |
 | **Markdown** | Headers (with inline formatting), lists, tables, code blocks, blockquotes, links, images |
-| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, pie, sequence) |
+| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, Radar, pie, sequence) |
 | **Extras** | Footnotes, SVG support, collapsible sections, task lists |
 | **Theming** | Light/dark modes, GitHub/VS Code presets, custom themes |
 | **Plugins** | Mentions, hashtags, emojis, AI chat blocks (thinking, artifacts) |
@@ -42,7 +42,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.6.0
+  flutter_smooth_markdown: ^0.6.1
 ```
 
 ```bash
@@ -138,7 +138,24 @@ MermaidDiagram(
 )
 ```
 
-Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Kanban Boards, Timeline Diagrams
+Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Kanban Boards, Timeline Diagrams, **Radar Charts**
+
+### Radar Chart Example
+
+```dart
+MermaidDiagram(
+  code: '''
+  radar-beta
+    title Skills Assessment
+    axis Programming, Design, Communication, Management, Innovation
+    curve Alice{5, 3, 4, 2, 4}
+    curve Bob{3, 5, 3, 4, 3}
+    showLegend true
+    max 5
+    graticule polygon
+  ''',
+)
+```
 
 ## Markdown Syntax
 
