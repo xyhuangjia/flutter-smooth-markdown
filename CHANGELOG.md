@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-02-12
+
+### Added
+- **Selectable Text Enhancement** - Selection handles now work across non-text blocks
+  - Transparent selectable overlay on image-only paragraphs for handle anchoring
+  - `DefaultSelectionStyle` with transparent selection color to hide overlay artifacts
+  - Automatic clipboard filtering to remove overlay placeholder content on copy
+  - Supports both context menu copy and keyboard shortcut (Cmd/Ctrl+C)
+- **Image Tap Callback** - New `onTapImage` API for handling image taps
+  - `SmoothMarkdown.onTapImage` and `StreamMarkdown.onTapImage` parameters
+  - Callback receives `url`, `alt`, and `title` for full image context
+  - Works with all image types: network, asset, SVG
+  - Compatible with selectable mode (`IgnorePointer` on overlay preserves tap events)
+
 ## [0.6.1] - 2026-01-07
 
 ### Added
