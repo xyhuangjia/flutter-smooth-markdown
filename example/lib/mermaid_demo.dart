@@ -603,6 +603,16 @@ kanban
     bar [40, 55, 65, 75, 85]
     line [45, 58, 68, 78, 88]''',
     ),
+    MermaidExample(
+      title: 'XY图 - 年度营收',
+      description: '12个月营收柱状图+趋势线',
+      code: '''xychart-beta
+    title "Sales Revenue"
+    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
+    y-axis "Revenue (in \$)" 4000 --> 11000
+    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
+    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]''',
+    ),
   ];
 
   @override
@@ -694,11 +704,11 @@ kanban
             const Divider(),
             // XY chart section
             _buildSectionHeader('XY图 (XY Chart)', _isDarkMode),
-            ..._buildExampleTiles(33, 36),
+            ..._buildExampleTiles(33, 37),
             const Divider(),
             // Complex examples
             _buildSectionHeader('复杂示例', _isDarkMode),
-            ..._buildExampleTiles(36, _examples.length),
+            ..._buildExampleTiles(37, _examples.length),
           ],
         ),
       ),
@@ -1014,7 +1024,7 @@ kanban
       return Icons.view_kanban; // Kanban board
     } else if (index < 33) {
       return Icons.radar; // Radar chart
-    } else if (index < 36) {
+    } else if (index < 37) {
       return Icons.bar_chart; // XY chart
     } else {
       return Icons.hub; // Complex
