@@ -8,6 +8,7 @@ import '../models/node.dart';
 import '../models/radar.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
+import '../models/xy_chart.dart';
 
 /// Abstract base class for layout engines
 abstract class LayoutEngine {
@@ -288,6 +289,34 @@ class RadarChartLayout {
 
     final totalWidth = chartSize + padding * 2;
     final totalHeight = titleHeight + chartSize + legendHeight + padding * 2;
+
+    return Size(totalWidth, totalHeight);
+  }
+}
+
+/// Layout engine for XY charts
+class XYChartLayout {
+  /// Creates an XY chart layout engine
+  const XYChartLayout({this.deviceConfig});
+
+  /// Responsive device configuration
+  final MermaidDeviceConfig? deviceConfig;
+
+  /// Computes layout size for XY chart
+  Size computeLayout(
+    XYChartData xyData,
+    MermaidStyle style,
+    Size availableSize,
+  ) {
+    if (xyData.series.isEmpty) return Size.zero;
+
+    final isMobile = deviceConfig?.deviceType == DeviceType.mobile;
+    final padding = style.padding;
+    final titleHeight = xyData.title != null ? (isMobile ? 35.0 : 45.0) : 0.0;
+    final xAxisLabelHeight = isMobile ? 40.0 : 50.0;
+
+    final totalWidth = math.min(availableSize.width, isMobile ? 400.0 : 700.0);
+    final totalHeight = titleHeight + (isMobile ? 280.0 : 400.0) + xAxisLabelHeight + padding * 2;
 
     return Size(totalWidth, totalHeight);
   }

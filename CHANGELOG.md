@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-02-12
+
+### Added
+- 📊 **Mermaid XY Chart Support** - Bar and line chart rendering
+  - `XYChartData` model with series, axes, categories, and orientation
+  - `XYChartParser` for parsing `xychart-beta` / `xychart` syntax
+  - `XYChartPainter` for native Flutter rendering with bar and line series
+  - Support for categorical x-axis (`[Q1, Q2, Q3, Q4]`) and numeric range (`0 --> 100`)
+  - Support for mixed bar + line series in a single chart
+  - Grouped bar layout for multiple bar series
+  - Chart title, axis titles, and axis labels
+  - Horizontal orientation support (`xychart-beta horizontal`)
+  - Quoted category labels (`["Q1 2024", "Q2 2024"]`)
+  - Negative and decimal values
+  - Horizontal grid lines for readability
+  - Responsive layout with mobile/tablet/desktop support
+  - 3 XY chart examples in demo app
+  - 15 unit tests covering parsing and data model
+
+### Fixed
+- 🐛 **XY Chart Y-axis scaling** - Fixed `_roundUpToNice` using proper `log10` math instead of string length heuristic
+
 ## [0.7.0] - 2026-02-12
 
 ### Added

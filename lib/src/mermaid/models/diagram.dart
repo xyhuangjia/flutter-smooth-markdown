@@ -46,6 +46,9 @@ enum DiagramType {
   /// Radar chart diagram
   radar,
 
+  /// XY chart diagram
+  xyChart,
+
   /// Unknown/unsupported type
   unknown,
 }

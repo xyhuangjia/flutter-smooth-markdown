@@ -11,6 +11,7 @@ import '../models/pie_chart.dart';
 import '../models/radar.dart';
 import '../models/timeline.dart';
 import '../models/style.dart';
+import '../models/xy_chart.dart';
 import '../painter/flowchart_painter.dart';
 import '../painter/gantt_painter.dart';
 import '../painter/kanban_painter.dart';
@@ -18,6 +19,7 @@ import '../painter/pie_chart_painter.dart';
 import '../painter/radar_painter.dart';
 import '../painter/sequence_painter.dart';
 import '../painter/timeline_painter.dart';
+import '../painter/xy_chart_painter.dart';
 import '../parser/mermaid_parser.dart';
 
 /// A widget that renders Mermaid diagrams using pure Dart/Flutter
@@ -94,6 +96,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
   TimelineChartData? _timelineChartData;
   KanbanChartData? _kanbanChartData;
   RadarChartData? _radarChartData;
+  XYChartData? _xyChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -185,6 +188,14 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
           _style,
           Size(widget.width ?? availableWidth, widget.height ?? 600),
         );
+      } else if (diagram.type == DiagramType.xyChart && result.xyChartData != null) {
+        // Use XY chart layout with responsive config
+        final xyLayout = XYChartLayout(deviceConfig: _deviceConfig);
+        size = xyLayout.computeLayout(
+          result.xyChartData!,
+          _style,
+          Size(widget.width ?? availableWidth, widget.height ?? 600),
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -200,6 +211,7 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
       _timelineChartData = result.timelineChartData;
       _kanbanChartData = result.kanbanChartData;
       _radarChartData = result.radarChartData;
+      _xyChartData = result.xyChartData;
       _computedSize = size;
       _error = null;
       _isLoading = false;
@@ -287,6 +299,15 @@ class _MermaidDiagramState extends State<MermaidDiagram> {
         if (_radarChartData != null) {
           return RadarPainter(
             radarData: _radarChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.xyChart:
+        if (_xyChartData != null) {
+          return XYChartPainter(
+            xyData: _xyChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );
@@ -620,6 +641,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
   TimelineChartData? _timelineChartData;
   KanbanChartData? _kanbanChartData;
   RadarChartData? _radarChartData;
+  XYChartData? _xyChartData;
   Size _computedSize = Size.zero;
   String? _error;
   bool _isLoading = true;
@@ -695,6 +717,14 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
           _style,
           widget.viewportSize,
         );
+      } else if (diagram.type == DiagramType.xyChart &&
+          result.xyChartData != null) {
+        final xyLayout = XYChartLayout(deviceConfig: _deviceConfig);
+        size = xyLayout.computeLayout(
+          result.xyChartData!,
+          _style,
+          widget.viewportSize,
+        );
       } else {
         final layoutEngine = _getLayoutEngine(diagram.type);
         size = layoutEngine.computeLayout(
@@ -711,6 +741,7 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         _timelineChartData = result.timelineChartData;
         _kanbanChartData = result.kanbanChartData;
         _radarChartData = result.radarChartData;
+        _xyChartData = result.xyChartData;
         _computedSize = size;
         _error = null;
         _isLoading = false;
@@ -793,6 +824,15 @@ class _CenteringMermaidDiagramState extends State<_CenteringMermaidDiagram> {
         if (_radarChartData != null) {
           return RadarPainter(
             radarData: _radarChartData!,
+            style: _style,
+            deviceConfig: _deviceConfig,
+          );
+        }
+        return FlowchartPainter(diagram: diagram, style: _style);
+      case DiagramType.xyChart:
+        if (_xyChartData != null) {
+          return XYChartPainter(
+            xyData: _xyChartData!,
             style: _style,
             deviceConfig: _deviceConfig,
           );
