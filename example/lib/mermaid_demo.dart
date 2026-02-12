@@ -572,6 +572,37 @@ kanban
     graticule circle
     max 5''',
     ),
+
+    // XY Chart examples
+    MermaidExample(
+      title: 'XY图 - 柱状图',
+      description: '季度销售数据柱状图',
+      code: '''xychart-beta
+    title "季度销售额"
+    x-axis [Q1, Q2, Q3, Q4]
+    y-axis "销售额(万)" 0 --> 100
+    bar [23, 45, 67, 89]''',
+    ),
+    MermaidExample(
+      title: 'XY图 - 柱状+折线',
+      description: '柱状图与折线图混合展示',
+      code: '''xychart-beta
+    title "收入与利润趋势"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun]
+    y-axis "金额(万)" 0 --> 200
+    bar [120, 135, 148, 160, 175, 190]
+    line [30, 38, 42, 55, 60, 72]''',
+    ),
+    MermaidExample(
+      title: 'XY图 - 多系列',
+      description: '多组数据对比',
+      code: '''xychart-beta
+    title "产品销量对比"
+    x-axis [一月, 二月, 三月, 四月, 五月]
+    bar [50, 60, 70, 80, 90]
+    bar [40, 55, 65, 75, 85]
+    line [45, 58, 68, 78, 88]''',
+    ),
   ];
 
   @override
@@ -661,9 +692,13 @@ kanban
             _buildSectionHeader('雷达图 (Radar Chart)', _isDarkMode),
             ..._buildExampleTiles(30, 33),
             const Divider(),
+            // XY chart section
+            _buildSectionHeader('XY图 (XY Chart)', _isDarkMode),
+            ..._buildExampleTiles(33, 36),
+            const Divider(),
             // Complex examples
             _buildSectionHeader('复杂示例', _isDarkMode),
-            ..._buildExampleTiles(33, _examples.length),
+            ..._buildExampleTiles(36, _examples.length),
           ],
         ),
       ),
@@ -977,6 +1012,10 @@ kanban
       return Icons.timeline; // Timeline
     } else if (index < 30) {
       return Icons.view_kanban; // Kanban board
+    } else if (index < 33) {
+      return Icons.radar; // Radar chart
+    } else if (index < 36) {
+      return Icons.bar_chart; // XY chart
     } else {
       return Icons.hub; // Complex
     }

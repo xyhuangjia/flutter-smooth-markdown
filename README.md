@@ -12,7 +12,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 |----------|----------|
 | **Rendering** | AST-based parsing, syntax highlighting, real-time streaming, text selection |
 | **Markdown** | Headers (with inline formatting), lists, tables, code blocks, blockquotes, links, images |
-| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, Radar, pie, sequence) |
+| **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, Radar, XY Chart, pie, sequence) |
 | **Extras** | Footnotes, SVG support, collapsible sections, task lists |
 | **Theming** | Light/dark modes, GitHub/VS Code presets, custom themes |
 | **Plugins** | Mentions, hashtags, emojis, AI chat blocks (thinking, artifacts) |
@@ -42,7 +42,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.7.0
+  flutter_smooth_markdown: ^0.7.1
 ```
 
 ```bash
@@ -152,7 +152,22 @@ MermaidDiagram(
 )
 ```
 
-Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Kanban Boards, Timeline Diagrams, **Radar Charts**
+Supports: Flowcharts, Sequence Diagrams, Pie Charts, Gantt Charts, Kanban Boards, Timeline Diagrams, Radar Charts, **XY Charts**
+
+### XY Chart Example
+
+```dart
+MermaidDiagram(
+  code: '''
+  xychart-beta
+    title "Sales Revenue"
+    x-axis [Q1, Q2, Q3, Q4]
+    y-axis "Revenue" 0 --> 100
+    bar [23, 45, 67, 89]
+    line [20, 50, 60, 85]
+  ''',
+)
+```
 
 ### Radar Chart Example
 

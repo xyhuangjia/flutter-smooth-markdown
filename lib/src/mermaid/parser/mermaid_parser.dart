@@ -4,6 +4,7 @@ import '../models/kanban.dart';
 import '../models/pie_chart.dart';
 import '../models/radar.dart';
 import '../models/timeline.dart';
+import '../models/xy_chart.dart';
 import 'flowchart_parser.dart';
 import 'gantt_parser.dart';
 import 'kanban_parser.dart';
@@ -11,6 +12,7 @@ import 'pie_chart_parser.dart';
 import 'radar_parser.dart';
 import 'sequence_parser.dart';
 import 'timeline_parser.dart';
+import 'xy_chart_parser.dart';
 
 /// Result of parsing a Mermaid diagram
 class MermaidParseResult {
@@ -22,6 +24,7 @@ class MermaidParseResult {
     this.timelineChartData,
     this.kanbanChartData,
     this.radarChartData,
+    this.xyChartData,
   });
 
   /// The parsed diagram data
@@ -41,6 +44,9 @@ class MermaidParseResult {
 
   /// Radar chart specific data (only set for Radar charts)
   final RadarChartData? radarChartData;
+
+  /// XY chart specific data (only set for XY charts)
+  final XYChartData? xyChartData;
 }
 
 /// Main parser for Mermaid diagrams
@@ -147,6 +153,15 @@ class MermaidParser {
           );
         }
         return null;
+      case DiagramType.xyChart:
+        final result = const XYChartParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            xyChartData: result.$2,
+          );
+        }
+        return null;
       case DiagramType.classDiagram:
       case DiagramType.stateDiagram:
         // TODO: Implement class and state diagram parsers
@@ -192,6 +207,11 @@ class MermaidParser {
     // Radar chart
     if (firstLine.startsWith('radar-beta')) {
       return DiagramType.radar;
+    }
+
+    // XY chart
+    if (firstLine.startsWith('xychart')) {
+      return DiagramType.xyChart;
     }
 
     // Class diagram
