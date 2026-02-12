@@ -10,7 +10,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 | Category | Features |
 |----------|----------|
-| **Rendering** | AST-based parsing, syntax highlighting, real-time streaming |
+| **Rendering** | AST-based parsing, syntax highlighting, real-time streaming, text selection |
 | **Markdown** | Headers (with inline formatting), lists, tables, code blocks, blockquotes, links, images |
 | **Math & Charts** | LaTeX formulas, Mermaid diagrams (flowcharts, Gantt, Kanban, Timeline, Radar, pie, sequence) |
 | **Extras** | Footnotes, SVG support, collapsible sections, task lists |
@@ -42,7 +42,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.6.1
+  flutter_smooth_markdown: ^0.7.0
 ```
 
 ```bash
@@ -60,6 +60,20 @@ SmoothMarkdown(
   onTapLink: (url) => print('Tapped: $url'),
 )
 ```
+
+### Selectable Text
+
+```dart
+SmoothMarkdown(
+  data: markdownText,
+  selectable: true,
+  onTapImage: (url, alt, title) {
+    showImagePreview(context, url);
+  },
+)
+```
+
+Selection handles work across text and non-text blocks (images, tables, etc.). Copied content is automatically cleaned.
 
 ### Streaming (Real-time)
 
