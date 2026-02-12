@@ -43,6 +43,7 @@ class ToolCallBuilder extends MarkdownWidgetBuilder {
       onTap: onToolCallTap,
       showParameters: showParameters,
       showResult: showResult,
+      selectable: context.selectable,
     );
   }
 }
@@ -54,6 +55,7 @@ class _ToolCallWidget extends StatefulWidget {
     this.onTap,
     this.showParameters = true,
     this.showResult = true,
+    this.selectable = false,
   });
 
   final ToolCallNode toolCall;
@@ -61,6 +63,7 @@ class _ToolCallWidget extends StatefulWidget {
   final void Function(ToolCallNode toolCall)? onTap;
   final bool showParameters;
   final bool showResult;
+  final bool selectable;
 
   @override
   State<_ToolCallWidget> createState() => _ToolCallWidgetState();
@@ -331,15 +334,25 @@ class _ToolCallWidgetState extends State<_ToolCallWidget> {
             ),
           ),
           const SizedBox(height: 6),
-          SelectableText(
-            content,
-            style: TextStyle(
-              color: isError ? textColor : textColor,
-              fontSize: 12,
-              fontFamily: 'monospace',
-              height: 1.4,
-            ),
-          ),
+          widget.selectable
+              ? Text(
+                  content,
+                  style: TextStyle(
+                    color: isError ? textColor : textColor,
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    height: 1.4,
+                  ),
+                )
+              : SelectableText(
+                  content,
+                  style: TextStyle(
+                    color: isError ? textColor : textColor,
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    height: 1.4,
+                  ),
+                ),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../config/style_sheet.dart';
 import '../parser/ast/markdown_node.dart';
@@ -214,8 +214,29 @@ class MarkdownRenderer {
     );
   }
 
+  /// Node types that produce non-text block widgets.
+  ///
+  /// When inside a [SelectionArea], these are wrapped with an invisible
+  /// [Text] overlay so that selection handles can anchor on them.
+  static const _nonTextBlockTypes = {'image', 'horizontal_rule', 'table'};
+
   /// Renders a single node
   Widget? _renderNode(MarkdownNode node, MarkdownRenderContext context) {
+    // When selectable, a paragraph that contains only a single image should
+    // be rendered as a block-level widget with a selectable overlay instead
+    // of a Text.rich + WidgetSpan (whose handles can't anchor on the image).
+    if (context.selectable && node is ParagraphNode) {
+      final onlyImage = _extractSoleImage(node);
+      if (onlyImage != null) {
+        final imageBuilder = _builderRegistry.findBuilder(onlyImage);
+        if (imageBuilder != null) {
+          return _selectableOverlay(
+            imageBuilder.build(onlyImage, styleSheet, context),
+          );
+        }
+      }
+    }
+
     final builder = _builderRegistry.findBuilder(node);
 
     if (builder == null) {
@@ -223,7 +244,67 @@ class MarkdownRenderer {
       return Text('Unknown node type: ${node.type}');
     }
 
-    return builder.build(node, styleSheet, context);
+    final widget = builder.build(node, styleSheet, context);
+
+    if (context.selectable && _nonTextBlockTypes.contains(node.type)) {
+      return _selectableOverlay(widget);
+    }
+
+    return widget;
+  }
+
+  /// Returns the [ImageNode] if [paragraph] contains exactly one image
+  /// and nothing else (ignoring whitespace-only text nodes).
+  static ImageNode? _extractSoleImage(ParagraphNode paragraph) {
+    ImageNode? image;
+    for (final child in paragraph.children) {
+      if (child is ImageNode) {
+        if (image != null) return null; // more than one image
+        image = child;
+      } else if (child is TextNode) {
+        if (child.content.trim().isNotEmpty) return null;
+      } else {
+        return null; // other inline content
+      }
+    }
+    return image;
+  }
+
+  /// Wraps [child] with an invisible multi-line [Text] overlay whose
+  /// selectable geometry covers the full widget area, giving selection
+  /// handles an anchor point inside a [SelectionArea].
+  static Widget _selectableOverlay(Widget child) {
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const fontSize = 14.0;
+              final rows =
+                  (constraints.maxHeight / fontSize).ceil().clamp(1, 200);
+              final line = '\u00A0' * 500;
+              return IgnorePointer(
+                child: DefaultSelectionStyle(
+                  selectionColor: const Color(0x00000000),
+                  child: Text(
+                    List.filled(rows, line).join('\n'),
+                    softWrap: false,
+                    overflow: TextOverflow.clip,
+                    maxLines: rows,
+                    style: const TextStyle(
+                      fontSize: fontSize,
+                      height: 1,
+                      color: Color(0x00000000),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   /// Renders inline nodes (used by builders)
@@ -261,6 +342,8 @@ class MarkdownRenderer {
         return widget.textSpan ?? TextSpan(text: widget.data);
       } else if (widget is RichText) {
         return widget.text;
+      } else if (widget is SelectableText) {
+        return widget.textSpan ?? TextSpan(text: widget.data);
       }
 
       // For non-text widgets (like images), wrap in WidgetSpan
@@ -269,6 +352,15 @@ class MarkdownRenderer {
         child: widget,
       );
     }).toList();
+
+    if (context.selectable) {
+      return Text.rich(
+        TextSpan(
+          style: baseStyle,
+          children: spans,
+        ),
+      );
+    }
 
     return RichText(
       text: TextSpan(

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart' as highlight_github;
 import 'package:flutter_highlight/themes/vs2015.dart' as highlight_dark;
+import 'package:highlight/highlight.dart' show highlight, Node;
 
 import '../../config/style_sheet.dart';
 import '../../parser/ast/markdown_node.dart';
@@ -48,6 +48,7 @@ class EnhancedCodeBlockBuilder extends MarkdownWidgetBuilder {
       showCopyButton: showCopyButton,
       showLanguageTag: showLanguageTag,
       enableSyntaxHighlighting: enableSyntaxHighlighting,
+      selectable: context.selectable,
     );
   }
 }
@@ -60,6 +61,7 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
     required this.showCopyButton,
     required this.showLanguageTag,
     required this.enableSyntaxHighlighting,
+    this.selectable = false,
   });
 
   final String code;
@@ -68,6 +70,7 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
   final bool showCopyButton;
   final bool showLanguageTag;
   final bool enableSyntaxHighlighting;
+  final bool selectable;
 
   @override
   State<_EnhancedCodeBlockWidget> createState() =>
@@ -108,6 +111,55 @@ class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
     });
   }
 
+  Widget _buildCodeContent(BuildContext context) {
+    final hasHighlighting =
+        widget.enableSyntaxHighlighting && widget.language != null;
+
+    if (hasHighlighting) {
+      final theme = _getHighlightTheme(context);
+      final result = highlight.parse(widget.code, language: widget.language!);
+      final spans = _convertNodes(result.nodes ?? [], theme);
+      final textSpan = TextSpan(
+        style: widget.styleSheet.codeBlockStyle,
+        children: spans,
+      );
+
+      if (widget.selectable) {
+        return Text.rich(textSpan);
+      }
+      return RichText(text: textSpan);
+    }
+
+    if (widget.selectable) {
+      return Text(widget.code, style: widget.styleSheet.codeBlockStyle);
+    }
+    return SelectableText(widget.code, style: widget.styleSheet.codeBlockStyle);
+  }
+
+  List<TextSpan> _convertNodes(
+    List<Node> nodes,
+    Map<String, TextStyle> theme,
+  ) {
+    final spans = <TextSpan>[];
+    for (final node in nodes) {
+      if (node.value != null) {
+        spans.add(
+          node.className == null
+              ? TextSpan(text: node.value)
+              : TextSpan(text: node.value, style: theme[node.className!]),
+        );
+      } else if (node.children != null) {
+        spans.add(
+          TextSpan(
+            children: _convertNodes(node.children!, theme),
+            style: theme[node.className!],
+          ),
+        );
+      }
+    }
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
     // On mobile platforms, always show the copy button (no hover support)
@@ -136,18 +188,7 @@ class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
               padding: widget.styleSheet.codeBlockPadding,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: widget.enableSyntaxHighlighting && widget.language != null
-                    ? HighlightView(
-                        widget.code,
-                        language: widget.language!,
-                        theme: _getHighlightTheme(context),
-                        padding: EdgeInsets.zero,
-                        textStyle: widget.styleSheet.codeBlockStyle,
-                      )
-                    : SelectableText(
-                        widget.code,
-                        style: widget.styleSheet.codeBlockStyle,
-                      ),
+                child: _buildCodeContent(context),
               ),
             ),
 

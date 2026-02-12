@@ -1470,6 +1470,7 @@ gantt
                   },
                   // Enable enhanced code blocks with copy button
                   useEnhancedComponents: true,
+                  selectable: true,
                 ),
               ),
             ),

@@ -44,6 +44,7 @@ class ArtifactBuilder extends MarkdownWidgetBuilder {
       onTap: onArtifactTap,
       showCopyButton: showCopyButton,
       showDownloadButton: showDownloadButton,
+      selectable: context.selectable,
     );
   }
 }
@@ -55,6 +56,7 @@ class _ArtifactWidget extends StatefulWidget {
     this.onTap,
     this.showCopyButton = true,
     this.showDownloadButton = false,
+    this.selectable = false,
   });
 
   final ArtifactNode artifact;
@@ -62,6 +64,7 @@ class _ArtifactWidget extends StatefulWidget {
   final void Function(ArtifactNode artifact)? onTap;
   final bool showCopyButton;
   final bool showDownloadButton;
+  final bool selectable;
 
   @override
   State<_ArtifactWidget> createState() => _ArtifactWidgetState();
@@ -250,15 +253,25 @@ class _ArtifactWidgetState extends State<_ArtifactWidget> {
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(12),
-                child: SelectableText(
-                  widget.artifact.content,
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 13,
-                    height: 1.5,
-                    color: isDark ? Colors.white70 : Colors.black87,
-                  ),
-                ),
+                child: widget.selectable
+                    ? Text(
+                        widget.artifact.content,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          height: 1.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      )
+                    : SelectableText(
+                        widget.artifact.content,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          height: 1.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
               ),
             ),
           ),

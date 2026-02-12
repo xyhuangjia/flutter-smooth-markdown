@@ -54,6 +54,7 @@ class ThinkingBuilder extends MarkdownWidgetBuilder {
       backgroundColor: backgroundColor,
       borderColor: borderColor,
       iconColor: iconColor,
+      selectable: context.selectable,
     );
   }
 }
@@ -68,6 +69,7 @@ class _ThinkingWidget extends StatefulWidget {
     this.backgroundColor,
     this.borderColor,
     this.iconColor,
+    this.selectable = false,
   });
 
   final String content;
@@ -78,6 +80,7 @@ class _ThinkingWidget extends StatefulWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final Color? iconColor;
+  final bool selectable;
 
   @override
   State<_ThinkingWidget> createState() => _ThinkingWidgetState();
@@ -196,14 +199,23 @@ class _ThinkingWidgetState extends State<_ThinkingWidget>
             sizeFactor: _expandAnimation,
             child: Container(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: SelectableText(
-                widget.content,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 13,
-                  height: 1.5,
-                ),
-              ),
+              child: widget.selectable
+                  ? Text(
+                      widget.content,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    )
+                  : SelectableText(
+                      widget.content,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
+                    ),
             ),
           ),
         ],
