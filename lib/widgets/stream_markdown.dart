@@ -145,9 +145,11 @@ class StreamMarkdown extends StatefulWidget {
     this.styleSheet,
     this.config,
     this.onTapLink,
+    this.onTapImage,
     this.imageBuilder,
     this.codeBuilder,
     this.useEnhancedComponents = false,
+    this.selectable = false,
     this.loadingWidget,
     this.errorBuilder,
     this.plugins,
@@ -194,6 +196,11 @@ class StreamMarkdown extends StatefulWidget {
   /// See [SmoothMarkdown.onTapLink] for detailed documentation and examples.
   final void Function(String url)? onTapLink;
 
+  /// Callback invoked when an image is tapped.
+  ///
+  /// See [SmoothMarkdown.onTapImage] for detailed documentation and examples.
+  final void Function(String url, String? alt, String? title)? onTapImage;
+
   /// Custom widget builder for rendering images.
   ///
   /// See [SmoothMarkdown.imageBuilder] for detailed documentation and examples.
@@ -208,6 +215,11 @@ class StreamMarkdown extends StatefulWidget {
   ///
   /// See [SmoothMarkdown.useEnhancedComponents] for detailed documentation.
   final bool useEnhancedComponents;
+
+  /// Whether the rendered text content is selectable.
+  ///
+  /// See [SmoothMarkdown.selectable] for detailed documentation.
+  final bool selectable;
 
   /// Widget to display while waiting for the first chunk from the stream.
   ///
@@ -352,9 +364,11 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
         styleSheet: widget.styleSheet,
         config: widget.config,
         onTapLink: widget.onTapLink,
+        onTapImage: widget.onTapImage,
         imageBuilder: widget.imageBuilder,
         codeBuilder: widget.codeBuilder,
         useEnhancedComponents: widget.useEnhancedComponents,
+        selectable: widget.selectable,
         enableCache: false, // Disable cache for constantly changing content
         useRepaintBoundary: false, // Already wrapped in RepaintBoundary
         plugins: widget.plugins,

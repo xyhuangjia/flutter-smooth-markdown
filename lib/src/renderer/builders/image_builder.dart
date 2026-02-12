@@ -24,10 +24,10 @@ class ImageBuilder extends MarkdownWidgetBuilder {
 
     // Use custom builder if provided
     if (context.imageBuilder != null) {
-      return context.imageBuilder!(
-        imageNode.url,
-        imageNode.alt,
-        imageNode.title,
+      return _wrapTap(
+        context,
+        imageNode,
+        context.imageBuilder!(imageNode.url, imageNode.alt, imageNode.title),
       );
     }
 
@@ -38,40 +38,60 @@ class ImageBuilder extends MarkdownWidgetBuilder {
 
     // SVG rendering
     if (isSvg) {
-      if (isNetwork) {
-        return SvgPicture.network(
-          imageNode.url,
-          placeholderBuilder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      } else {
-        return SvgPicture.asset(
-          imageNode.url,
-          placeholderBuilder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
+      final svgWidget = isNetwork
+          ? SvgPicture.network(
+              imageNode.url,
+              placeholderBuilder: (context) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : SvgPicture.asset(
+              imageNode.url,
+              placeholderBuilder: (context) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+      return _wrapTap(context, imageNode, svgWidget);
     }
 
     // Default bitmap image rendering
     if (isNetwork) {
-      return CachedNetworkImage(
-        imageUrl: imageNode.url,
-        placeholder: (context, url) => const Center(
-          child: CircularProgressIndicator(),
+      return _wrapTap(
+        context,
+        imageNode,
+        CachedNetworkImage(
+          imageUrl: imageNode.url,
+          placeholder: (ctx, url) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          errorWidget: (ctx, url, error) => const Icon(Icons.error),
         ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
       );
     }
 
     // Local image
-    return Image.asset(
-      imageNode.url,
-      errorBuilder: (context, error, stackTrace) {
-        return const Icon(Icons.broken_image);
-      },
+    return _wrapTap(
+      context,
+      imageNode,
+      Image.asset(
+        imageNode.url,
+        errorBuilder: (ctx, error, stackTrace) {
+          return const Icon(Icons.broken_image);
+        },
+      ),
+    );
+  }
+
+  Widget _wrapTap(
+    MarkdownRenderContext context,
+    ImageNode imageNode,
+    Widget child,
+  ) {
+    final onTap = context.onTapImage;
+    if (onTap == null) return child;
+    return GestureDetector(
+      onTap: () => onTap(imageNode.url, imageNode.alt, imageNode.title),
+      child: child,
     );
   }
 }

@@ -43,6 +43,9 @@ enum DiagramType {
   /// Kanban board diagram
   kanban,
 
+  /// Radar chart diagram
+  radar,
+
   /// Unknown/unsupported type
   unknown,
 }

@@ -2,11 +2,13 @@ import '../models/diagram.dart';
 import '../models/gantt.dart';
 import '../models/kanban.dart';
 import '../models/pie_chart.dart';
+import '../models/radar.dart';
 import '../models/timeline.dart';
 import 'flowchart_parser.dart';
 import 'gantt_parser.dart';
 import 'kanban_parser.dart';
 import 'pie_chart_parser.dart';
+import 'radar_parser.dart';
 import 'sequence_parser.dart';
 import 'timeline_parser.dart';
 
@@ -19,6 +21,7 @@ class MermaidParseResult {
     this.ganttChartData,
     this.timelineChartData,
     this.kanbanChartData,
+    this.radarChartData,
   });
 
   /// The parsed diagram data
@@ -35,6 +38,9 @@ class MermaidParseResult {
 
   /// Kanban chart specific data (only set for Kanban charts)
   final KanbanChartData? kanbanChartData;
+
+  /// Radar chart specific data (only set for Radar charts)
+  final RadarChartData? radarChartData;
 }
 
 /// Main parser for Mermaid diagrams
@@ -132,6 +138,15 @@ class MermaidParser {
           );
         }
         return null;
+      case DiagramType.radar:
+        final result = const RadarParser().parse(cleanedLines);
+        if (result != null) {
+          return MermaidParseResult(
+            diagram: result.$1,
+            radarChartData: result.$2,
+          );
+        }
+        return null;
       case DiagramType.classDiagram:
       case DiagramType.stateDiagram:
         // TODO: Implement class and state diagram parsers
@@ -172,6 +187,11 @@ class MermaidParser {
     // Kanban
     if (firstLine.startsWith('kanban')) {
       return DiagramType.kanban;
+    }
+
+    // Radar chart
+    if (firstLine.startsWith('radar-beta')) {
+      return DiagramType.radar;
     }
 
     // Class diagram

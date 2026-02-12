@@ -45,16 +45,21 @@ class MarkdownRenderContext {
   /// Creates a new render context
   const MarkdownRenderContext({
     this.onTapLink,
+    this.onTapImage,
     this.imageBuilder,
     this.codeBuilder,
     this.listLevel = 0,
     this.inlineRenderer,
     this.blockRenderer,
     this.styleSheet,
+    this.selectable = false,
   });
 
   /// Callback for link taps
   final void Function(String url)? onTapLink;
+
+  /// Callback for image taps
+  final void Function(String url, String? alt, String? title)? onTapImage;
 
   /// Custom image widget builder
   final Widget Function(String url, String? alt, String? title)? imageBuilder;
@@ -80,24 +85,34 @@ class MarkdownRenderContext {
   /// The style sheet being used for rendering
   final MarkdownStyleSheet? styleSheet;
 
+  /// Whether the rendered content is inside a SelectionArea.
+  ///
+  /// When `true`, builders should use `Text` instead of `SelectableText`
+  /// to avoid nested selection conflicts.
+  final bool selectable;
+
   /// Creates a copy with updated fields
   MarkdownRenderContext copyWith({
     void Function(String url)? onTapLink,
+    void Function(String url, String? alt, String? title)? onTapImage,
     Widget Function(String url, String? alt, String? title)? imageBuilder,
     Widget Function(String code, String? language)? codeBuilder,
     int? listLevel,
     InlineRenderer? inlineRenderer,
     BlockRenderer? blockRenderer,
     MarkdownStyleSheet? styleSheet,
+    bool? selectable,
   }) {
     return MarkdownRenderContext(
       onTapLink: onTapLink ?? this.onTapLink,
+      onTapImage: onTapImage ?? this.onTapImage,
       imageBuilder: imageBuilder ?? this.imageBuilder,
       codeBuilder: codeBuilder ?? this.codeBuilder,
       listLevel: listLevel ?? this.listLevel,
       inlineRenderer: inlineRenderer ?? this.inlineRenderer,
       blockRenderer: blockRenderer ?? this.blockRenderer,
       styleSheet: styleSheet ?? this.styleSheet,
+      selectable: selectable ?? this.selectable,
     );
   }
 }

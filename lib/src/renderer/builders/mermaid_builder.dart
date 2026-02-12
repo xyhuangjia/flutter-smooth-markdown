@@ -52,6 +52,7 @@ class MermaidBuilder extends MarkdownWidgetBuilder {
       onNodeTap: onNodeTap,
       minScale: minScale,
       maxScale: maxScale,
+      selectable: context.selectable,
     );
   }
 }
@@ -66,6 +67,7 @@ class _ScrollableMermaidDiagram extends StatefulWidget {
     this.onNodeTap,
     this.minScale = 0.5,
     this.maxScale = 3.0,
+    this.selectable = false,
   });
 
   final MermaidDiagramNode node;
@@ -74,6 +76,7 @@ class _ScrollableMermaidDiagram extends StatefulWidget {
   final void Function(String nodeId)? onNodeTap;
   final double minScale;
   final double maxScale;
+  final bool selectable;
 
   @override
   State<_ScrollableMermaidDiagram> createState() =>
@@ -225,6 +228,7 @@ class EnhancedMermaidBuilder extends MermaidBuilder {
       showCopyButton: showCopyButton,
       showFullscreenButton: showFullscreenButton,
       showSourceToggle: showSourceToggle,
+      selectable: context.selectable,
     );
   }
 }
@@ -240,6 +244,7 @@ class _EnhancedMermaidContainer extends StatefulWidget {
     this.showCopyButton = true,
     this.showFullscreenButton = true,
     this.showSourceToggle = false,
+    this.selectable = false,
   });
 
   final MermaidDiagramNode node;
@@ -251,6 +256,7 @@ class _EnhancedMermaidContainer extends StatefulWidget {
   final bool showCopyButton;
   final bool showFullscreenButton;
   final bool showSourceToggle;
+  final bool selectable;
 
   @override
   State<_EnhancedMermaidContainer> createState() =>
@@ -447,14 +453,23 @@ class _EnhancedMermaidContainerState extends State<_EnhancedMermaidContainer> {
       padding: const EdgeInsets.all(16),
       color: bgColor ?? Colors.grey.shade100,
       child: SingleChildScrollView(
-        child: SelectableText(
-          widget.node.code,
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 13,
-            color: widget.styleSheet.inlineCodeStyle?.color ?? Colors.black87,
-          ),
-        ),
+        child: widget.selectable
+            ? Text(
+                widget.node.code,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  color: widget.styleSheet.inlineCodeStyle?.color ?? Colors.black87,
+                ),
+              )
+            : SelectableText(
+                widget.node.code,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  color: widget.styleSheet.inlineCodeStyle?.color ?? Colors.black87,
+                ),
+              ),
       ),
     );
   }
