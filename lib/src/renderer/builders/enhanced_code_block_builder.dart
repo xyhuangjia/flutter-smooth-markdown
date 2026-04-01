@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -80,6 +82,7 @@ class _EnhancedCodeBlockWidget extends StatefulWidget {
 class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
   bool _copied = false;
   bool _isHovered = false;
+  Timer? _copyResetTimer;
 
   /// Get the appropriate highlight theme based on the brightness
   Map<String, TextStyle> _getHighlightTheme(BuildContext context) {
@@ -102,13 +105,20 @@ class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
     });
 
     // Reset copied state after 2 seconds
-    Future.delayed(const Duration(seconds: 2), () {
+    _copyResetTimer?.cancel();
+    _copyResetTimer = Timer(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           _copied = false;
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _copyResetTimer?.cancel();
+    super.dispose();
   }
 
   Widget _buildCodeContent(BuildContext context) {
@@ -131,9 +141,9 @@ class _EnhancedCodeBlockWidgetState extends State<_EnhancedCodeBlockWidget> {
     }
 
     if (widget.selectable) {
-      return Text(widget.code, style: widget.styleSheet.codeBlockStyle);
+      return Text.rich(TextSpan(text: widget.code, style: widget.styleSheet.codeBlockStyle));
     }
-    return SelectableText(widget.code, style: widget.styleSheet.codeBlockStyle);
+    return Text(widget.code, style: widget.styleSheet.codeBlockStyle);
   }
 
   List<TextSpan> _convertNodes(

@@ -21,16 +21,35 @@ class InlineParser {
   /// Plugin registry for custom inline parsers
   final ParserPluginRegistry? _plugins;
 
+  /// Maximum recursion depth to prevent stack overflow on deeply nested input
+  static const _maxDepth = 16;
+
+  /// Characters that can be escaped with backslash per CommonMark spec
+  static const _escapableChars = r'\`*_{}[]()#+-.!~$|>';
+
   /// Parses inline elements from text
-  List<MarkdownNode> parse(String text) {
+  List<MarkdownNode> parse(String text, {int depth = 0}) {
     if (text.isEmpty) {
       return [];
+    }
+
+    // Prevent stack overflow on deeply nested input
+    if (depth >= _maxDepth) {
+      return [TextNode(text)];
     }
 
     final nodes = <MarkdownNode>[];
     var i = 0;
 
     while (i < text.length) {
+      // Handle backslash escapes first
+      if (text[i] == r'\' && i + 1 < text.length &&
+          _escapableChars.contains(text[i + 1])) {
+        nodes.add(TextNode(text[i + 1]));
+        i += 2;
+        continue;
+      }
+
       // Try to match different inline patterns
       MarkdownNode? node;
       var consumed = 0;
@@ -67,7 +86,7 @@ class InlineParser {
 
       // Try link
       if (node == null && i < text.length && text[i] == '[') {
-        final result = _tryParseLink(text, i);
+        final result = _tryParseLink(text, i, depth);
         if (result != null) {
           node = result.node;
           consumed = result.consumed;
@@ -95,7 +114,7 @@ class InlineParser {
       // Try strikethrough
       if (node == null && i + 1 < text.length &&
           text[i] == '~' && text[i + 1] == '~') {
-        final result = _tryParseStrikethrough(text, i);
+        final result = _tryParseStrikethrough(text, i, depth);
         if (result != null) {
           node = result.node;
           consumed = result.consumed;
@@ -106,7 +125,7 @@ class InlineParser {
       if (node == null && i + 1 < text.length &&
           ((text[i] == '*' && text[i + 1] == '*') ||
            (text[i] == '_' && text[i + 1] == '_'))) {
-        final result = _tryParseBold(text, i);
+        final result = _tryParseBold(text, i, depth);
         if (result != null) {
           node = result.node;
           consumed = result.consumed;
@@ -116,7 +135,7 @@ class InlineParser {
       // Try italic (* or _)
       if (node == null && i < text.length &&
           (text[i] == '*' || text[i] == '_')) {
-        final result = _tryParseItalic(text, i);
+        final result = _tryParseItalic(text, i, depth);
         if (result != null) {
           node = result.node;
           consumed = result.consumed;
@@ -165,17 +184,9 @@ class InlineParser {
       return null;
     }
 
-    // Find closing )
+    // Find closing ) with parentheses nesting support
     final urlStart = altEnd + 2;
-    var urlEnd = -1;
-    i = urlStart;
-    while (i < text.length) {
-      if (text[i] == ')') {
-        urlEnd = i;
-        break;
-      }
-      i++;
-    }
+    final urlEnd = _findClosingParen(text, urlStart);
 
     if (urlEnd == -1) return null;
 
@@ -196,7 +207,7 @@ class InlineParser {
   }
 
   /// Tries to parse a link
-  _InlineParseResult? _tryParseLink(String text, int start) {
+  _InlineParseResult? _tryParseLink(String text, int start, int depth) {
     if (start >= text.length || text[start] != '[') {
       return null;
     }
@@ -219,17 +230,9 @@ class InlineParser {
       return null;
     }
 
-    // Find closing )
+    // Find closing ) with parentheses nesting support
     final urlStart = textEnd + 2;
-    var urlEnd = -1;
-    i = urlStart;
-    while (i < text.length) {
-      if (text[i] == ')') {
-        urlEnd = i;
-        break;
-      }
-      i++;
-    }
+    final urlEnd = _findClosingParen(text, urlStart);
 
     if (urlEnd == -1) return null;
 
@@ -240,7 +243,7 @@ class InlineParser {
     final parts = _parseUrlAndTitle(urlAndTitle);
 
     // Recursively parse link text
-    final children = parse(linkText);
+    final children = parse(linkText, depth: depth + 1);
 
     return _InlineParseResult(
       node: LinkNode(
@@ -250,6 +253,27 @@ class InlineParser {
       ),
       consumed: urlEnd - start + 1,
     );
+  }
+
+  /// Finds the closing parenthesis matching the opening one, handling nesting.
+  ///
+  /// [start] is the index right after the opening `(`.
+  /// Returns the index of the matching `)`, or -1 if not found.
+  int _findClosingParen(String text, int start) {
+    var depth = 1;
+    var i = start;
+    while (i < text.length) {
+      if (text[i] == '(') {
+        depth++;
+      } else if (text[i] == ')') {
+        depth--;
+        if (depth == 0) {
+          return i;
+        }
+      }
+      i++;
+    }
+    return -1;
   }
 
   /// Parses URL and optional title from link/image URL part
@@ -355,7 +379,7 @@ class InlineParser {
   }
 
   /// Tries to parse bold text
-  _InlineParseResult? _tryParseBold(String text, int start) {
+  _InlineParseResult? _tryParseBold(String text, int start, int depth) {
     if (start + 1 >= text.length) return null;
 
     final marker = text.substring(start, start + 2);
@@ -369,7 +393,7 @@ class InlineParser {
         if (content.isEmpty) return null;
 
         // Recursively parse content
-        final children = parse(content);
+        final children = parse(content, depth: depth + 1);
 
         return _InlineParseResult(
           node: BoldNode(children),
@@ -383,7 +407,7 @@ class InlineParser {
   }
 
   /// Tries to parse italic text
-  _InlineParseResult? _tryParseItalic(String text, int start) {
+  _InlineParseResult? _tryParseItalic(String text, int start, int depth) {
     if (start >= text.length) return null;
 
     final marker = text[start];
@@ -402,7 +426,7 @@ class InlineParser {
         if (content.isEmpty) return null;
 
         // Recursively parse content
-        final children = parse(content);
+        final children = parse(content, depth: depth + 1);
 
         return _InlineParseResult(
           node: ItalicNode(children),
@@ -416,7 +440,7 @@ class InlineParser {
   }
 
   /// Tries to parse strikethrough text
-  _InlineParseResult? _tryParseStrikethrough(String text, int start) {
+  _InlineParseResult? _tryParseStrikethrough(String text, int start, int depth) {
     if (start + 1 >= text.length) return null;
     if (text.substring(start, start + 2) != '~~') return null;
 
@@ -428,7 +452,7 @@ class InlineParser {
         if (content.isEmpty) return null;
 
         // Recursively parse content
-        final children = parse(content);
+        final children = parse(content, depth: depth + 1);
 
         return _InlineParseResult(
           node: StrikethroughNode(children),
@@ -449,8 +473,9 @@ class InlineParser {
     while (i < text.length) {
       final char = text[i];
 
-      // Stop at special characters
-      if (char == '*' ||
+      // Stop at special characters (including backslash for escape handling)
+      if (char == r'\' ||
+          char == '*' ||
           char == '_' ||
           char == '`' ||
           char == '~' ||

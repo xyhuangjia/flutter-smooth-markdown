@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../src/config/markdown_config.dart';
@@ -289,6 +291,9 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
   String _currentText = '';
   DateTime _lastUpdateTime = DateTime.now();
   bool _hasPendingUpdate = false;
+  StreamSubscription<String>? _subscription;
+  Timer? _throttleTimer;
+  Object? _error;
 
   /// Throttle duration to batch rapid updates
   static const _throttleDuration = Duration(milliseconds: 50);
@@ -300,7 +305,9 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
   }
 
   void _listenToStream() {
-    widget.stream.listen(
+    _subscription?.cancel();
+    _throttleTimer?.cancel();
+    _subscription = widget.stream.listen(
       (chunk) {
         if (!mounted) return;
 
@@ -316,15 +323,22 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
           _performUpdate();
         } else {
           // Schedule delayed update
-          Future.delayed(_throttleDuration - timeSinceLastUpdate, () {
-            if (mounted && _hasPendingUpdate) {
-              _performUpdate();
-            }
-          });
+          _throttleTimer?.cancel();
+          _throttleTimer = Timer(
+            _throttleDuration - timeSinceLastUpdate,
+            () {
+              if (mounted && _hasPendingUpdate) {
+                _performUpdate();
+              }
+            },
+          );
         }
       },
-      onError: (error) {
-        // Error will be handled by StreamBuilder
+      onError: (Object error) {
+        if (!mounted) return;
+        setState(() {
+          _error = error;
+        });
       },
     );
   }
@@ -344,12 +358,17 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
     if (oldWidget.stream != widget.stream) {
       _buffer.clear();
       _currentText = '';
+      _error = null;
       _listenToStream();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_error != null && widget.errorBuilder != null) {
+      return widget.errorBuilder!(_error!);
+    }
+
     if (_currentText.isEmpty) {
       return widget.loadingWidget ??
           const Center(
@@ -379,6 +398,8 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
 
   @override
   void dispose() {
+    _subscription?.cancel();
+    _throttleTimer?.cancel();
     _buffer.clear();
     super.dispose();
   }

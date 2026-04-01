@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -72,6 +74,7 @@ class _ArtifactWidget extends StatefulWidget {
 
 class _ArtifactWidgetState extends State<_ArtifactWidget> {
   bool _isCopied = false;
+  Timer? _copyResetTimer;
 
   IconData _getArtifactIcon() {
     switch (widget.artifact.artifactType) {
@@ -117,7 +120,8 @@ class _ArtifactWidgetState extends State<_ArtifactWidget> {
       setState(() {
         _isCopied = true;
       });
-      Future.delayed(const Duration(seconds: 2), () {
+      _copyResetTimer?.cancel();
+      _copyResetTimer = Timer(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
             _isCopied = false;
@@ -128,24 +132,20 @@ class _ArtifactWidgetState extends State<_ArtifactWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  void dispose() {
+    _copyResetTimer?.cancel();
+    super.dispose();
+  }
 
-    final headerBgColor = isDark
-        ? const Color(0xFF1E1E2E)
-        : const Color(0xFFF8F9FA);
-    final contentBgColor = isDark
-        ? const Color(0xFF282838)
-        : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF3E3E4E)
-        : const Color(0xFFE5E7EB);
-    final headerTextColor = isDark
-        ? Colors.white70
-        : const Color(0xFF374151);
-    final labelColor = isDark
-        ? const Color(0xFF60A5FA)
-        : const Color(0xFF3B82F6);
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final headerBgColor = colorScheme.surfaceContainerLow;
+    final contentBgColor = colorScheme.surface;
+    final borderColor = colorScheme.outlineVariant;
+    final headerTextColor = colorScheme.onSurfaceVariant;
+    final labelColor = colorScheme.primary;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -260,7 +260,7 @@ class _ArtifactWidgetState extends State<_ArtifactWidget> {
                           fontFamily: 'monospace',
                           fontSize: 13,
                           height: 1.5,
-                          color: isDark ? Colors.white70 : Colors.black87,
+                          color: colorScheme.onSurface,
                         ),
                       )
                     : SelectableText(
@@ -269,7 +269,7 @@ class _ArtifactWidgetState extends State<_ArtifactWidget> {
                           fontFamily: 'monospace',
                           fontSize: 13,
                           height: 1.5,
-                          color: isDark ? Colors.white70 : Colors.black87,
+                          color: colorScheme.onSurface,
                         ),
                       ),
               ),
