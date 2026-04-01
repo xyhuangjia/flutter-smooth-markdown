@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-04-01
+
+### Fixed
+- 🐛 **StreamMarkdown memory leak** - Store and cancel `StreamSubscription` in `dispose()` and on stream change; replace `Future.delayed` throttle with cancellable `Timer`
+- 🐛 **StreamMarkdown error handling** - Implement `errorBuilder` support with proper error state management
+- 🐛 **Future.delayed leak** in `EnhancedCodeBlockBuilder` and `ArtifactBuilder` - Replace with `Timer` and cancel in `dispose()`
+- 🐛 **Selectable text inconsistency** - Fix inverted selectable/non-selectable logic in code block builder when syntax highlighting is off
+- 🐛 **Footnote newline loss** - Fix `contentLines.join(' ')` → `join('\n')` to preserve line breaks in multi-line footnotes
+- 🐛 **Link/image URL parentheses** - Support nested parentheses in URLs (e.g. `[wiki](https://en.wikipedia.org/wiki/Dart_(language))`)
+
+### Added
+- ✨ **Backslash escape support** - CommonMark-compliant `\*`, `\[`, `\]`, `` \` ``, `\~`, `\$`, `\\` etc.
+- ♿ **Accessibility semantics** - Add `Semantics` wrappers to links (`link: true`) and images (`image: true`) for screen reader support
+- 🧪 **New tests** - 43 new tests covering Math formulas, footnotes, StreamMarkdown widget, backslash escapes, URL parentheses nesting, and recursion depth limits
+
+### Improved
+- ⚡ **RegExp performance** - Extract 11 regex patterns to `static final` constants in `BlockParser`, avoiding recompilation on every call
+- ⚡ **Recursion depth limit** - Add `_maxDepth = 16` to `InlineParser` to prevent stack overflow on deeply nested input
+- 🎨 **Theme consistency** - Replace 6 hard-coded hex colors in `ArtifactBuilder` with `Theme.of(context).colorScheme` tokens
+- 🧹 **Magic number cleanup** - Replace `substring(9)` with `substring('<summary>'.length)` in details block parser
+- 🏷️ **README badges** - Add GitHub stars, forks, issues, license, Flutter, and Dart shields.io badges
+
 ## [0.7.1] - 2026-02-12
 
 ### Added

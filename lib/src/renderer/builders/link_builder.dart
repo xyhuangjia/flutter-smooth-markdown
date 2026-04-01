@@ -32,13 +32,17 @@ class LinkBuilder extends MarkdownWidgetBuilder {
     }
 
     // Wrap in GestureDetector for tap handling
-    return GestureDetector(
-      onTap: () {
-        context.onTapLink?.call(linkNode.url);
-      },
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: linkWidget,
+    return Semantics(
+      link: true,
+      label: linkNode.title ?? linkNode.url,
+      child: GestureDetector(
+        onTap: () {
+          context.onTapLink?.call(linkNode.url);
+        },
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: linkWidget,
+        ),
       ),
     );
   }

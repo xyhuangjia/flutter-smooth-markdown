@@ -3,6 +3,12 @@
 [![pub package](https://img.shields.io/pub/v/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown)
 [![popularity](https://img.shields.io/pub/popularity/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown/score)
 [![likes](https://img.shields.io/pub/likes/flutter_smooth_markdown.svg)](https://pub.dev/packages/flutter_smooth_markdown/score)
+[![GitHub stars](https://img.shields.io/github/stars/JackCaow/flutter-smooth-markdown?style=flat&logo=github)](https://github.com/JackCaow/flutter-smooth-markdown/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/JackCaow/flutter-smooth-markdown?style=flat&logo=github)](https://github.com/JackCaow/flutter-smooth-markdown/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/JackCaow/flutter-smooth-markdown)](https://github.com/JackCaow/flutter-smooth-markdown/issues)
+[![GitHub license](https://img.shields.io/github/license/JackCaow/flutter-smooth-markdown)](https://github.com/JackCaow/flutter-smooth-markdown/blob/main/LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-02569B?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%3E%3D3.0.0-0175C2?logo=dart)](https://dart.dev)
 
 A high-performance Flutter markdown renderer with syntax highlighting, LaTeX math, tables, footnotes, SVG images, Mermaid diagrams, and real-time streaming support.
 
@@ -42,7 +48,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.7.1
+  flutter_smooth_markdown: ^0.7.2
 ```
 
 ```bash

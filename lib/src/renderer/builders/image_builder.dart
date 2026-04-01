@@ -87,11 +87,22 @@ class ImageBuilder extends MarkdownWidgetBuilder {
     ImageNode imageNode,
     Widget child,
   ) {
-    final onTap = context.onTapImage;
-    if (onTap == null) return child;
-    return GestureDetector(
-      onTap: () => onTap(imageNode.url, imageNode.alt, imageNode.title),
+    final semanticChild = Semantics(
+      image: true,
+      label: imageNode.alt.isNotEmpty
+          ? imageNode.alt
+          : imageNode.title ?? 'Image',
       child: child,
+    );
+    final onTap = context.onTapImage;
+    if (onTap == null) return semanticChild;
+    return Semantics(
+      button: true,
+      label: 'Tap to open image',
+      child: GestureDetector(
+        onTap: () => onTap(imageNode.url, imageNode.alt, imageNode.title),
+        child: semanticChild,
+      ),
     );
   }
 }

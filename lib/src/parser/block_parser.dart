@@ -28,6 +28,20 @@ class BlockParser {
   /// Plugin registry for custom block parsers
   final ParserPluginRegistry? _plugins;
 
+  // Pre-compiled RegExp patterns to avoid recompilation on every call
+  static final _hrDashPattern = RegExp(r'^-{3,}$');
+  static final _hrStarPattern = RegExp(r'^\*{3,}$');
+  static final _hrUnderscorePattern = RegExp(r'^_{3,}$');
+  static final _headerPattern = RegExp(r'^#{1,6}\s+.+');
+  static final _headerCapturePattern = RegExp(r'^(#{1,6})\s+(.+)$');
+  static final _unorderedListPattern = RegExp(r'^[-*+]\s+');
+  static final _orderedListPattern = RegExp(r'^\d+\.\s+');
+  static final _orderedListStartPattern = RegExp(r'^(\d+)\.');
+  static final _footnotePattern = RegExp(r'^\[\^[^\]]+\]:\s+.+');
+  static final _footnoteCapturePattern =
+      RegExp(r'^\[\^([^\]]+)\]:\s+(.+)$');
+  static final _tableSeparatorPattern = RegExp(r'^\s*:?-+:?\s*$');
+
   /// Parses a markdown text into a list of block-level nodes
   List<MarkdownNode> parse(String markdown) {
     if (markdown.isEmpty) {
@@ -132,23 +146,19 @@ class BlockParser {
     if (trimmed.length < 3) return false;
 
     // Check for ---, ***, or ___
-    final patterns = [
-      RegExp(r'^-{3,}$'),
-      RegExp(r'^\*{3,}$'),
-      RegExp(r'^_{3,}$'),
-    ];
-
-    return patterns.any((pattern) => pattern.hasMatch(trimmed));
+    return _hrDashPattern.hasMatch(trimmed) ||
+        _hrStarPattern.hasMatch(trimmed) ||
+        _hrUnderscorePattern.hasMatch(trimmed);
   }
 
   /// Checks if a line is a header
   bool _isHeader(String line) {
-    return RegExp(r'^#{1,6}\s+.+').hasMatch(line);
+    return _headerPattern.hasMatch(line);
   }
 
   /// Parses a header line
   HeaderNode _parseHeader(String line) {
-    final match = RegExp(r'^(#{1,6})\s+(.+)$').firstMatch(line);
+    final match = _headerCapturePattern.firstMatch(line);
     if (match == null) {
       throw FormatException('Invalid header format: $line');
     }
@@ -274,11 +284,11 @@ class BlockParser {
   bool _isListItem(String line) {
     final trimmed = line.trim();
     // Unordered list: -, *, +
-    if (RegExp(r'^[-*+]\s+').hasMatch(trimmed)) {
+    if (_unorderedListPattern.hasMatch(trimmed)) {
       return true;
     }
     // Ordered list: 1., 2., etc.
-    if (RegExp(r'^\d+\.\s+').hasMatch(trimmed)) {
+    if (_orderedListPattern.hasMatch(trimmed)) {
       return true;
     }
     return false;
@@ -287,7 +297,7 @@ class BlockParser {
   /// Parses a list (ordered or unordered)
   _ParseResult _parseList(List<String> lines, int startIndex) {
     final firstLine = lines[startIndex].trim();
-    final isOrdered = RegExp(r'^\d+\.').hasMatch(firstLine);
+    final isOrdered = _orderedListStartPattern.hasMatch(firstLine);
 
     final items = <ListItemNode>[];
     var i = startIndex;
@@ -311,7 +321,7 @@ class BlockParser {
       }
 
       // Check if list type matches
-      final lineIsOrdered = RegExp(r'^\d+\.').hasMatch(line);
+      final lineIsOrdered = _orderedListStartPattern.hasMatch(line);
       if (lineIsOrdered != isOrdered) {
         break;
       }
@@ -338,7 +348,7 @@ class BlockParser {
 
   /// Extracts the start index from an ordered list item
   int _extractStartIndex(String line) {
-    final match = RegExp(r'^(\d+)\.').firstMatch(line);
+    final match = _orderedListStartPattern.firstMatch(line);
     if (match == null) return 1;
     return int.tryParse(match.group(1)!) ?? 1;
   }
@@ -349,8 +359,8 @@ class BlockParser {
     String content;
     bool? checked;
 
-    if (RegExp(r'^[-*+]\s+').hasMatch(line)) {
-      content = line.replaceFirst(RegExp(r'^[-*+]\s+'), '');
+    if (_unorderedListPattern.hasMatch(line)) {
+      content = line.replaceFirst(_unorderedListPattern, '');
 
       // Check for task list
       if (content.startsWith('[ ] ')) {
@@ -361,7 +371,7 @@ class BlockParser {
         content = content.substring(4);
       }
     } else {
-      content = line.replaceFirst(RegExp(r'^\d+\.\s+'), '');
+      content = line.replaceFirst(_orderedListPattern, '');
     }
 
     return ListItemNode(
@@ -375,7 +385,7 @@ class BlockParser {
   /// Format: [^label]: content
   bool _isFootnoteDefinition(String line) {
     final trimmed = line.trim();
-    return RegExp(r'^\[\^[^\]]+\]:\s+.+').hasMatch(trimmed);
+    return _footnotePattern.hasMatch(trimmed);
   }
 
   /// Parses a footnote definition
@@ -383,7 +393,7 @@ class BlockParser {
   /// Format: [^label]: content (can span multiple indented lines)
   _ParseResult _parseFootnoteDefinition(List<String> lines, int startIndex) {
     final firstLine = lines[startIndex].trim();
-    final match = RegExp(r'^\[\^([^\]]+)\]:\s+(.+)$').firstMatch(firstLine);
+    final match = _footnoteCapturePattern.firstMatch(firstLine);
 
     if (match == null) {
       throw FormatException('Invalid footnote format: $firstLine');
@@ -414,7 +424,7 @@ class BlockParser {
     }
 
     // Parse the content as inline elements
-    final content = contentLines.join(' ');
+    final content = contentLines.join('\n');
     final children = _inlineParser.parse(content);
 
     return _ParseResult(
@@ -490,8 +500,7 @@ class BlockParser {
     if (parts.isEmpty) return false;
 
     // Each part should be a separator like ---, :---, ---:, or :---:
-    final separatorPattern = RegExp(r'^\s*:?-+:?\s*$');
-    return parts.every((part) => separatorPattern.hasMatch(part));
+    return parts.every((part) => _tableSeparatorPattern.hasMatch(part));
   }
 
   /// Parses a table
@@ -630,7 +639,8 @@ class BlockParser {
         foundSummary = true;
 
         // Extract summary content from same line if present
-        final summaryContent = line.trim().substring(9); // Remove <summary>
+        final summaryContent =
+            line.trim().substring('<summary>'.length); // Remove <summary>
         if (summaryContent.toLowerCase().contains('</summary>')) {
           // Summary closes on same line
           final endIndex = summaryContent.toLowerCase().indexOf('</summary>');

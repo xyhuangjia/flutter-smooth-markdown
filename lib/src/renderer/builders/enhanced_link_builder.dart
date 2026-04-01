@@ -96,15 +96,18 @@ class _EnhancedLinkWidgetState extends State<_EnhancedLinkWidget>
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _controller.forward(),
-      onExit: (_) => _controller.reverse(),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          widget.context.onTapLink?.call(widget.url);
-        },
-        child: AnimatedBuilder(
+    return Semantics(
+      link: true,
+      label: widget.url,
+      child: MouseRegion(
+        onEnter: (_) => _controller.forward(),
+        onExit: (_) => _controller.reverse(),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            widget.context.onTapLink?.call(widget.url);
+          },
+          child: AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
             return Container(
@@ -139,6 +142,7 @@ class _EnhancedLinkWidgetState extends State<_EnhancedLinkWidget>
             );
           },
         ),
+      ),
       ),
     );
   }
