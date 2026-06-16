@@ -15,6 +15,7 @@ import 'streaming_demo.dart';
 
 Future<void> main() async {
   // 加载 .env 文件
+  // TODO: uncomment when .env is available in CI
   // await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
