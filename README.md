@@ -48,7 +48,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.8.0
+  flutter_smooth_markdown: ^0.7.3
 ```
 
 ```bash
