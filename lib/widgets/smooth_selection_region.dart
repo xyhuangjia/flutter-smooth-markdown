@@ -127,18 +127,13 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
 
   @override
   void dispose() {
+    // Drop the captured SelectionContainer delegate references so that, if a
+    // caller still holds this state after the widget is unmounted, dispatch
+    // calls become safe no-ops instead of reaching a detached container.
     _containerHandler = null;
     _containerRegistrar = null;
     super.dispose();
   }
-
-  final GlobalKey<SelectableRegionState> _regionKey =
-      GlobalKey<SelectableRegionState>();
-
-  // The SelectionContainer's delegate (implements both SelectionHandler and
-  // SelectionRegistrar). Captured from the child subtree's registrar scope.
-  SelectionHandler? _containerHandler;
-  SelectionRegistrar? _containerRegistrar;
 
   /// The wrapped [SelectableRegionState]. `null` before first build.
   SelectableRegionState? get innerRegionState => _regionKey.currentState;
@@ -196,6 +191,12 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   /// start and the end edge to the boundary end, collapsing the selection to
   /// that single span and clearing the rest. The region rebuilds the
   /// already-visible overlay, repositioning the handles + toolbar.
+  ///
+  /// [globalPosition] is in global (screen) coordinates — pass the press
+  /// position from the gesture that triggered selection (e.g.
+  /// `LongPressStartDetails.globalPosition`). Points outside the region's
+  /// selectable bounds are handled by the framework (typically no-op), so the
+  /// call is always safe.
   void _selectAt(Offset globalPosition, TextGranularity granularity) {
     // Enter the selection state via the only public overlay-driving path:
     // creates and shows the handles + toolbar.
