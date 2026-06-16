@@ -55,7 +55,6 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
 /// // itself, drive the overlay.
 /// key.currentState?.dispatchEvent(const SelectAllSelectionEvent());
 /// ```
-/// A wrapper around [SelectableRegion] that additionally exposes the
 /// underlying `SelectionContainer + SelectionEvent` machinery for programmatic
 /// control.
 ///
