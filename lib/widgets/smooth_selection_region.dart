@@ -125,6 +125,21 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   SelectionHandler? _containerHandler;
   SelectionRegistrar? _containerRegistrar;
 
+  @override
+  void dispose() {
+    _containerHandler = null;
+    _containerRegistrar = null;
+    super.dispose();
+  }
+
+  final GlobalKey<SelectableRegionState> _regionKey =
+      GlobalKey<SelectableRegionState>();
+
+  // The SelectionContainer's delegate (implements both SelectionHandler and
+  // SelectionRegistrar). Captured from the child subtree's registrar scope.
+  SelectionHandler? _containerHandler;
+  SelectionRegistrar? _containerRegistrar;
+
   /// The wrapped [SelectableRegionState]. `null` before first build.
   SelectableRegionState? get innerRegionState => _regionKey.currentState;
 
