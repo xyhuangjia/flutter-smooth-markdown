@@ -16,7 +16,11 @@ import 'math_demo.dart';
   }
 import 'plugin_demo.dart';
 import 'streaming_demo.dart';
-
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env may not exist in CI; non-critical for demo apps.
+  }
 Future<void> main() async {
   // 加载 .env 文件
   // TODO: uncomment when .env is available in CI
