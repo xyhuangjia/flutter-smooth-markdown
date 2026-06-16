@@ -9,7 +9,11 @@ import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
 import 'conversation_list_demo.dart';
 import 'math_demo.dart';
-import 'mermaid_demo.dart';
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env 文件不存在时静默忽略（如 CI 环境）
+  }
 import 'plugin_demo.dart';
 import 'streaming_demo.dart';
 
