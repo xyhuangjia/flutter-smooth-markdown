@@ -25,6 +25,7 @@ import '../src/renderer/builders/thinking_builder.dart';
 import '../src/renderer/builders/tool_call_builder.dart';
 import '../src/renderer/markdown_renderer.dart';
 import '../src/renderer/widget_builder.dart';
+import 'smooth_selection_region.dart';
 
 /// A widget that renders Markdown content with high performance and customizable styling.
 ///
@@ -207,6 +208,8 @@ class SmoothMarkdown extends StatelessWidget {
     this.enableCache = true,
     this.useRepaintBoundary = true,
     this.selectable = false,
+    this.contextMenuBuilder,
+    this.selectableRegionKey,
     this.plugins,
     this.builderRegistry,
   });
@@ -501,7 +504,9 @@ class SmoothMarkdown extends StatelessWidget {
 
   /// Whether the rendered text content is selectable.
   ///
-  /// When `true`, wraps the output in a `SelectionArea` and renders text
+  /// When `true`, wraps the output in a [SmoothSelectionRegion] (a
+  /// [SelectableRegion] subclass that additionally exposes the underlying
+  /// `SelectionContainer + SelectionEvent` machinery) and renders text
   /// using `Text.rich()` instead of `RichText`, enabling cross-block text
   /// selection and copy across paragraphs, headers, code blocks, etc.
   ///
@@ -514,6 +519,73 @@ class SmoothMarkdown extends StatelessWidget {
   ///
   /// Defaults to `false`.
   final bool selectable;
+
+  /// Custom context menu builder for text selection.
+  ///
+  /// When [selectable] is `true`, this builder replaces the default
+  /// [SelectionArea.contextMenuBuilder]. Receives the current [BuildContext]
+  /// and the [SmoothSelectionRegionState], which provides `contextMenuAnchors`,
+  /// `contextMenuButtonItems`, `dispatchEvent`, `registrar`, and other methods
+  /// to control text selection.
+  ///
+  /// If `null` (default), the built-in adaptive toolbar with clipboard
+  /// filter is used.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// SmoothMarkdown(
+  ///   data: markdownText,
+  ///   selectable: true,
+  ///   contextMenuBuilder: (context, state) {
+  ///     return AdaptiveTextSelectionToolbar.buttonItems(
+  ///       anchors: state.contextMenuAnchors,
+  ///       buttonItems: [
+  ///         ...state.contextMenuButtonItems,
+  ///         ContextMenuButtonItem(
+  ///           label: '自定义操作',
+  ///           onPressed: () {
+  ///             // Custom action
+  ///           },
+  ///         ),
+  ///       ],
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// Defaults to `null`.
+  final Widget Function(BuildContext context, SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+
+  /// A key applied to the internal [SmoothSelectionRegion] widget.
+  ///
+  /// When provided, external code can use this key to programmatically
+  /// control text selection via [SmoothSelectionRegionState], for example
+  /// calling [SmoothSelectionRegionState.selectAll] to enter selection mode
+  /// with handles and show the context menu toolbar, or
+  /// [SmoothSelectionRegionState.dispatchEvent] to dispatch an arbitrary
+  /// `SelectionEvent` (e.g. `SelectAllSelectionEvent`) straight to the
+  /// underlying `SelectionContainer`.
+  ///
+  /// ```dart
+  /// final regionKey = GlobalKey<SmoothSelectionRegionState>();
+  ///
+  /// SmoothMarkdown(
+  ///   data: markdownText,
+  ///   selectable: true,
+  ///   selectableRegionKey: regionKey,
+  /// )
+  ///
+  /// // Later, trigger full-text selection (shows handles + toolbar):
+  /// regionKey.currentState?.selectAll(SelectionChangedCause.toolbar);
+  ///
+  /// // Or dispatch a raw SelectionEvent to the SelectionContainer:
+  /// regionKey.currentState?.dispatchEvent(const SelectAllSelectionEvent());
+  /// ```
+  ///
+  /// Only meaningful when [selectable] is `true`.
+  /// Defaults to `null`.
+  final GlobalKey<SmoothSelectionRegionState>? selectableRegionKey;
 
   /// Parser plugins for extending markdown syntax.
   ///
@@ -637,30 +709,21 @@ class SmoothMarkdown extends StatelessWidget {
 
     final widget = renderer.render(nodes, context: renderContext);
 
-    // Wrap in SelectionArea if selectable
+    // Wrap in SmoothSelectionRegion if selectable.
+    //
+    // SmoothSelectionRegion extends the framework SelectableRegion to also
+    // expose the underlying SelectionContainer + SelectionEvent machinery
+    // (dispatchEvent / registrar) for programmatic control.
     final content = selectable
         ? _SelectionCopyFilter(
-            child: SelectionArea(
-              contextMenuBuilder: (context, selectableRegionState) {
-                return AdaptiveTextSelectionToolbar.buttonItems(
-                  anchors: selectableRegionState.contextMenuAnchors,
-                  buttonItems: selectableRegionState.contextMenuButtonItems
-                      .map((item) {
-                    if (item.type == ContextMenuButtonType.copy) {
-                      final originalOnPressed = item.onPressed;
-                      return ContextMenuButtonItem(
-                        label: item.label,
-                        type: ContextMenuButtonType.copy,
-                        onPressed: () {
-                          originalOnPressed?.call();
-                          _scheduleClipboardFilter();
-                        },
-                      );
-                    }
-                    return item;
-                  }).toList(),
-                );
-              },
+            child: SmoothSelectionRegion(
+              key: selectableRegionKey,
+              // Use the modern TextSelectionHandleControls so the user-provided
+              // [contextMenuBuilder] is actually consulted by the framework
+              // (SelectableRegion only routes through contextMenuBuilder when
+              // selectionControls is a TextSelectionHandleControls).
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: contextMenuBuilder ?? _defaultContextMenuBuilder,
               child: widget,
             ),
           )
@@ -723,6 +786,34 @@ class SmoothMarkdown extends StatelessWidget {
         .split('\n')
         .where((line) => !RegExp(r'^\u00A0+$').hasMatch(line))
         .join('\n');
+  }
+
+  /// Default context menu builder: adaptive toolbar with clipboard filter.
+  ///
+  /// Overrides the Copy button to strip non-breaking-space overlay lines
+  /// from the clipboard after the default copy action runs.
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    SmoothSelectionRegionState selectableRegionState,
+  ) {
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: selectableRegionState.contextMenuAnchors,
+      buttonItems: selectableRegionState.contextMenuButtonItems
+          .map((item) {
+        if (item.type == ContextMenuButtonType.copy) {
+          final originalOnPressed = item.onPressed;
+          return ContextMenuButtonItem(
+            label: item.label,
+            type: ContextMenuButtonType.copy,
+            onPressed: () {
+              originalOnPressed?.call();
+              _scheduleClipboardFilter();
+            },
+          );
+        }
+        return item;
+      }).toList(),
+    );
   }
 }
 

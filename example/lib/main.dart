@@ -7,6 +7,7 @@ import 'ai_chat_demo.dart';
 import 'chat_list_demo.dart';
 import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
+import 'conversation_list_demo.dart';
 import 'math_demo.dart';
 import 'mermaid_demo.dart';
 import 'plugin_demo.dart';
@@ -14,7 +15,7 @@ import 'streaming_demo.dart';
 
 Future<void> main() async {
   // 加载 .env 文件
-  await dotenv.load(fileName: '.env');
+  // await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
@@ -110,8 +111,10 @@ class _MarkdownDemoPageState extends State<MarkdownDemoPage> {
   MarkdownTheme _selectedTheme = MarkdownTheme.defaultLight;
 
   // Mermaid plugin and builder for rendering mermaid diagrams
-  final _mermaidPlugins = ParserPluginRegistry()..register(const MermaidPlugin());
-  final _mermaidBuilders = BuilderRegistry()..register('mermaid', const MermaidBuilder());
+  final _mermaidPlugins = ParserPluginRegistry()
+    ..register(const MermaidPlugin());
+  final _mermaidBuilders = BuilderRegistry()
+    ..register('mermaid', const MermaidBuilder());
 
   final List<MarkdownExample> _examples = [
     MarkdownExample(
@@ -1104,379 +1107,425 @@ gantt
             ),
           ],
         ),
-      drawer: Drawer(
-        backgroundColor: isDark ? const Color(0xFF0D1117) : null,
-        child: ListView(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [const Color(0xFF161B22), const Color(0xFF21262D)]
-                      : [Colors.blue, Colors.purple],
+        drawer: Drawer(
+          backgroundColor: isDark ? const Color(0xFF0D1117) : null,
+          child: ListView(
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [const Color(0xFF161B22), const Color(0xFF21262D)]
+                        : [Colors.blue, Colors.purple],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.article, size: 48, color: Colors.white),
+                    const SizedBox(height: 8),
+                    Text(
+                      AppLocalizations.of(context)
+                          .translate('drawer_header_title'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
+              ...List.generate(_examples.length, (index) {
+                return ListTile(
+                  leading: Icon(
+                    _getIconForExample(index),
+                    color: _selectedIndex == index
+                        ? (isDark ? Colors.blue[300] : Colors.blue)
+                        : (isDark ? Colors.white70 : null),
+                  ),
+                  title: Text(
+                    _examples[index].title,
+                    style: TextStyle(
+                      fontWeight: _selectedIndex == index
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isDark ? Colors.white : null,
+                    ),
+                  ),
+                  selected: _selectedIndex == index,
+                  selectedTileColor: isDark ? const Color(0xFF161B22) : null,
+                  onTap: () {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Text(
+                  AppLocalizations.of(context).drawerDemos,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white54 : Colors.grey,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.calculate,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  AppLocalizations.of(context).demoMath,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MathDemo(
+                        styleSheet: _getStyleSheet(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.stream,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  AppLocalizations.of(context).demoStreaming,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StreamingMarkdownDemo(
+                        styleSheet: _getStyleSheet(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.note_add,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  AppLocalizations.of(context).demoFootnote,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FootnoteDemo(
+                        styleSheet: _getStyleSheet(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.chat,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  'Chat List Demo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                subtitle: Text(
+                  'Performance optimizations',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChatListDemo(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.auto_awesome,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  'AI Chat Demo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                subtitle: Text(
+                  'Qwen API + Thinking/Artifact/Tool',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AIChatDemo(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.forum,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  'Conversation List',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                subtitle: Text(
+                  '长按菜单 · 滑动操作 · 多选',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ConversationListDemo(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.extension,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  'Plugin System',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                subtitle: Text(
+                  '@mention #hashtag :emoji:',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PluginDemo(
+                        styleSheet: _getStyleSheet(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.schema,
+                  color: isDark ? Colors.white70 : null,
+                ),
+                title: Text(
+                  'Mermaid 图表',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                  ),
+                ),
+                subtitle: Text(
+                  '流程图、时序图',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MermaidDemo(),
+                    ),
+                  );
+                },
+              ),
+              const Divider(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Text(
+                  AppLocalizations.of(context).language,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white54 : Colors.grey,
+                  ),
+                ),
+              ),
+              ...AppLanguage.values.map((lang) {
+                return ListTile(
+                  leading: Icon(
+                    Icons.language,
+                    color: isDark ? Colors.white70 : null,
+                  ),
+                  title: Text(
+                    lang.nativeName,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : null,
+                    ),
+                  ),
+                  onTap: () {
+                    widget.onLanguageChange(lang.locale);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+        body: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF161B22)
+                    : Theme.of(context).colorScheme.primaryContainer,
+                border: Border(
+                  bottom: BorderSide(
+                    color:
+                        isDark ? const Color(0xFF30363D) : Colors.grey.shade300,
+                  ),
+                ),
+              ),
+              child: Row(
                 children: [
-                  const Icon(Icons.article, size: 48, color: Colors.white),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(context).translate('drawer_header_title'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  Icon(
+                    _getIconForExample(_selectedIndex),
+                    color: isDark
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      example.title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: isDark
+                                ? Colors.white
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                          ),
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF21262D)
+                          : Colors.white.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _selectedTheme.brightness == Brightness.dark
+                              ? Icons.dark_mode
+                              : Icons.light_mode,
+                          size: 16,
+                          color: isDark
+                              ? Colors.white70
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _selectedTheme.getLabel(context),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? Colors.white70
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            ...List.generate(_examples.length, (index) {
-              return ListTile(
-                leading: Icon(
-                  _getIconForExample(index),
-                  color: _selectedIndex == index
-                      ? (isDark ? Colors.blue[300] : Colors.blue)
-                      : (isDark ? Colors.white70 : null),
-                ),
-                title: Text(
-                  _examples[index].title,
-                  style: TextStyle(
-                    fontWeight: _selectedIndex == index
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: isDark ? Colors.white : null,
+            Expanded(
+              child: Container(
+                color: isDark ? const Color(0xFF0D1117) : Colors.white,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: SmoothMarkdown(
+                    data: example.markdown,
+                    styleSheet: styleSheet,
+                    plugins: _mermaidPlugins,
+                    builderRegistry: _mermaidBuilders,
+                    onTapLink: (url) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Link tapped: $url'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor:
+                              isDark ? const Color(0xFF161B22) : null,
+                        ),
+                      );
+                    },
+                    // Enable enhanced code blocks with copy button
+                    useEnhancedComponents: true,
+                    selectable: true,
                   ),
-                ),
-                selected: _selectedIndex == index,
-                selectedTileColor: isDark
-                    ? const Color(0xFF161B22)
-                    : null,
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            }),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                AppLocalizations.of(context).drawerDemos,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white54 : Colors.grey,
                 ),
               ),
             ),
-            ListTile(
-              leading: Icon(
-                Icons.calculate,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                AppLocalizations.of(context).demoMath,
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MathDemo(
-                      styleSheet: _getStyleSheet(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.stream,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                AppLocalizations.of(context).demoStreaming,
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StreamingMarkdownDemo(
-                      styleSheet: _getStyleSheet(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.note_add,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                AppLocalizations.of(context).demoFootnote,
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FootnoteDemo(
-                      styleSheet: _getStyleSheet(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.chat,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                'Chat List Demo',
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              subtitle: Text(
-                'Performance optimizations',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.grey,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ChatListDemo(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.auto_awesome,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                'AI Chat Demo',
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              subtitle: Text(
-                'Qwen API + Thinking/Artifact/Tool',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.grey,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AIChatDemo(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.extension,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                'Plugin System',
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              subtitle: Text(
-                '@mention #hashtag :emoji:',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.grey,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PluginDemo(
-                      styleSheet: _getStyleSheet(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.schema,
-                color: isDark ? Colors.white70 : null,
-              ),
-              title: Text(
-                'Mermaid 图表',
-                style: TextStyle(
-                  color: isDark ? Colors.white : null,
-                ),
-              ),
-              subtitle: Text(
-                '流程图、时序图',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.white38 : Colors.grey,
-                ),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MermaidDemo(),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                AppLocalizations.of(context).language,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white54 : Colors.grey,
-                ),
-              ),
-            ),
-            ...AppLanguage.values.map((lang) {
-              return ListTile(
-                leading: Icon(
-                  Icons.language,
-                  color: isDark ? Colors.white70 : null,
-                ),
-                title: Text(
-                  lang.nativeName,
-                  style: TextStyle(
-                    color: isDark ? Colors.white : null,
-                  ),
-                ),
-                onTap: () {
-                  widget.onLanguageChange(lang.locale);
-                  Navigator.pop(context);
-                },
-              );
-            }),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF161B22) : Theme.of(context).colorScheme.primaryContainer,
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark ? const Color(0xFF30363D) : Colors.grey.shade300,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _getIconForExample(_selectedIndex),
-                  color: isDark ? Colors.white : Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    example.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: isDark ? Colors.white : Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF21262D)
-                        : Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _selectedTheme.brightness == Brightness.dark
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                        size: 16,
-                        color: isDark ? Colors.white70 : Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        _selectedTheme.getLabel(context),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? Colors.white70 : Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: isDark ? const Color(0xFF0D1117) : Colors.white,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: SmoothMarkdown(
-                  data: example.markdown,
-                  styleSheet: styleSheet,
-                  plugins: _mermaidPlugins,
-                  builderRegistry: _mermaidBuilders,
-                  onTapLink: (url) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Link tapped: $url'),
-                        duration: const Duration(seconds: 2),
-                        backgroundColor: isDark ? const Color(0xFF161B22) : null,
-                      ),
-                    );
-                  },
-                  // Enable enhanced code blocks with copy button
-                  useEnhancedComponents: true,
-                  selectable: true,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             showDialog<void>(
@@ -1484,10 +1533,12 @@ gantt
               builder: (context) => Theme(
                 data: isDark ? ThemeData.dark() : ThemeData.light(),
                 child: AlertDialog(
-                  backgroundColor: isDark ? const Color(0xFF161B22) : Colors.white,
+                  backgroundColor:
+                      isDark ? const Color(0xFF161B22) : Colors.white,
                   title: Text(
                     'Markdown Source',
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                    style:
+                        TextStyle(color: isDark ? Colors.white : Colors.black),
                   ),
                   content: Container(
                     width: 600,
@@ -1535,11 +1586,11 @@ gantt
       case 5:
         return Icons.link;
       case 6:
-        return Icons.auto_awesome;  // Enhanced UI
+        return Icons.auto_awesome; // Enhanced UI
       case 7:
-        return Icons.palette;  // Theme Showcase
+        return Icons.palette; // Theme Showcase
       case 8:
-        return Icons.dashboard;  // Complex Example
+        return Icons.dashboard; // Complex Example
       default:
         return Icons.article;
     }

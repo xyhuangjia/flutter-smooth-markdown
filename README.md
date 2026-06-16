@@ -48,7 +48,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.7.2
+  flutter_smooth_markdown: ^0.7.3
 ```
 
 ```bash
@@ -80,6 +80,38 @@ SmoothMarkdown(
 ```
 
 Selection handles work across text and non-text blocks (images, tables, etc.). Copied content is automatically cleaned.
+
+### Programmatic Selection
+
+When `selectable: true`, the content is wrapped in a `SmoothSelectionRegion` (a `SelectableRegion` subclass). Pass a `selectableRegionKey` to drive selection programmatically:
+
+```dart
+final regionKey = GlobalKey<SmoothSelectionRegionState>();
+
+SmoothMarkdown(
+  data: markdownText,
+  selectable: true,
+  selectableRegionKey: regionKey,
+)
+
+// Later — enter selection mode with handles + toolbar:
+regionKey.currentState?.selectAll(SelectionChangedCause.toolbar);
+```
+
+For lower-level control, `SmoothSelectionRegionState` exposes the underlying `SelectionContainer` + `SelectionEvent` machinery:
+
+```dart
+// Dispatch an arbitrary SelectionEvent straight to the SelectionContainer
+// (fans out to every text selectable). Does not drive the overlay by itself.
+regionKey.currentState?.dispatchEvent(const SelectAllSelectionEvent());
+
+// Reach the SelectionRegistrar collecting the text selectables.
+final registrar = regionKey.currentState?.registrar;
+```
+
+`contextMenuBuilder` (if provided) now receives a `SmoothSelectionRegionState`, giving the menu access to `dispatchEvent`, `registrar`, `contextMenuButtonItems`, and `contextMenuAnchors`.
+
+> **Migration (minor breaking):** `selectableRegionKey` is now typed `GlobalKey<SmoothSelectionRegionState>` (was `GlobalKey<SelectableRegionState>`), and `contextMenuBuilder`'s second parameter is now `SmoothSelectionRegionState`. Rename the type and the new methods become available; existing calls (`selectAll`, `contextMenuButtonItems`, `contextMenuAnchors`) work unchanged.
 
 ### Streaming (Real-time)
 

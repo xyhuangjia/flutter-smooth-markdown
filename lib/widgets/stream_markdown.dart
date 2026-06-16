@@ -7,6 +7,7 @@ import '../src/config/style_sheet.dart';
 import '../src/parser/parser_plugin.dart';
 import '../src/renderer/widget_builder.dart';
 import 'smooth_markdown.dart';
+import 'smooth_selection_region.dart';
 
 /// A widget that renders Markdown content from a stream in real-time.
 ///
@@ -152,6 +153,8 @@ class StreamMarkdown extends StatefulWidget {
     this.codeBuilder,
     this.useEnhancedComponents = false,
     this.selectable = false,
+    this.contextMenuBuilder,
+    this.selectableRegionKey,
     this.loadingWidget,
     this.errorBuilder,
     this.plugins,
@@ -222,6 +225,17 @@ class StreamMarkdown extends StatefulWidget {
   ///
   /// See [SmoothMarkdown.selectable] for detailed documentation.
   final bool selectable;
+
+  /// Custom context menu builder for text selection.
+  ///
+  /// See [SmoothMarkdown.contextMenuBuilder] for detailed documentation.
+  final Widget Function(BuildContext context, SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+
+  /// A key applied to the internal [SmoothSelectionRegion] for programmatic
+  /// selection control.
+  ///
+  /// See [SmoothMarkdown.selectableRegionKey] for detailed documentation.
+  final GlobalKey<SmoothSelectionRegionState>? selectableRegionKey;
 
   /// Widget to display while waiting for the first chunk from the stream.
   ///
@@ -388,6 +402,8 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
         codeBuilder: widget.codeBuilder,
         useEnhancedComponents: widget.useEnhancedComponents,
         selectable: widget.selectable,
+        contextMenuBuilder: widget.contextMenuBuilder,
+        selectableRegionKey: widget.selectableRegionKey,
         enableCache: false, // Disable cache for constantly changing content
         useRepaintBoundary: false, // Already wrapped in RepaintBoundary
         plugins: widget.plugins,

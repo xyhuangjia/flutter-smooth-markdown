@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-06-16
+
+### Changed
+- ⚠️ **Selection API (minor breaking)** - `selectable: true` now wraps content in a new `SmoothSelectionRegion` (a `SelectableRegion` subclass). `selectableRegionKey` is now typed `GlobalKey<SmoothSelectionRegionState>` (was `GlobalKey<SelectableRegionState>`); `contextMenuBuilder`'s state parameter is now `SmoothSelectionRegionState`. Existing calls (`selectAll`, `contextMenuButtonItems`, `contextMenuAnchors`) work unchanged.
+- ⚠️ **Selection controls** - Switched the internal selection controls from `materialTextSelectionControls` to `materialTextSelectionHandleControls` so that the user-provided `contextMenuBuilder` is actually consulted by the framework (previously it was never invoked).
+
+### Added
+- ✨ **Programmatic selection** - `SmoothSelectionRegionState` exposes `dispatchEvent(SelectionEvent)` (forward any `SelectionEvent`, e.g. `SelectAllSelectionEvent`, to the inner `SelectionContainer`) and `registrar` / `innerRegionState` for advanced control. See README → Programmatic Selection.
+- ✨ **Press-positioned selection** - `SmoothSelectionRegionState.selectWordAt(Offset)` / `selectParagraphAt(Offset)` select the word/paragraph under a press point (e.g. a long-press menu's "select text" action) with handles + toolbar, instead of selecting the whole document.
+- 🧪 **Tests** - New `test/widgets/smooth_selection_region_test.dart` covering programmatic select-all, `dispatchEvent(SelectAllSelectionEvent)`, registrar exposure, custom `contextMenuBuilder`, and press-positioned word/paragraph selection.
+
+### Fixed
+- 🐛 **Custom context menu never shown** - `contextMenuBuilder` was ignored because the legacy `materialTextSelectionControls` path bypasses it; now routed correctly via `materialTextSelectionHandleControls`.
+- 🐛 **Example "选择文字" no-op** - `conversation_list_demo` `_triggerSelectAll` relied on a select-all context-menu button that does not exist before any selection exists; replaced with a direct `selectAll(SelectionChangedCause.toolbar)` call (which also reliably summons handles + toolbar).
+
 ## [0.7.2] - 2026-04-01
 
 ### Fixed
