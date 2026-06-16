@@ -22,7 +22,6 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
 );
 
 /// A [SelectableRegion]-based selection region that additionally exposes the
-/// underlying `SelectionContainer + SelectionEvent` machinery for programmatic
 /// control.
 ///
 /// Internally this widget composes a framework [SelectableRegion] (which is
