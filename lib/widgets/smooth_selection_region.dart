@@ -24,7 +24,6 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
 /// A [SelectableRegion]-based selection region that additionally exposes the
 /// control.
 ///
-/// Internally this widget composes a framework [SelectableRegion] (which is
 /// itself built on top of a `SelectionContainer`): its state implements
 /// [SelectionRegistrar], the `SelectionContainer` in the subtree registers with
 /// it as a single selectable, and `SelectableRegionState.selectAll` internally
