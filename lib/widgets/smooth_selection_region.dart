@@ -55,6 +55,7 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
 /// key.currentState?.dispatchEvent(const SelectAllSelectionEvent());
 /// ```
 /// ```
+/// ```
 ///
 /// Internally this widget composes a framework [SelectableRegion] (which is
 /// control.
