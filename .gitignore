@@ -57,3 +57,8 @@ example/.env
 .claude
 .agents
 AGENTS.md
+
+# Keep tracked lockfiles visible to pub's package validator.
+!pubspec.lock
+!example/pubspec.lock
+!example/macos/Podfile.lock
