@@ -9,6 +9,7 @@ import 'footnote_demo.dart';
 import 'l10n/app_localizations.dart';
 import 'conversation_list_demo.dart';
 import 'math_demo.dart';
+import 'mermaid_demo.dart';
 import 'plugin_demo.dart';
 import 'streaming_demo.dart';
 
@@ -19,20 +20,7 @@ Future<void> main() async {
   } catch (_) {
     // .env may not exist in CI; non-critical for demo apps.
   }
-    await dotenv.load(fileName: '.env');
-  } catch (_) {}
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env 文件不存在时静默忽略（如 CI 环境）
-  }
-import 'plugin_demo.dart';
-import 'streaming_demo.dart';
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env may not exist in CI; non-critical for demo apps.
-  }
-Future<void> main() async {
+
   // 加载 .env 文件
   // TODO: uncomment when .env is available in CI
   // await dotenv.load(fileName: '.env');
