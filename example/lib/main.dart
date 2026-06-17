@@ -16,6 +16,10 @@ Future<void> main() async {
   // 加载 .env 文件（不存在时静默忽略，如 CI 环境）
   try {
     await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env may not exist in CI; non-critical for demo apps.
+  }
+    await dotenv.load(fileName: '.env');
   } catch (_) {}
     await dotenv.load(fileName: '.env');
   } catch (_) {
