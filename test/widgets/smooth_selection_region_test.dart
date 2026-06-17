@@ -4,8 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show SelectAllSelectionEvent;
 import 'package:flutter/services.dart' show MethodCall, SystemChannels;
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_smooth_markdown/flutter_smooth_markdown.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 const _markdownData = '# Title\n\n'
     'Hello **world** this is selectable text across paragraphs.\n\n'
@@ -24,6 +24,19 @@ Widget _wrap(Widget child) => MaterialApp(
 Future<String?> _copySelected(
   GlobalKey<SmoothSelectionRegionState> regionKey,
   WidgetTester tester,
+) =>
+    _copySelectedFromItems(
+        regionKey.currentState!.contextMenuButtonItems, tester);
+
+Future<String?> _copySelectedFromController(
+  SmoothSelectionController controller,
+  WidgetTester tester,
+) =>
+    _copySelectedFromItems(controller.contextMenuButtonItems, tester);
+
+Future<String?> _copySelectedFromItems(
+  List<ContextMenuButtonItem> buttonItems,
+  WidgetTester tester,
 ) async {
   String? clip;
   tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -35,9 +48,8 @@ Future<String?> _copySelected(
       return null;
     },
   );
-  final ContextMenuButtonItem copy = regionKey.currentState!
-      .contextMenuButtonItems
-      .firstWhere((i) => i.type == ContextMenuButtonType.copy);
+  final copy =
+      buttonItems.firstWhere((i) => i.type == ContextMenuButtonType.copy);
   copy.onPressed!();
   await tester.pump();
   await tester.pump();
@@ -102,8 +114,8 @@ void main() {
       // Lower-level: dispatch SelectAllSelectionEvent straight to the
       // SelectionContainer's delegate (the SelectionContainer +
       // SelectAllSelectionEvent path).
-      final result =
-          regionKey.currentState!.dispatchEvent(const SelectAllSelectionEvent());
+      final result = regionKey.currentState!
+          .dispatchEvent(const SelectAllSelectionEvent());
       expect(result, isNotNull, reason: 'container delegate should be mounted');
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
@@ -129,7 +141,59 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(regionKey.currentState!.registrar, isNotNull,
-          reason: 'SelectionContainer delegate should be captured as registrar');
+          reason:
+              'SelectionContainer delegate should be captured as registrar');
+    });
+
+    testWidgets('controller attaches and drives selectAll', (tester) async {
+      final controller = SmoothSelectionController();
+
+      await tester.pumpWidget(
+        _wrap(SmoothMarkdown(
+          data: _markdownData,
+          selectable: true,
+          selectionController: controller,
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.isAttached, isTrue);
+      expect(controller.currentState, isNotNull);
+
+      controller.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+
+      expect(find.byType(TextSelectionToolbar), findsOneWidget);
+      expect(await _copySelectedFromController(controller, tester),
+          contains('Hello world'));
+    });
+
+    testWidgets('controller detaches when selection region unmounts',
+        (tester) async {
+      final controller = SmoothSelectionController();
+
+      await tester.pumpWidget(
+        _wrap(SmoothMarkdown(
+          data: _markdownData,
+          selectable: true,
+          selectionController: controller,
+        )),
+      );
+      await tester.pumpAndSettle();
+      expect(controller.isAttached, isTrue);
+
+      await tester.pumpWidget(
+        _wrap(SmoothMarkdown(
+          data: _markdownData,
+          selectable: false,
+          selectionController: controller,
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.isAttached, isFalse);
+      expect(controller.currentState, isNull);
     });
 
     testWidgets('custom contextMenuBuilder receives SmoothSelectionRegionState',
@@ -182,7 +246,7 @@ void main() {
 
       // Select the word under the center of the rendered text — like a
       // long-press at that point.
-      final Offset center = tester.getCenter(find.byType(RichText).first);
+      final center = tester.getCenter(find.byType(RichText).first);
       regionKey.currentState!.selectWordAt(center);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
@@ -193,7 +257,7 @@ void main() {
 
       // The selection is a single word — strictly shorter than the document
       // and a real token from it (not empty, not the whole thing).
-      final String? wordText = await _copySelected(regionKey, tester);
+      final wordText = await _copySelected(regionKey, tester);
       expect(wordText, isNotNull, reason: 'a word should be selected');
       expect(wordText!.length, lessThan(source.length),
           reason: 'selectWordAt must select a word, not the whole document');
@@ -221,7 +285,7 @@ void main() {
       regionKey.currentState!.selectAll(SelectionChangedCause.toolbar);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
-      final String? allText = await _copySelected(regionKey, tester);
+      final allText = await _copySelected(regionKey, tester);
       expect(allText, isNotNull,
           reason: 'selectAll baseline should produce content');
       expect(allText!.length, greaterThan(20),
@@ -229,7 +293,7 @@ void main() {
 
       // Select the paragraph under the center of the first rendered text —
       // like a long-press "select text" at that point.
-      final Offset center = tester.getCenter(find.byType(RichText).first);
+      final center = tester.getCenter(find.byType(RichText).first);
       regionKey.currentState!.selectParagraphAt(center);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
@@ -240,13 +304,53 @@ void main() {
 
       // The selection is a single paragraph — strictly shorter than the whole
       // document and a real slice of it (not empty, not the whole thing).
-      final String? paragraphText = await _copySelected(regionKey, tester);
-      expect(paragraphText, isNotNull, reason: 'a paragraph should be selected');
+      final paragraphText = await _copySelected(regionKey, tester);
+      expect(paragraphText, isNotNull,
+          reason: 'a paragraph should be selected');
       expect(paragraphText!.length, lessThan(allText.length),
           reason: 'selectParagraphAt must select a paragraph, not the whole '
               'document');
       expect(allText.contains(paragraphText), isTrue,
           reason: 'selected text must be a slice from the document');
+    });
+
+    testWidgets('selectParagraphAt from nearby padding clears selectAll',
+        (tester) async {
+      final regionKey = GlobalKey<SmoothSelectionRegionState>();
+      const source = 'alpha beta gamma\n\ndelta epsilon zeta';
+
+      await tester.pumpWidget(
+        _wrap(Padding(
+          padding: const EdgeInsets.all(24),
+          child: SmoothMarkdown(
+            data: source,
+            selectable: true,
+            selectableRegionKey: regionKey,
+          ),
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      regionKey.currentState!.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      final allText = await _copySelected(regionKey, tester);
+      expect(allText, isNotNull);
+
+      final textTopLeft = tester.getTopLeft(find.byType(RichText).first);
+      regionKey.currentState!.selectParagraphAt(
+        textTopLeft.translate(4, -8),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+
+      expect(
+        regionKey.currentState!.contextMenuButtonItems
+            .where((i) => i.type == ContextMenuButtonType.copy),
+        isEmpty,
+        reason: 'a padding-adjacent press should clear selection instead of '
+            'keeping select-all active',
+      );
     });
   });
 
@@ -254,8 +358,8 @@ void main() {
     testWidgets('selectableRegionKey is wired through StreamMarkdown',
         (tester) async {
       final regionKey = GlobalKey<SmoothSelectionRegionState>();
-      final controller = StreamController<String>();
-      controller.add('# Stream\n\nSelectable text via stream.');
+      final controller = StreamController<String>()
+        ..add('# Stream\n\nSelectable text via stream.');
 
       await tester.pumpWidget(
         _wrap(StreamMarkdown(
@@ -282,6 +386,38 @@ void main() {
 
       await controller.close();
     });
+
+    testWidgets('selectionController is wired through StreamMarkdown',
+        (tester) async {
+      final selectionController = SmoothSelectionController();
+      final streamController = StreamController<String>()
+        ..add('# Stream\n\nSelectable text via stream.');
+
+      await tester.pumpWidget(
+        _wrap(StreamMarkdown(
+          stream: streamController.stream,
+          selectable: true,
+          selectionController: selectionController,
+        )),
+      );
+      await tester.pumpAndSettle();
+
+      expect(selectionController.isAttached, isTrue,
+          reason: 'StreamMarkdown should forward selectionController');
+
+      selectionController.dispatchEvent(const SelectAllSelectionEvent());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+
+      expect(
+        selectionController.contextMenuButtonItems
+            .where((i) => i.type == ContextMenuButtonType.copy),
+        isNotEmpty,
+        reason: 'controller dispatchEvent should select streamed text',
+      );
+
+      await streamController.close();
+    });
   });
 
   group('gesture arena — outer long-press wins over SelectableRegion', () {
@@ -292,7 +428,7 @@ void main() {
     // resolve(accepted) first and win the arena.
     testWidgets('shorter outer deadline suppresses inner native selection',
         (tester) async {
-      bool outerFired = false;
+      var outerFired = false;
       final regionKey = GlobalKey<SmoothSelectionRegionState>();
 
       await tester.pumpWidget(
@@ -300,8 +436,8 @@ void main() {
           RawGestureDetector(
             behavior: HitTestBehavior.opaque,
             gestures: <Type, GestureRecognizerFactory>{
-              LongPressGestureRecognizer:
-                  GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+              LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+                  LongPressGestureRecognizer>(
                 () => LongPressGestureRecognizer(
                   duration: const Duration(milliseconds: 350),
                 ),

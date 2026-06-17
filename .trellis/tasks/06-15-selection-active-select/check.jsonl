@@ -1,4 +1,0 @@
-{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Verified: 3 Selection Patterns + 6 Common Mistakes — correct contracts, no code paths, references real file locations"}
-{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Verified: Testing Requirements for selection — patterns match the actual test file structure"}
-{"file": ".trellis/spec/guides/evidence-first-debugging.md", "reason": "Verified: general thinking guide, no project-specific code paths, references the real Step 0 evidence story"}
-{"file": ".trellis/spec/guides/index.md", "reason": "Verified: entry + trigger added correctly"}

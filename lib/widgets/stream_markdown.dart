@@ -154,6 +154,7 @@ class StreamMarkdown extends StatefulWidget {
     this.useEnhancedComponents = false,
     this.selectable = false,
     this.contextMenuBuilder,
+    this.selectionController,
     this.selectableRegionKey,
     this.loadingWidget,
     this.errorBuilder,
@@ -229,7 +230,13 @@ class StreamMarkdown extends StatefulWidget {
   /// Custom context menu builder for text selection.
   ///
   /// See [SmoothMarkdown.contextMenuBuilder] for detailed documentation.
-  final Widget Function(BuildContext context, SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+  final Widget Function(BuildContext context,
+      SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+
+  /// Controller for programmatic text selection.
+  ///
+  /// See [SmoothMarkdown.selectionController] for detailed documentation.
+  final SmoothSelectionController? selectionController;
 
   /// A key applied to the internal [SmoothSelectionRegion] for programmatic
   /// selection control.
@@ -403,6 +410,7 @@ class _StreamMarkdownState extends State<StreamMarkdown> {
         useEnhancedComponents: widget.useEnhancedComponents,
         selectable: widget.selectable,
         contextMenuBuilder: widget.contextMenuBuilder,
+        selectionController: widget.selectionController,
         selectableRegionKey: widget.selectableRegionKey,
         enableCache: false, // Disable cache for constantly changing content
         useRepaintBoundary: false, // Already wrapped in RepaintBoundary

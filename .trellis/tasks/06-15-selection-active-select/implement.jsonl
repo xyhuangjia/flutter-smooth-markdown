@@ -1,4 +1,0 @@
-{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Selection Patterns (delegate capture, selectAt, disposal safety) + Common Mistakes (contextMenuBuilder + controls, toolbar cause, buttonItems timing, SelectableRegion composition, Dart State invariance, gesture arena) distilled from implementation"}
-{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Testing Requirements for text selection: toolbar assertion, clipboard content mock, gesture arena test, stream markdown selection"}
-{"file": ".trellis/spec/guides/evidence-first-debugging.md", "reason": "New thinking guide documenting the Step 0 evidence-first approach: before assuming a framework widget is broken, prove it with a minimal reproduction"}
-{"file": ".trellis/spec/guides/index.md", "reason": "Added evidence-first debugging guide entry + quick reference trigger for debugging framework widget wrappers"}

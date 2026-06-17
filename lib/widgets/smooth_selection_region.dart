@@ -21,46 +21,103 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
   SmoothSelectionRegionState selectableRegionState,
 );
 
-/// A [SelectableRegion]-based selection region that additionally exposes the
-/// underlying `SelectionContainer + SelectionEvent` machinery for programmatic
+/// Controller for programmatic text selection in a [SmoothSelectionRegion].
+///
+/// This is the preferred API for callers that need to drive selection from
+/// outside the markdown widget. It keeps widget state and [GlobalKey] usage out
+/// of application code while preserving the same capabilities exposed by
+/// [SmoothSelectionRegionState].
+class SmoothSelectionController {
+  SmoothSelectionRegionState? _state;
+
+  /// Whether this controller is currently attached to a mounted
+  /// [SmoothSelectionRegion].
+  bool get isAttached => _state != null;
+
+  /// The attached region state, if any.
+  ///
+  /// Prefer the controller methods for ordinary selection control. This is
+  /// exposed for advanced integrations that need the full state surface.
+  SmoothSelectionRegionState? get currentState => _state;
+
+  void _attach(SmoothSelectionRegionState state) {
+    _state = state;
+  }
+
+  void _detach(SmoothSelectionRegionState state) {
+    if (identical(_state, state)) {
+      _state = null;
+    }
+  }
+
+  /// Selects all content in the attached region, showing handles and toolbar
+  /// when [cause] is [SelectionChangedCause.toolbar].
+  void selectAll(
+      [SelectionChangedCause cause = SelectionChangedCause.toolbar]) {
+    _state?.selectAll(cause);
+  }
+
+  /// Selects the word at [globalPosition].
+  void selectWordAt(Offset globalPosition) {
+    _state?.selectWordAt(globalPosition);
+  }
+
+  /// Selects the paragraph at [globalPosition].
+  void selectParagraphAt(Offset globalPosition) {
+    _state?.selectParagraphAt(globalPosition);
+  }
+
+  /// Clears the current selection.
+  void clearSelection() {
+    _state?.clearSelection();
+  }
+
+  /// The platform-default context menu button items for the current selection.
+  List<ContextMenuButtonItem> get contextMenuButtonItems =>
+      _state?.contextMenuButtonItems ?? const <ContextMenuButtonItem>[];
+
+  /// The anchors used to position the text selection toolbar.
+  TextSelectionToolbarAnchors get contextMenuAnchors =>
+      _state?.contextMenuAnchors ??
+      const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero);
+
+  /// Dispatches an arbitrary [SelectionEvent] to the attached region's
+  /// contained `SelectionContainer`.
+  SelectionResult? dispatchEvent(SelectionEvent event) =>
+      _state?.dispatchEvent(event);
+
+  /// The [SelectionRegistrar] captured from the attached region.
+  SelectionRegistrar? get registrar => _state?.registrar;
+}
+
+/// A thin [SelectableRegion] adapter that exposes programmatic selection
 /// control.
 ///
-/// Internally this widget composes a framework [SelectableRegion] (which is
-/// itself built on top of a `SelectionContainer`): its state implements
-/// [SelectionRegistrar], the `SelectionContainer` in the subtree registers with
-/// it as a single selectable, and `SelectableRegionState.selectAll` internally
-/// dispatches a `SelectAllSelectionEvent` to that selectable.
-///
-/// [SmoothSelectionRegion] surfaces that lower-level surface so callers can
-/// dispatch *arbitrary* [SelectionEvent]s and reach the registrar directly,
-/// without giving up the framework-provided overlay (selection handles,
-/// magnifier, toolbar, keyboard shortcuts, gestures).
+/// The widget keeps Flutter's built-in selection overlay, gestures, shortcuts,
+/// handles, magnifier, and toolbar. It adds a stable controller/state surface
+/// for selecting all content, selecting a word or paragraph at a press
+/// position, and dispatching lower-level [SelectionEvent]s to the underlying
+/// `SelectionContainer`.
 ///
 /// Example:
 ///
 /// ```dart
-/// final key = GlobalKey<SmoothSelectionRegionState>();
+/// final controller = SmoothSelectionController();
 ///
 /// SmoothMarkdown(
 ///   data: markdownText,
 ///   selectable: true,
-///   selectableRegionKey: key,
+///   selectionController: controller,
 /// )
 ///
 /// // Programmatic select-all (shows handles + toolbar):
-/// key.currentState?.selectAll(SelectionChangedCause.toolbar);
+/// controller.selectAll(SelectionChangedCause.toolbar);
 ///
 /// // Lower-level: dispatch an arbitrary SelectionEvent straight to the
 /// // SelectionContainer (fans out to every text selectable). Does not, by
 /// // itself, drive the overlay.
-/// key.currentState?.dispatchEvent(const SelectAllSelectionEvent());
+/// controller.dispatchEvent(const SelectAllSelectionEvent());
 /// ```
-/// A wrapper around [SelectableRegion] that additionally exposes the
-/// underlying `SelectionContainer + SelectionEvent` machinery for programmatic
-/// control.
-///
-/// Internally this widget composes a framework [SelectableRegion] (which is
-/// itself built on top of a `SelectionContainer`): its state implements
 class SmoothSelectionRegion extends StatefulWidget {
   /// Creates a [SmoothSelectionRegion].
   ///
@@ -74,6 +131,7 @@ class SmoothSelectionRegion extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
     this.contextMenuBuilder,
+    this.controller,
   });
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -93,6 +151,9 @@ class SmoothSelectionRegion extends StatefulWidget {
 
   /// Custom context menu builder. Receives a [SmoothSelectionRegionState].
   final SmoothSelectionContextMenuBuilder? contextMenuBuilder;
+
+  /// Optional controller for driving selection without a [GlobalKey].
+  final SmoothSelectionController? controller;
 
   @override
   State<SmoothSelectionRegion> createState() => SmoothSelectionRegionState();
@@ -126,7 +187,23 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   SelectionRegistrar? _containerRegistrar;
 
   @override
+  void initState() {
+    super.initState();
+    widget.controller?._attach(this);
+  }
+
+  @override
+  void didUpdateWidget(SmoothSelectionRegion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller?._detach(this);
+      widget.controller?._attach(this);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.controller?._detach(this);
     // Drop the captured SelectionContainer delegate references so that, if a
     // caller still holds this state after the widget is unmounted, dispatch
     // calls become safe no-ops instead of reaching a detached container.
@@ -170,7 +247,8 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   /// [cause] is [SelectionChangedCause.toolbar], the context toolbar.
   ///
   /// Mirrors [SelectableRegionState.selectAll].
-  void selectAll([SelectionChangedCause cause = SelectionChangedCause.toolbar]) {
+  void selectAll(
+      [SelectionChangedCause cause = SelectionChangedCause.toolbar]) {
     innerRegionState?.selectAll(cause);
   }
 
@@ -194,9 +272,9 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   ///
   /// [globalPosition] is in global (screen) coordinates — pass the press
   /// position from the gesture that triggered selection (e.g.
-  /// `LongPressStartDetails.globalPosition`). Points outside the region's
-  /// selectable bounds are handled by the framework (typically no-op), so the
-  /// call is always safe.
+  /// `LongPressStartDetails.globalPosition`). Points outside the selectable
+  /// text are handled by the framework, so the call is always safe, but they
+  /// may clear the temporary select-all state without selecting a span.
   void _selectAt(Offset globalPosition, TextGranularity granularity) {
     // Enter the selection state via the only public overlay-driving path:
     // creates and shows the handles + toolbar.
@@ -251,7 +329,8 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
   ///
   /// Mirrors [SelectableRegionState.contextMenuButtonItems].
   List<ContextMenuButtonItem> get contextMenuButtonItems =>
-      innerRegionState?.contextMenuButtonItems ?? const <ContextMenuButtonItem>[];
+      innerRegionState?.contextMenuButtonItems ??
+      const <ContextMenuButtonItem>[];
 
   /// The anchors used to position the text selection toolbar.
   ///

@@ -33,7 +33,7 @@ Widget _buildAvatar(Conversation conv, bool isDark, {double size = 52}) {
 
 class _MenuAction {
   const _MenuAction({
-    this.icon,
+    required this.icon,
     required this.label,
     required this.onTap,
   });
@@ -80,7 +80,7 @@ void _showMessageContextMenu({
     context: context,
     barrierDismissible: true,
     barrierLabel: 'Dismiss',
-    barrierColor: Colors.black.withOpacity(0.08),
+    barrierColor: Colors.black.withValues(alpha: 0.08),
     transitionDuration: const Duration(milliseconds: 180),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       final curved = CurvedAnimation(
@@ -111,7 +111,7 @@ void _showMessageContextMenu({
                         borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: Colors.black.withValues(alpha: 0.12),
                             blurRadius: 28,
                             offset: const Offset(0, 8),
                           ),
@@ -200,7 +200,8 @@ Widget _buildMenuActionWidget(
             label,
             style: TextStyle(
               fontSize: 11,
-              color: (textColor ?? const Color(0xFF1A3352)).withOpacity(0.75),
+              color: (textColor ?? const Color(0xFF1A3352))
+                  .withValues(alpha: 0.75),
             ),
           ),
         ],
@@ -415,7 +416,7 @@ class _ConversationListDemoState extends State<ConversationListDemo> {
       msgs: [
         ChatMsg(
             content:
-                '# 🎉 v0.8.0 发布通知\n\n各位社区成员，新版本发布啦！\n\n## 主要更新\n- ✅ Markdown 渲染性能提升 **32x**\n- ✅ 新增 Mermaid 图表支持\n- ✅ 流式渲染优化\n- ✅ 插件系统重构\n\n大家快来试试！',
+                '# 🎉 v0.7.4 发布通知\n\n各位社区成员，新版本发布啦！\n\n## 主要更新\n- ✅ Markdown 渲染性能提升 **32x**\n- ✅ 新增 Mermaid 图表支持\n- ✅ 流式渲染优化\n- ✅ 插件系统重构\n\n大家快来试试！',
             isMe: false,
             timestamp: DateTime.now().subtract(const Duration(hours: 3))),
         ChatMsg(
@@ -771,12 +772,11 @@ class _ConversationDetailPage extends StatelessWidget {
   final Conversation conversation;
   final bool isDark;
 
-  /// Per-message keys for accessing [SmoothSelectionRegionState] to
-  /// programmatically trigger text selection.
-  final Map<int, GlobalKey<SmoothSelectionRegionState>> _selectionKeys = {};
+  /// Per-message controllers for programmatically triggering text selection.
+  final Map<int, SmoothSelectionController> _selectionControllers = {};
 
-  GlobalKey<SmoothSelectionRegionState> _getKey(int index) => _selectionKeys
-      .putIfAbsent(index, () => GlobalKey<SmoothSelectionRegionState>());
+  SmoothSelectionController _getController(int index) => _selectionControllers
+      .putIfAbsent(index, () => SmoothSelectionController());
 
   @override
   Widget build(BuildContext context) {
@@ -842,13 +842,13 @@ class _ConversationDetailPage extends StatelessWidget {
   /// double-post-frame + context-menu-button workaround, which was a no-op when
   /// there was no prior selection (the built-in selectAll button only exists
   /// once a selection has started).
-  void _triggerSelectAll(SmoothSelectionRegionState state) {
-    state.selectAll(SelectionChangedCause.toolbar);
+  void _triggerSelectAll(SmoothSelectionController controller) {
+    controller.selectAll(SelectionChangedCause.toolbar);
   }
 
   Widget _buildBubble(
       BuildContext context, ChatMsg msg, bool isDark, int index) {
-    final selectableKey = _getKey(index);
+    final selectionController = _getController(index);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
@@ -871,7 +871,8 @@ class _ConversationDetailPage extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               gestures: <Type, GestureRecognizerFactory>{
                 LongPressGestureRecognizer:
-                    GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                    GestureRecognizerFactoryWithHandlers<
+                        LongPressGestureRecognizer>(
                   () => LongPressGestureRecognizer(
                     duration: const Duration(milliseconds: 350),
                   ),
@@ -886,13 +887,11 @@ class _ConversationDetailPage extends StatelessWidget {
                           // Defer one frame so the long-press menu overlay can
                           // dismiss before we summon the selection overlay.
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            final state = selectableKey.currentState;
-                            if (state != null) {
-                              // Select the paragraph under the press point
-                              // (not the whole message) — mirrors a native
-                              // long-press "select text" action.
-                              state.selectParagraphAt(details.globalPosition);
-                            }
+                            // Select the paragraph under the press point
+                            // (not the whole message) — mirrors a native
+                            // long-press "select text" action.
+                            selectionController
+                                .selectParagraphAt(details.globalPosition);
                           });
                         },
                       );
@@ -913,7 +912,7 @@ class _ConversationDetailPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -930,7 +929,7 @@ class _ConversationDetailPage extends StatelessWidget {
                       useRepaintBoundary: true,
                       useEnhancedComponents: true,
                       selectable: true,
-                      selectableRegionKey: selectableKey,
+                      selectionController: selectionController,
                       contextMenuBuilder: (context, selectableRegionState) {
                         return AdaptiveTextSelectionToolbar.buttonItems(
                           anchors: selectableRegionState.contextMenuAnchors,
@@ -943,7 +942,7 @@ class _ConversationDetailPage extends StatelessWidget {
                             ContextMenuButtonItem(
                               label: '选择文字',
                               onPressed: () {
-                                _triggerSelectAll(selectableRegionState);
+                                _triggerSelectAll(selectionController);
                               },
                             ),
                           ],
@@ -975,12 +974,13 @@ class _ConversationDetailPage extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                               inlineCodeStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                backgroundColor: Colors.black.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.9),
+                                backgroundColor:
+                                    Colors.black.withValues(alpha: 0.2),
                                 fontFamily: 'monospace',
                               ),
                               codeBlockStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontFamily: 'monospace',
                               ),
                             )
@@ -995,7 +995,7 @@ class _ConversationDetailPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         color: msg.isMe
-                            ? Colors.white.withOpacity(0.6)
+                            ? Colors.white.withValues(alpha: 0.6)
                             : (isDark ? Colors.grey[500] : Colors.grey[500]),
                       ),
                     ),

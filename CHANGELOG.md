@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-06-17
+
+### Added
+- ✨ **Selection controller** - Added `SmoothSelectionController` plus `SmoothMarkdown.selectionController` / `StreamMarkdown.selectionController` as the recommended programmatic selection API. Existing `selectableRegionKey` access remains supported for advanced integrations.
+- 🧪 **Tests** - Added coverage for controller attach/detach lifecycle, controller-driven `selectAll`, `StreamMarkdown.selectionController` passthrough, and `selectParagraphAt` clearing an active select-all from padding-adjacent press points.
+
 ## [0.7.3] - 2026-06-16
 
 ### Changed
@@ -480,7 +486,9 @@ None - All optimizations are opt-in or enabled by default without breaking exist
 - 87+ unit tests with comprehensive coverage
 - Flutter lints enabled for code quality
 
-[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.8...HEAD
+[Unreleased]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.7.4...HEAD
+[0.7.4]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.7.3...v0.7.4
+[0.7.3]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.7.2...v0.7.3
 [0.1.8]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/JackCaow/flutter-smooth-markdown/compare/v0.1.5...v0.1.6

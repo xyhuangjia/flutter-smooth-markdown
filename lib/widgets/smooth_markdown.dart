@@ -156,12 +156,12 @@ import 'smooth_selection_region.dart';
 ///
 /// - The widget uses an AST-based parser for efficient parsing
 /// - Rendering is optimized to minimize widget rebuilds
-/// - For real-time streaming content, use [StreamMarkdown] instead
+/// - For real-time streaming content, use `StreamMarkdown` instead
 /// - Large documents (10k+ lines) may benefit from lazy loading techniques
 ///
 /// See also:
 ///
-/// - [StreamMarkdown], for real-time streaming markdown rendering
+/// - `StreamMarkdown`, for real-time streaming markdown rendering
 /// - [MarkdownStyleSheet], for customizing the visual appearance
 /// - [MarkdownConfig], for configuring parsing behavior
 /// - [MarkdownRenderer], for advanced custom rendering
@@ -209,6 +209,7 @@ class SmoothMarkdown extends StatelessWidget {
     this.useRepaintBoundary = true,
     this.selectable = false,
     this.contextMenuBuilder,
+    this.selectionController,
     this.selectableRegionKey,
     this.plugins,
     this.builderRegistry,
@@ -504,11 +505,11 @@ class SmoothMarkdown extends StatelessWidget {
 
   /// Whether the rendered text content is selectable.
   ///
-  /// When `true`, wraps the output in a [SmoothSelectionRegion] (a
-  /// [SelectableRegion] subclass that additionally exposes the underlying
-  /// `SelectionContainer + SelectionEvent` machinery) and renders text
-  /// using `Text.rich()` instead of `RichText`, enabling cross-block text
-  /// selection and copy across paragraphs, headers, code blocks, etc.
+  /// When `true`, wraps the output in a [SmoothSelectionRegion] (a thin
+  /// [SelectableRegion] adapter that additionally exposes programmatic
+  /// selection control) and renders text using `Text.rich()` instead of
+  /// `RichText`, enabling cross-block text selection and copy across
+  /// paragraphs, headers, code blocks, etc.
   ///
   /// ```dart
   /// SmoothMarkdown(
@@ -555,17 +556,35 @@ class SmoothMarkdown extends StatelessWidget {
   /// ```
   ///
   /// Defaults to `null`.
-  final Widget Function(BuildContext context, SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+  final Widget Function(BuildContext context,
+      SmoothSelectionRegionState selectableRegionState)? contextMenuBuilder;
+
+  /// Controller for programmatic text selection.
+  ///
+  /// This is the preferred way to drive selection from application code because
+  /// it avoids exposing widget state through a [GlobalKey]. It is only attached
+  /// when [selectable] is `true`.
+  ///
+  /// ```dart
+  /// final controller = SmoothSelectionController();
+  ///
+  /// SmoothMarkdown(
+  ///   data: markdownText,
+  ///   selectable: true,
+  ///   selectionController: controller,
+  /// )
+  ///
+  /// // Later, select the paragraph under a long-press point:
+  /// controller.selectParagraphAt(details.globalPosition);
+  /// ```
+  ///
+  /// Defaults to `null`.
+  final SmoothSelectionController? selectionController;
 
   /// A key applied to the internal [SmoothSelectionRegion] widget.
   ///
-  /// When provided, external code can use this key to programmatically
-  /// control text selection via [SmoothSelectionRegionState], for example
-  /// calling [SmoothSelectionRegionState.selectAll] to enter selection mode
-  /// with handles and show the context menu toolbar, or
-  /// [SmoothSelectionRegionState.dispatchEvent] to dispatch an arbitrary
-  /// `SelectionEvent` (e.g. `SelectAllSelectionEvent`) straight to the
-  /// underlying `SelectionContainer`.
+  /// Prefer [selectionController] for new code. This key remains available for
+  /// advanced integrations that need direct access to [SmoothSelectionRegionState].
   ///
   /// ```dart
   /// final regionKey = GlobalKey<SmoothSelectionRegionState>();
@@ -711,9 +730,8 @@ class SmoothMarkdown extends StatelessWidget {
 
     // Wrap in SmoothSelectionRegion if selectable.
     //
-    // SmoothSelectionRegion extends the framework SelectableRegion to also
-    // expose the underlying SelectionContainer + SelectionEvent machinery
-    // (dispatchEvent / registrar) for programmatic control.
+    // SmoothSelectionRegion composes the framework SelectableRegion while
+    // exposing controller/state APIs for programmatic selection.
     final content = selectable
         ? _SelectionCopyFilter(
             child: SmoothSelectionRegion(
@@ -723,7 +741,9 @@ class SmoothMarkdown extends StatelessWidget {
               // (SelectableRegion only routes through contextMenuBuilder when
               // selectionControls is a TextSelectionHandleControls).
               selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: contextMenuBuilder ?? _defaultContextMenuBuilder,
+              contextMenuBuilder:
+                  contextMenuBuilder ?? _defaultContextMenuBuilder,
+              controller: selectionController,
               child: widget,
             ),
           )
@@ -798,8 +818,7 @@ class SmoothMarkdown extends StatelessWidget {
   ) {
     return AdaptiveTextSelectionToolbar.buttonItems(
       anchors: selectableRegionState.contextMenuAnchors,
-      buttonItems: selectableRegionState.contextMenuButtonItems
-          .map((item) {
+      buttonItems: selectableRegionState.contextMenuButtonItems.map((item) {
         if (item.type == ContextMenuButtonType.copy) {
           final originalOnPressed = item.onPressed;
           return ContextMenuButtonItem(
