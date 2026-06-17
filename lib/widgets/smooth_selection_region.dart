@@ -55,7 +55,7 @@ typedef SmoothSelectionContextMenuBuilder = Widget Function(
 /// ```
 class SmoothSelectionRegion extends StatefulWidget {
 /// ```
-/// ```
+///
 ///
 /// Internally this widget composes a framework [SelectableRegion] (which is
 /// control.
