@@ -48,7 +48,7 @@ A high-performance Flutter markdown renderer with syntax highlighting, LaTeX mat
 
 ```yaml
 dependencies:
-  flutter_smooth_markdown: ^0.7.2
+  flutter_smooth_markdown: ^0.7.4
 ```
 
 ```bash
@@ -80,6 +80,65 @@ SmoothMarkdown(
 ```
 
 Selection handles work across text and non-text blocks (images, tables, etc.). Copied content is automatically cleaned.
+
+### Programmatic Selection
+
+When `selectable: true`, the content is wrapped in a `SmoothSelectionRegion` (a thin `SelectableRegion` adapter). Pass a `selectionController` to drive selection programmatically:
+
+```dart
+final controller = SmoothSelectionController();
+
+SmoothMarkdown(
+  data: markdownText,
+  selectable: true,
+  selectionController: controller,
+)
+
+// Later — enter selection mode with handles + toolbar:
+controller.selectAll(SelectionChangedCause.toolbar);
+
+// Or select text around a press position:
+controller.selectParagraphAt(details.globalPosition);
+```
+
+The selection rule lives in your application code. For example, a chat bubble
+menu can choose paragraph selection while an editor toolbar chooses select-all:
+
+```dart
+void handleSelectText(Offset pressPosition) {
+  switch (selectionMode) {
+    case SelectionMode.word:
+      controller.selectWordAt(pressPosition);
+      return;
+    case SelectionMode.paragraph:
+      controller.selectParagraphAt(pressPosition);
+      return;
+    case SelectionMode.message:
+      controller.selectAll(SelectionChangedCause.toolbar);
+      return;
+  }
+}
+```
+
+For lower-level control, `SmoothSelectionController` exposes the underlying `SelectionContainer` + `SelectionEvent` machinery:
+
+```dart
+// Clear the current selection (hides handles + toolbar):
+controller.clearSelection();
+
+// Dispatch an arbitrary SelectionEvent straight to the SelectionContainer
+// (fans out to every text selectable). Does not drive the overlay by itself.
+controller.dispatchEvent(const SelectAllSelectionEvent());
+
+// Reach the SelectionRegistrar collecting the text selectables.
+final registrar = controller.registrar;
+```
+
+`contextMenuBuilder` (if provided) now receives a `SmoothSelectionRegionState`, giving the menu access to `dispatchEvent`, `registrar`, `contextMenuButtonItems`, and `contextMenuAnchors`.
+
+`selectableRegionKey` is still available for advanced integrations that need direct access to `SmoothSelectionRegionState`.
+
+> **Migration (minor breaking):** `selectableRegionKey` is now typed `GlobalKey<SmoothSelectionRegionState>` (was `GlobalKey<SelectableRegionState>`), and `contextMenuBuilder`'s second parameter is now `SmoothSelectionRegionState`. Rename the type and the new methods become available; existing calls (`selectAll`, `contextMenuButtonItems`, `contextMenuAnchors`) work unchanged. New code should prefer `selectionController`.
 
 ### Streaming (Real-time)
 

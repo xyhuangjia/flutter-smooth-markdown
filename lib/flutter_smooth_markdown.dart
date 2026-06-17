@@ -40,4 +40,5 @@ export 'src/renderer/markdown_renderer.dart';
 export 'src/renderer/widget_builder.dart';
 // Export widgets
 export 'widgets/smooth_markdown.dart';
+export 'widgets/smooth_selection_region.dart';
 export 'widgets/stream_markdown.dart';

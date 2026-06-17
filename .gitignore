@@ -51,3 +51,9 @@ app.*.map.json
 .env.*
 example/.env
 *.lock
+.trellis
+.opencode
+.codex
+.claude
+.agents
+AGENTS.md
