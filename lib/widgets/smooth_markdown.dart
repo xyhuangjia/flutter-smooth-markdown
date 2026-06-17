@@ -736,11 +736,6 @@ class SmoothMarkdown extends StatelessWidget {
         ? _SelectionCopyFilter(
             child: SmoothSelectionRegion(
               key: selectableRegionKey,
-              // Use the modern TextSelectionHandleControls so the user-provided
-              // [contextMenuBuilder] is actually consulted by the framework
-              // (SelectableRegion only routes through contextMenuBuilder when
-              // selectionControls is a TextSelectionHandleControls).
-              selectionControls: materialTextSelectionHandleControls,
               contextMenuBuilder:
                   contextMenuBuilder ?? _defaultContextMenuBuilder,
               controller: selectionController,

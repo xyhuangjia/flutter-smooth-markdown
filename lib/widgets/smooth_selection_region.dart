@@ -1,3 +1,7 @@
+import 'package:flutter/cupertino.dart'
+    show
+        cupertinoDesktopTextSelectionHandleControls,
+        cupertinoTextSelectionHandleControls;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
     show
@@ -121,14 +125,14 @@ class SmoothSelectionController {
 class SmoothSelectionRegion extends StatefulWidget {
   /// Creates a [SmoothSelectionRegion].
   ///
-  /// Mirrors [SelectableRegion.new], but [contextMenuBuilder] receives a
+  /// Mirrors [SelectionArea.new], but [contextMenuBuilder] receives a
   /// [SmoothSelectionRegionState] instead of a plain [SelectableRegionState].
   const SmoothSelectionRegion({
-    required this.selectionControls,
     required this.child,
     super.key,
     this.focusNode,
-    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.selectionControls,
+    this.magnifierConfiguration,
     this.onSelectionChanged,
     this.contextMenuBuilder,
     this.controller,
@@ -138,13 +142,15 @@ class SmoothSelectionRegion extends StatefulWidget {
   final FocusNode? focusNode;
 
   /// The configuration for the magnifier used with selections in this region.
-  final TextMagnifierConfiguration magnifierConfiguration;
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// The delegate to build the selection handles and toolbar for mobile devices.
-  final TextSelectionControls selectionControls;
+  ///
+  /// If it is null, a platform-specific selection control is used.
+  final TextSelectionControls? selectionControls;
 
   /// The child widget this selection region applies to.
   final Widget child;
@@ -217,12 +223,17 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
+    final selectionControls =
+        widget.selectionControls ?? _defaultSelectionControls(context);
+
     return SelectableRegion(
       key: _regionKey,
       focusNode: widget.focusNode,
-      magnifierConfiguration: widget.magnifierConfiguration,
+      magnifierConfiguration: widget.magnifierConfiguration ??
+          TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
-      selectionControls: widget.selectionControls,
+      selectionControls: selectionControls,
       contextMenuBuilder: widget.contextMenuBuilder == null
           ? null
           : (BuildContext context, SelectableRegionState state) {
@@ -239,6 +250,19 @@ class SmoothSelectionRegionState extends State<SmoothSelectionRegion> {
         },
       ),
     );
+  }
+
+  TextSelectionControls _defaultSelectionControls(BuildContext context) {
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia =>
+        materialTextSelectionHandleControls,
+      TargetPlatform.linux ||
+      TargetPlatform.windows =>
+        desktopTextSelectionHandleControls,
+      TargetPlatform.iOS => cupertinoTextSelectionHandleControls,
+      TargetPlatform.macOS => cupertinoDesktopTextSelectionHandleControls,
+    };
   }
 
   // ─── Programmatic, overlay-driven APIs (delegate to SelectableRegionState) ───

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - ⚠️ **Selection API (minor breaking)** - `selectable: true` now wraps content in a new `SmoothSelectionRegion` (wraps `SelectableRegion` via composition). `selectableRegionKey` is now typed `GlobalKey<SmoothSelectionRegionState>` (was `GlobalKey<SelectableRegionState>`); `contextMenuBuilder`'s state parameter is now `SmoothSelectionRegionState`. Existing calls (`selectAll`, `contextMenuButtonItems`, `contextMenuAnchors`) work unchanged.
-- ⚠️ **Selection controls** - Switched the internal selection controls from `materialTextSelectionControls` to `materialTextSelectionHandleControls` so that the user-provided `contextMenuBuilder` is actually consulted by the framework (previously it was never invoked).
+- ⚠️ **Selection controls** - Switched the internal selection controls to the platform-specific handle controls used by `SelectionArea`, so that the user-provided `contextMenuBuilder` is actually consulted by the framework (previously it was never invoked).
 
 ### Added
 - ✨ **Programmatic selection** - `SmoothSelectionRegionState` exposes `dispatchEvent(SelectionEvent)` (forward any `SelectionEvent`, e.g. `SelectAllSelectionEvent`, to the inner `SelectionContainer`) and `registrar` / `innerRegionState` for advanced control. See README → Programmatic Selection.
